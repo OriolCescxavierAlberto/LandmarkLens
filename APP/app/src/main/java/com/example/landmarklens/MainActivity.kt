@@ -1,12 +1,30 @@
+/**
+ * LandmarkLens - Aplicación de identificación de monumentos mediante IA
+ *
+ * Estructura:
+ * - Pestaña 1 (Cámara): Captura de fotos con metadatos de GPS y brújula
+ * - Pestaña 2 (IA Ollama): Chat con IA local para descripción de monumentos
+ * - Pestaña 3 (ML Local): Reservado para análisis ML offline futuro
+ *
+ * Tecnologías utilizadas:
+ * - Jetpack Compose para UI
+ * - CameraX para captura de fotos
+ * - FusedLocationProviderClient para GPS
+ * - SensorManager para Acimut (brújula)
+ * - MVVM pattern con ViewModel
+ */
+
 package com.example.landmarklens
 
 import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -61,6 +79,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -79,14 +98,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
 
+/**
+ * Actividad principal de LandmarkLens
+ * Configura la UI principal y habilita el diseño edge-to-edge
+ */
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -173,85 +196,207 @@ fun MainApp(landmarkViewModel: LandmarkViewModel = viewModel()) {
     }
 }
 
+/**
+ * Pantalla principal de cámara para capturar monumentos
+ * Gestiona:
+ * - Solicitud de permisos en tiempo de ejecución
+ * - Vista previa de cámara con CameraX
+ * - Captura de foto estática
+ * - Actualización de metadatos (GPS y Acimut)
+ * - Muestra de resultado tras captura
+ */
 @Composable
 fun CameraLandmarkScreen(viewModel: LandmarkViewModel) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
+    val TAG = "CameraLandmarkScreen"
+    
     var previewView by remember { mutableStateOf<PreviewView?>(null) }
+    var hasPermissions by remember { mutableStateOf(false) }
     
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
-        if (permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true) {
+        val hasCameraPermission = permissions[Manifest.permission.CAMERA] ?: false
+        val hasLocationPermission = permissions[Manifest.permission.ACCESS_FINE_LOCATION] ?: false
+        
+        hasPermissions = hasCameraPermission && hasLocationPermission
+        
+        if (hasLocationPermission) {
             viewModel.updateLocation(context)
+            Log.d(TAG, "Permisos de ubicación otorgados")
+        }
+        
+        if (hasCameraPermission) {
+            Log.d(TAG, "Permisos de cámara otorgados")
         }
     }
 
+    // Solicitar permisos al cargar la pantalla
     LaunchedEffect(Unit) {
-        permissionLauncher.launch(arrayOf(
-            Manifest.permission.CAMERA,
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_COARSE_LOCATION
-        ))
+        // Verificar si los permisos ya están concedidos
+        val hasCameraPermission = ContextCompat.checkSelfPermission(
+            context, Manifest.permission.CAMERA
+        ) == PackageManager.PERMISSION_GRANTED
+        
+        val hasLocationPermission = ContextCompat.checkSelfPermission(
+            context, Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+        
+        if (hasCameraPermission && hasLocationPermission) {
+            hasPermissions = true
+            viewModel.updateLocation(context)
+        } else {
+            permissionLauncher.launch(arrayOf(
+                Manifest.permission.CAMERA,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ))
+        }
     }
 
     if (viewModel.showResult) {
         CaptureResultScreen(viewModel)
     } else {
-        Box(modifier = Modifier.fillMaxSize()) {
-            AndroidView(
-                factory = { ctx ->
-                    PreviewView(ctx).also {
-                        previewView = it
-                        val cameraProviderFuture = ProcessCameraProvider.getInstance(ctx)
-                        cameraProviderFuture.addListener({
-                            val cameraProvider = cameraProviderFuture.get()
-                            val preview = Preview.Builder().build()
-                            val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
-                            
-                            preview.setSurfaceProvider(it.surfaceProvider)
-                            try {
-                                cameraProvider.unbindAll()
-                                cameraProvider.bindToLifecycle(lifecycleOwner, cameraSelector, preview)
-                            } catch (e: Exception) {
-                                e.printStackTrace()
-                            }
-                        }, ContextCompat.getMainExecutor(ctx))
-                    }
-                },
-                modifier = Modifier.fillMaxSize()
-            )
+        if (hasPermissions) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                // Vista previa de cámara con CameraX
+                AndroidView(
+                    factory = { ctx ->
+                        PreviewView(ctx).also { preview ->
+                            previewView = preview
+                            val cameraProviderFuture = ProcessCameraProvider.getInstance(ctx)
+                            cameraProviderFuture.addListener({
+                                try {
+                                    val cameraProvider = cameraProviderFuture.get()
+                                    val cameraPreview = Preview.Builder().build()
+                                    val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+                                    
+                                    cameraPreview.setSurfaceProvider(preview.surfaceProvider)
+                                    cameraProvider.unbindAll()
+                                    cameraProvider.bindToLifecycle(lifecycleOwner, cameraSelector, cameraPreview)
+                                    Log.d(TAG, "Cámara iniciada correctamente")
+                                } catch (e: Exception) {
+                                    Log.e(TAG, "Error al configurar cámara: ${e.message}", e)
+                                }
+                            }, ContextCompat.getMainExecutor(ctx))
+                        }
+                    },
+                    modifier = Modifier.fillMaxSize()
+                )
 
-            Column(
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .padding(16.dp)
-                    .background(Color.Black.copy(alpha = 0.5f), RoundedCornerShape(8.dp))
-                    .padding(8.dp)
-            ) {
-                Text("Lat: ${"%.4f".format(viewModel.lat)}", color = Color.White)
-                Text("Lon: ${"%.4f".format(viewModel.lon)}", color = Color.White)
-                Text("Acimut: ${"%.1f".format(viewModel.azimuth)}°", color = Color.White)
+                // Overlay con metadatos en tiempo real
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(16.dp)
+                        .background(Color.Black.copy(alpha = 0.6f), RoundedCornerShape(8.dp))
+                        .padding(12.dp)
+                ) {
+                    Text(
+                        text = "Latitud: ${"%.4f".format(viewModel.lat)}",
+                        color = Color.White,
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Longitud: ${"%.4f".format(viewModel.lon)}",
+                        color = Color.White,
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Acimut: ${"%.1f".format(viewModel.azimuth)}°",
+                        color = Color.White,
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                }
+
+                // Botón FAB para capturar foto
+                FloatingActionButton(
+                    onClick = {
+                        viewModel.updateLocation(context)
+                        previewView?.bitmap?.let { bitmap ->
+                            viewModel.onPhotoCaptured(bitmap)
+                            // Guardar foto localmente
+                            val filePath = FileUtils.saveBitmap(
+                                context,
+                                bitmap,
+                                viewModel.lat,
+                                viewModel.lon,
+                                viewModel.azimuth
+                            )
+                            Log.d(TAG, "Foto guardada en: $filePath")
+                        }
+                    },
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 32.dp),
+                    containerColor = Color(0xFFF39C12)
+                ) {
+                    Icon(Icons.Default.Camera, contentDescription = "Capturar", tint = Color.White)
+                }
             }
-
-            FloatingActionButton(
-                onClick = {
-                    viewModel.updateLocation(context)
-                    previewView?.bitmap?.let { bitmap ->
-                        viewModel.onPhotoCaptured(bitmap)
-                    }
-                },
+        } else {
+            // Pantalla de error si no hay permisos
+            Box(
                 modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 32.dp),
-                containerColor = Color(0xFFF39C12)
+                    .fillMaxSize()
+                    .background(Color(0xFFF3F3F3)),
+                contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Default.Camera, contentDescription = "Capturar", tint = Color.White)
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.padding(24.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Camera,
+                        contentDescription = null,
+                        modifier = Modifier.size(64.dp),
+                        tint = Color.Gray
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "Permisos requeridos",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Se necesitan permisos de cámara y ubicación para usar esta función.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.Gray
+                    )
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Button(
+                        onClick = {
+                            permissionLauncher.launch(arrayOf(
+                                Manifest.permission.CAMERA,
+                                Manifest.permission.ACCESS_FINE_LOCATION,
+                                Manifest.permission.ACCESS_COARSE_LOCATION
+                            ))
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF39C12))
+                    ) {
+                        Text("Otorgar Permisos", fontWeight = FontWeight.Bold)
+                    }
+                }
             }
         }
     }
 }
 
+/**
+ * Pantalla de resultado de captura
+ * Muestra:
+ * - La foto capturada
+ * - Metadatos exactos de la captura (Lat, Lon, Acimut)
+ * - Botón para volver a la cámara
+ */
 @Composable
 fun CaptureResultScreen(viewModel: LandmarkViewModel) {
     BackHandler {
@@ -342,6 +487,11 @@ fun CaptureResultScreen(viewModel: LandmarkViewModel) {
     }
 }
 
+/**
+ * Pantalla de Machine Learning offline
+ * Reservada para análisis ML local futuro
+ * Por ahora muestra un placeholder con información de próximas características
+ */
 @Composable
 fun MLOfflineScreen() {
     Column(
@@ -349,7 +499,12 @@ fun MLOfflineScreen() {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Icon(Icons.Default.Construction, contentDescription = null, modifier = Modifier.size(64.dp), tint = Color.Gray)
+        Icon(
+            Icons.Default.Construction,
+            contentDescription = null,
+            modifier = Modifier.size(64.dp),
+            tint = Color.Gray
+        )
         Spacer(Modifier.height(16.dp))
         Text(
             text = "Próximamente: Análisis ML offline",
@@ -359,6 +514,14 @@ fun MLOfflineScreen() {
     }
 }
 
+/**
+ * Pantalla de chat con Ollama IA local
+ * Permite interacción con modelos LLM disponibles localmente
+ * Características:
+ * - Selección dinámica de modelos disponibles
+ * - Historial de conversación
+ * - Indicador de carga durante procesamiento
+ */
 @Composable
 fun OllamaChatScreen(
     messages: SnapshotStateList<ChatMessage>,
@@ -493,7 +656,10 @@ fun OllamaChatScreen(
     }
 }
 
-@Preview(showBackground = true)
+/**
+ * Burbuja de chat para mostrar mensajes en la conversación
+ * Diferencia visualmente entre mensajes del usuario y del asistente
+ */
 @Composable
 fun ChatBubble(message: ChatMessage) {
     val isUser = message.role == "user"
@@ -531,19 +697,4 @@ fun ChatBubble(message: ChatMessage) {
     }
 }
 
-fun loadBitmapFromUri(context: Context, uri: Uri): Bitmap? {
-    return try {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            val source = ImageDecoder.createSource(context.contentResolver, uri)
-            ImageDecoder.decodeBitmap(source) { decoder, _, _ ->
-                decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
-            }
-        } else {
-            @Suppress("DEPRECATION")
-            MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
-        }
-    } catch (e: Exception) {
-        e.printStackTrace()
-        null
-    }
-}
+

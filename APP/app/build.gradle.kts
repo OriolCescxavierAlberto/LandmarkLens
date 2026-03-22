@@ -47,6 +47,7 @@ dependencies {
     
     // Lifecycle ViewModel Compose
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.7")
     
     // Iconos extendidos
     implementation(libs.androidx.compose.material.icons.extended)
@@ -58,6 +59,21 @@ dependencies {
 
     // Location
     implementation(libs.play.services.location)
+    
+    // Google Maps
+    implementation("com.google.android.gms:play-services-maps:18.2.0")
+    
+    // Google Places
+    implementation("com.google.android.libraries.places:places:3.4.0")
+    
+    // Compose Maps (para Maps Compose)
+    implementation("com.google.maps.android:maps-compose:4.3.1")
+    
+    // OkHttp3 para cliente HTTP
+    implementation("com.squareup.okhttp3:okhttp:4.11.0")
+    
+    // JSON parsing
+    implementation("org.json:json:20230227")
     
     // TensorFlow Lite
     implementation(libs.tensorflow.lite)
