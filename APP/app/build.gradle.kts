@@ -45,11 +45,22 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
     
-    // TensorFlow Lite
-    implementation(libs.tensorflow.lite)
+    // Lifecycle ViewModel Compose
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
     
     // Iconos extendidos
     implementation(libs.androidx.compose.material.icons.extended)
+
+    // CameraX
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.view)
+
+    // Location
+    implementation(libs.play.services.location)
+    
+    // TensorFlow Lite
+    implementation(libs.tensorflow.lite)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
