@@ -391,14 +391,48 @@ fun CameraLandmarkScreen(viewModel: LandmarkViewModel) {
 }
 
 /**
- * Pantalla de resultado de captura
+ * Pantalla de resultado de captura mejorada
  * Muestra:
  * - La foto capturada
- * - Metadatos exactos de la captura (Lat, Lon, Acimut)
- * - Botón para volver a la cámara
+ * - Mapa con ubicación GPS
+ * - Información del lugar identificado (nombre, dirección, tipo)
+ * - Metadatos exactos (Lat, Lon, Acimut)
  */
 @Composable
 fun CaptureResultScreen(viewModel: LandmarkViewModel) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    
+    var identifiedLocation by remember { mutableStateOf<LandmarkLocation?>(null) }
+    var isLoadingLocation by remember { mutableStateOf(false) }
+    var locationError by remember { mutableStateOf<String?>(null) }
+    
+    val placesService = remember { PlacesService(context) }
+
+    // Buscar ubicación cuando se carga la pantalla
+    LaunchedEffect(viewModel.showResult) {
+        if (viewModel.showResult && identifiedLocation == null && !isLoadingLocation) {
+            isLoadingLocation = true
+            locationError = null
+            
+            scope.launch {
+                try {
+                    val location = placesService.getCompleteLocationInfo(
+                        viewModel.capturedLat,
+                        viewModel.capturedLon
+                    )
+                    identifiedLocation = location
+                    Log.d("CaptureResultScreen", "Ubicación identificada: ${location?.name}")
+                } catch (e: Exception) {
+                    Log.e("CaptureResultScreen", "Error identificando ubicación: ${e.message}", e)
+                    locationError = "No se pudo identificar la ubicación: ${e.message}"
+                } finally {
+                    isLoadingLocation = false
+                }
+            }
+        }
+    }
+
     BackHandler {
         viewModel.resetCapture()
     }
@@ -419,13 +453,14 @@ fun CaptureResultScreen(viewModel: LandmarkViewModel) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Foto capturada
             viewModel.capturedBitmap?.let { bitmap ->
                 Image(
                     bitmap = bitmap.asImageBitmap(),
                     contentDescription = "Foto capturada",
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(1f)
+                        .height(250.dp)
                         .clip(RoundedCornerShape(16.dp))
                         .border(2.dp, Color(0xFFF39C12), RoundedCornerShape(16.dp)),
                     contentScale = ContentScale.Crop
@@ -434,6 +469,63 @@ fun CaptureResultScreen(viewModel: LandmarkViewModel) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Mapa con ubicación
+            if (isLoadingLocation) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .background(Color.Gray.copy(alpha = 0.1f), RoundedCornerShape(16.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(40.dp),
+                            color = Color(0xFFF39C12)
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            text = "Buscando lugar...",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.Gray
+                        )
+                    }
+                }
+            } else if (locationError != null) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFFEBEE))
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            text = "⚠️ Error",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFC62828)
+                        )
+                        Text(
+                            text = locationError!!,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color(0xFF7F0000)
+                        )
+                    }
+                }
+            } else {
+                // Mostrar mapa
+                MapDisplay(
+                    latitude = viewModel.capturedLat,
+                    longitude = viewModel.capturedLon,
+                    locationName = identifiedLocation?.name ?: "Ubicación capturada"
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Información de la ubicación identificada
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
@@ -441,28 +533,87 @@ fun CaptureResultScreen(viewModel: LandmarkViewModel) {
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "Metadatos de la Captura",
+                        text = "📍 Información del Lugar",
                         style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFFF39C12)
+                    )
+                    
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // Nombre del lugar
+                    if (identifiedLocation != null) {
+                        Text(
+                            text = "Nombre: ${identifiedLocation!!.name}",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        // Tipo de lugar
+                        Text(
+                            text = "Tipo: ${identifiedLocation!!.type}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.Gray
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        // Dirección
+                        if (identifiedLocation!!.address.isNotEmpty()) {
+                            Text(
+                                text = "Ubicación: ${identifiedLocation!!.address}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.Gray
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+                    } else {
+                        Text(
+                            text = "No se identificó el lugar específico",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.Gray
+                        )
+                    }
+
+                    // Metadatos de captura
+                    Spacer(modifier = Modifier.height(12.dp))
+                    
+                    Text(
+                        text = "Metadatos de Captura",
+                        style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text(text = "Latitud:", fontWeight = FontWeight.SemiBold)
-                        Text(text = "%.6f".format(viewModel.capturedLat))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(text = "Latitud:", fontWeight = FontWeight.SemiBold, fontSize = MaterialTheme.typography.bodySmall.fontSize)
+                        Text(text = "%.6f".format(viewModel.capturedLat), fontSize = MaterialTheme.typography.bodySmall.fontSize)
                     }
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text(text = "Longitud:", fontWeight = FontWeight.SemiBold)
-                        Text(text = "%.6f".format(viewModel.capturedLon))
+                    
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(text = "Longitud:", fontWeight = FontWeight.SemiBold, fontSize = MaterialTheme.typography.bodySmall.fontSize)
+                        Text(text = "%.6f".format(viewModel.capturedLon), fontSize = MaterialTheme.typography.bodySmall.fontSize)
                     }
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text(text = "Acimut:", fontWeight = FontWeight.SemiBold)
-                        Text(text = "%.1f°".format(viewModel.capturedAzimuth))
+                    
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(text = "Acimut:", fontWeight = FontWeight.SemiBold, fontSize = MaterialTheme.typography.bodySmall.fontSize)
+                        Text(text = "%.1f°".format(viewModel.capturedAzimuth), fontSize = MaterialTheme.typography.bodySmall.fontSize)
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.weight(1f))
 
+            // Botón para volver a la cámara
             Button(
                 onClick = { viewModel.resetCapture() },
                 modifier = Modifier
@@ -475,12 +626,13 @@ fun CaptureResultScreen(viewModel: LandmarkViewModel) {
             }
         }
 
+        // Botón para cerrar en esquina superior
         IconButton(
             onClick = { viewModel.resetCapture() },
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .padding(24.dp)
-                .background(Color.White.copy(alpha = 0.7f), RoundedCornerShape(24.dp))
+                .background(Color.White.copy(alpha = 0.8f), RoundedCornerShape(24.dp))
         ) {
             Icon(Icons.Default.Close, contentDescription = "Cerrar")
         }

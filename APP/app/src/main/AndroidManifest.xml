@@ -21,6 +21,18 @@
         android:usesCleartextTraffic="true"
         android:theme="@style/Theme.LandmarkLens">
 
+        <!-- Google Maps API Key -->
+        <!-- REEMPLAZA CON TU PROPIA API KEY -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="YOUR_GOOGLE_MAPS_API_KEY_HERE" />
+
+        <!-- Google Places API Key -->
+        <!-- REEMPLAZA CON TU PROPIA API KEY -->
+        <meta-data
+            android:name="com.google.android.libraries.places.API_KEY"
+            android:value="YOUR_GOOGLE_PLACES_API_KEY_HERE" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
