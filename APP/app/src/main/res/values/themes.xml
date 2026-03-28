@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <style name="Theme.LandmarkLens" parent="android:Theme.Material.Light.NoActionBar" />
+    <!-- AppCompat theme necesario para AppCompatActivity + OSMDroid -->
+    <style name="Theme.LandmarkLens" parent="Theme.AppCompat.Light.NoActionBar" />
 </resources>
