@@ -2,3 +2,7 @@ osmium
 pyosmium
 requests
 geopy
+ollama
+pandas
+numpy
+python-dotenv
