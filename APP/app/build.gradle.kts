@@ -44,12 +44,10 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
-    
-    // Lifecycle ViewModel Compose
+
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.7")
-    
-    // Iconos extendidos
+
     implementation(libs.androidx.compose.material.icons.extended)
 
     // CameraX
@@ -59,25 +57,15 @@ dependencies {
 
     // Location
     implementation(libs.play.services.location)
-    
-    // Google Maps
-    implementation("com.google.android.gms:play-services-maps:18.2.0")
-    
-    // Google Places
-    implementation("com.google.android.libraries.places:places:3.4.0")
-    
-    // Compose Maps (para Maps Compose)
-    implementation("com.google.maps.android:maps-compose:4.3.1")
-    
-    // OkHttp3 para cliente HTTP
+
+    // HTTP + JSON (para Nominatim y Ollama)
     implementation("com.squareup.okhttp3:okhttp:4.11.0")
-    
-    // JSON parsing
     implementation("org.json:json:20230227")
-    
+
     // TensorFlow Lite
     implementation(libs.tensorflow.lite)
-
+    // OSMDroid - OpenStreetMap nativo Android
+    implementation("org.osmdroid:osmdroid-android:6.1.18")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

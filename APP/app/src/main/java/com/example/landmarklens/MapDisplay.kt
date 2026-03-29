@@ -1,45 +1,34 @@
 package com.example.landmarklens
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
+import android.preference.PreferenceManager
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
-import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.LatLng
-import com.google.maps.android.compose.GoogleMap
-import com.google.maps.android.compose.Marker
-import com.google.maps.android.compose.rememberCameraPositionState
-import com.google.maps.android.compose.rememberMarkerState
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import org.osmdroid.config.Configuration
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.Marker
 
-/**
- * Componente de mapa que muestra la ubicación capturada
- * Muestra:
- * - Mapa centrado en coordenadas GPS
- * - Marcador (pin) en la ubicación exacta
- * - Zoom configurado para visibilidad óptima
- */
 @Composable
 fun MapDisplay(
     latitude: Double,
     longitude: Double,
     locationName: String = "Ubicación capturada"
 ) {
-    val location = LatLng(latitude, longitude)
-    val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(location, 15f)
-    }
-
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -48,78 +37,85 @@ fun MapDisplay(
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Box(modifier = Modifier.fillMaxWidth()) {
-            GoogleMap(
-                modifier = Modifier.fillMaxWidth(),
-                cameraPositionState = cameraPositionState
-            ) {
-                Marker(
-                    state = rememberMarkerState(position = location),
-                    title = locationName,
-                    snippet = "$latitude, $longitude"
-                )
-            }
-
-            // Overlay con información de la ubicación en la esquina superior
-            Card(
-                modifier = Modifier
-                    .align(Alignment.TopStart),
-                shape = RoundedCornerShape(0.dp, 0.dp, 16.dp, 0.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.Black.copy(alpha = 0.7f))
-            ) {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    Text(
-                        text = "📍 $locationName",
-                        color = Color.White,
-                        style = androidx.compose.material3.MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier
-                            .background(Color.Black.copy(alpha = 0.7f))
-                            .fillMaxWidth()
-                    )
-                    Text(
-                        text = "$latitude, $longitude",
-                        color = Color(0xFFB0B0B0),
-                        style = androidx.compose.material3.MaterialTheme.typography.labelSmall,
-                        modifier = Modifier
-                            .background(Color.Black.copy(alpha = 0.7f))
-                            .fillMaxWidth()
-                    )
-                }
-            }
-        }
+        OsmMapView(
+            latitude = latitude,
+            longitude = longitude,
+            locationName = locationName,
+            modifier = Modifier.fillMaxWidth().height(300.dp)
+        )
     }
 }
 
-/**
- * Componente compacto de mapa para preview/thumbnail
- */
 @Composable
 fun MapDisplaySmall(
     latitude: Double,
     longitude: Double,
     modifier: Modifier = Modifier
 ) {
-    val location = LatLng(latitude, longitude)
-    val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(location, 15f)
-    }
-
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(200.dp)
-            .background(Color.Gray.copy(alpha = 0.1f), RoundedCornerShape(12.dp))
-    ) {
-        GoogleMap(
-            modifier = modifier.fillMaxWidth(),
-            cameraPositionState = cameraPositionState
-        ) {
-            Marker(
-                state = rememberMarkerState(position = location),
-                title = "Ubicación"
-            )
-        }
-    }
+    OsmMapView(
+        latitude = latitude,
+        longitude = longitude,
+        locationName = "Ubicación",
+        modifier = modifier.fillMaxWidth().height(200.dp)
+    )
 }
 
+@Composable
+fun OsmMapView(
+    latitude: Double,
+    longitude: Double,
+    locationName: String,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    // Inicializar configuración de OSMDroid
+    Configuration.getInstance().apply {
+        load(context, PreferenceManager.getDefaultSharedPreferences(context))
+        userAgentValue = "LandmarkLens/1.0"
+    }
+
+    val mapView = remember {
+        MapView(context).apply {
+            setTileSource(TileSourceFactory.MAPNIK)
+            setMultiTouchControls(true)
+            controller.setZoom(16.0)
+            controller.setCenter(GeoPoint(latitude, longitude))
+            isHorizontalMapRepetitionEnabled = false
+            isVerticalMapRepetitionEnabled = false
+        }
+    }
+
+    // Añadir/actualizar marcador
+    remember(latitude, longitude, locationName) {
+        mapView.overlays.clear()
+        val marker = Marker(mapView).apply {
+            position = GeoPoint(latitude, longitude)
+            title = locationName
+            snippet = "${"%.6f".format(latitude)}, ${"%.6f".format(longitude)}"
+            setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+        }
+        mapView.overlays.add(marker)
+        marker.showInfoWindow()
+        mapView.invalidate()
+    }
+
+    // Gestionar ciclo de vida del mapa (pause/resume)
+    DisposableEffect(lifecycleOwner) {
+        val observer = object : DefaultLifecycleObserver {
+            override fun onResume(owner: LifecycleOwner) = mapView.onResume()
+            override fun onPause(owner: LifecycleOwner) = mapView.onPause()
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+            mapView.onDetach()
+        }
+    }
+
+    AndroidView(
+        factory = { mapView },
+        modifier = modifier
+    )
+}
