@@ -14,9 +14,9 @@ import androidx.camera.core.CameraSelector
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,11 +27,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.automirrored.filled.Send
@@ -39,6 +43,7 @@ import androidx.compose.material.icons.filled.Android
 import androidx.compose.material.icons.filled.Camera
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Construction
+import androidx.compose.material.icons.filled.HistoryEdu
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.PhotoCamera
@@ -51,11 +56,13 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -71,16 +78,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.landmarklens.ui.theme.LandmarkLensTheme
 
 // ─── Modelos de datos ─────────────────────────────────────────────────────────
 enum class AppTab { CAMERA, MAP, CHAT, ML }
@@ -93,10 +104,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            MaterialTheme {
+            LandmarkLensTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = Color(0xFFF3F3F3)
+                    color = MaterialTheme.colorScheme.background
                 ) {
                     MainApp()
                 }
@@ -108,8 +119,6 @@ class MainActivity : ComponentActivity() {
 // ─── Raíz de la UI ───────────────────────────────────────────────────────────
 @Composable
 fun MainApp(vm: LandmarkViewModel = viewModel()) {
-
-    // Todo el estado viene del ViewModel — sobrevive rotaciones
     val currentTab = vm.currentTab
 
     val needsSensors = currentTab == AppTab.CAMERA || currentTab == AppTab.MAP
@@ -119,33 +128,40 @@ fun MainApp(vm: LandmarkViewModel = viewModel()) {
     }
 
     Scaffold(
-        containerColor = Color(0xFFF3F3F3),
+        containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
-            NavigationBar(containerColor = Color.White) {
-                NavigationBarItem(
-                    selected = currentTab == AppTab.CAMERA,
-                    onClick = { vm.setTab(AppTab.CAMERA) },
-                    icon = { Icon(Icons.Default.PhotoCamera, "Explorar") },
-                    label = { Text("Explorar") }
-                )
-                NavigationBarItem(
-                    selected = currentTab == AppTab.MAP,
-                    onClick = { vm.setTab(AppTab.MAP) },
-                    icon = { Icon(Icons.Default.LocationOn, "Mapa") },
-                    label = { Text("Mapa") }
-                )
-                NavigationBarItem(
-                    selected = currentTab == AppTab.CHAT,
-                    onClick = { vm.setTab(AppTab.CHAT) },
-                    icon = { Icon(Icons.AutoMirrored.Filled.Chat, "IA") },
-                    label = { Text("Guía IA") }
-                )
-                NavigationBarItem(
-                    selected = currentTab == AppTab.ML,
-                    onClick = { vm.setTab(AppTab.ML) },
-                    icon = { Icon(Icons.Default.Memory, "ML") },
-                    label = { Text("Offline") }
-                )
+            // Ocultamos la barra solo si estamos viendo el resultado DENTRO de la pestaña cámara
+            if (!vm.showResult || currentTab != AppTab.CAMERA) {
+                NavigationBar(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    tonalElevation = 8.dp
+                ) {
+                    val items = listOf(
+                        AppTab.CAMERA to ("Explorar" to Icons.Default.PhotoCamera),
+                        AppTab.MAP to ("Mapa" to Icons.Default.LocationOn),
+                        AppTab.CHAT to ("Guía IA" to Icons.AutoMirrored.Filled.Chat),
+                        AppTab.ML to ("Offline" to Icons.Default.Memory)
+                    )
+
+                    items.forEach { (tab, info) ->
+                        val (label, icon) = info
+                        NavigationBarItem(
+                            selected = currentTab == tab,
+                            onClick = { 
+                                vm.setTab(tab)
+                                // Si cambiamos de pestaña manualmente, cerramos cualquier overlay de resultado
+                                if (vm.showResult) vm.resetCapture()
+                            },
+                            icon = { Icon(icon, label) },
+                            label = { Text(label, style = MaterialTheme.typography.labelSmall) },
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = MaterialTheme.colorScheme.primary,
+                                selectedTextColor = MaterialTheme.colorScheme.primary,
+                                indicatorColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+                            )
+                        )
+                    }
+                }
             }
         }
     ) { innerPadding ->
@@ -189,7 +205,6 @@ fun CameraLandmarkScreen(vm: LandmarkViewModel) {
         hasLocationPermission = permissions[Manifest.permission.ACCESS_FINE_LOCATION] ?: false
         if (hasLocationPermission) {
             vm.updateLocationBalanced()
-            Log.d(TAG, "Permiso de ubicación otorgado")
         }
     }
 
@@ -214,39 +229,38 @@ fun CameraLandmarkScreen(vm: LandmarkViewModel) {
 
     if (!hasCameraPermission) {
         Box(
-            modifier = Modifier.fillMaxSize().background(Color(0xFFF3F3F3)),
+            modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
             contentAlignment = Alignment.Center
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(24.dp)
+                modifier = Modifier.padding(32.dp)
             ) {
                 Icon(Icons.Default.Camera, contentDescription = null,
-                    modifier = Modifier.size(64.dp), tint = Color.Gray)
-                Spacer(modifier = Modifier.height(16.dp))
-                Text("Permisos requeridos", style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold)
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    "Se necesitan permisos de cámara y ubicación para usar esta función.",
-                    style = MaterialTheme.typography.bodyMedium, color = Color.Gray
-                )
+                    modifier = Modifier.size(80.dp), tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
                 Spacer(modifier = Modifier.height(24.dp))
+                Text("Permisos necesarios", style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    "Para identificar monumentos, necesitamos acceso a tu cámara y ubicación en tiempo real.",
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(32.dp))
                 Button(
                     onClick = {
                         permissionLauncher.launch(
                             arrayOf(
                                 Manifest.permission.CAMERA,
-                                Manifest.permission.ACCESS_FINE_LOCATION,
-                                Manifest.permission.ACCESS_COARSE_LOCATION
+                                Manifest.permission.ACCESS_FINE_LOCATION
                             )
                         )
                     },
-                    modifier = Modifier.fillMaxWidth().height(48.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF39C12))
+                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                    shape = RoundedCornerShape(16.dp)
                 ) {
-                    Text("Otorgar Permisos", fontWeight = FontWeight.Bold)
+                    Text("Configurar permisos", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 }
             }
         }
@@ -268,7 +282,6 @@ fun CameraLandmarkScreen(vm: LandmarkViewModel) {
                             cameraProvider.bindToLifecycle(
                                 lifecycleOwner, CameraSelector.DEFAULT_BACK_CAMERA, cameraPreview
                             )
-                            Log.d(TAG, "Cámara iniciada")
                         } catch (e: Exception) {
                             Log.e(TAG, "Error cámara: ${e.message}", e)
                         }
@@ -278,32 +291,31 @@ fun CameraLandmarkScreen(vm: LandmarkViewModel) {
             modifier = Modifier.fillMaxSize()
         )
 
-        // Overlay GPS + brújula
+        // Scrim superior para info
+        Box(modifier = Modifier
+            .fillMaxWidth()
+            .height(160.dp)
+            .background(Brush.verticalGradient(listOf(Color.Black.copy(alpha = 0.7f), Color.Transparent)))
+        )
+
+        // Overlay Sensores
         Column(
             modifier = Modifier
                 .align(Alignment.TopStart)
-                .padding(16.dp)
-                .background(Color.Black.copy(alpha = 0.6f), RoundedCornerShape(8.dp))
-                .padding(12.dp)
+                .padding(20.dp)
         ) {
-            Text("Latitud: ${"%.4f".format(vm.lat)}", color = Color.White,
-                style = MaterialTheme.typography.labelMedium)
-            Spacer(modifier = Modifier.height(4.dp))
-            Text("Longitud: ${"%.4f".format(vm.lon)}", color = Color.White,
-                style = MaterialTheme.typography.labelMedium)
-            Spacer(modifier = Modifier.height(4.dp))
-            Text("Acimut: ${"%.1f".format(vm.azimuth)}°", color = Color.White,
-                style = MaterialTheme.typography.labelMedium)
+            InfoChip(label = "LAT", value = "%.4f".format(vm.lat))
+            Spacer(modifier = Modifier.height(8.dp))
+            InfoChip(label = "LON", value = "%.4f".format(vm.lon))
+            Spacer(modifier = Modifier.height(8.dp))
+            InfoChip(label = "AZI", value = "%.1f°".format(vm.azimuth))
         }
 
+        // Botón Captura
         FloatingActionButton(
             onClick = {
                 previewView?.bitmap?.let { bitmap ->
-                    // FileUtils.saveBitmap movido aquí — es la única parte de UI que
-                    // necesita el context del Composable; todo lo demás va al ViewModel.
                     FileUtils.saveBitmap(context, bitmap, vm.lat, vm.lon, vm.azimuth)
-                        .also { Log.d(TAG, "Foto guardada en: $it") }
-
                     if (hasLocationPermission) {
                         vm.captureWithHighAccuracyLocation(bitmap)
                     } else {
@@ -311,10 +323,30 @@ fun CameraLandmarkScreen(vm: LandmarkViewModel) {
                     }
                 }
             },
-            modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 32.dp),
-            containerColor = Color(0xFFF39C12)
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 48.dp)
+                .size(84.dp),
+            shape = CircleShape,
+            containerColor = MaterialTheme.colorScheme.secondary,
+            contentColor = MaterialTheme.colorScheme.onSecondary,
+            elevation = FloatingActionButtonDefaults.elevation(12.dp)
         ) {
-            Icon(Icons.Default.Camera, contentDescription = "Capturar", tint = Color.White)
+            Icon(Icons.Default.PhotoCamera, contentDescription = "Capturar", modifier = Modifier.size(40.dp))
+        }
+    }
+}
+
+@Composable
+fun InfoChip(label: String, value: String) {
+    Surface(
+        color = Color.Black.copy(alpha = 0.5f),
+        shape = RoundedCornerShape(20.dp)
+    ) {
+        Row(modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(label, color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.Black, fontSize = 10.sp)
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(value, color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Medium)
         }
     }
 }
@@ -323,9 +355,7 @@ fun CameraLandmarkScreen(vm: LandmarkViewModel) {
 @Composable
 fun CaptureResultScreen(vm: LandmarkViewModel) {
     val context = LocalContext.current
-
-    // PlacesService sigue instanciándose aquí porque necesita Context,
-    // pero la lógica de red (coroutine + estado) vive en el ViewModel.
+    val scrollState = rememberScrollState()
     val placesService = remember { PlacesService(context) }
 
     LaunchedEffect(vm.showResult) {
@@ -334,131 +364,181 @@ fun CaptureResultScreen(vm: LandmarkViewModel) {
 
     BackHandler { vm.resetCapture() }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         Column(
-            modifier = Modifier.fillMaxSize().padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(scrollState)
         ) {
-            Text("Monumento Detectado", style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold, color = Color(0xFFF39C12))
-            Spacer(modifier = Modifier.height(16.dp))
-
-            vm.capturedBitmap?.let { bitmap ->
-                Image(
-                    bitmap = bitmap.asImageBitmap(),
-                    contentDescription = "Foto capturada",
-                    modifier = Modifier.fillMaxWidth().height(250.dp)
-                        .clip(RoundedCornerShape(16.dp))
-                        .border(2.dp, Color(0xFFF39C12), RoundedCornerShape(16.dp)),
-                    contentScale = ContentScale.Crop
+            // Header con Imagen a pantalla completa de ancho
+            Box(modifier = Modifier.fillMaxWidth().height(320.dp)) {
+                vm.capturedBitmap?.let { bitmap ->
+                    Image(
+                        bitmap = bitmap.asImageBitmap(),
+                        contentDescription = "Foto capturada",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+                
+                // Degradado superior para el botón de cerrar
+                Box(modifier = Modifier
+                    .fillMaxWidth()
+                    .height(80.dp)
+                    .background(Brush.verticalGradient(listOf(Color.Black.copy(alpha = 0.4f), Color.Transparent)))
                 )
-            }
 
-            Spacer(modifier = Modifier.height(16.dp))
+                IconButton(
+                    onClick = { vm.resetCapture() },
+                    modifier = Modifier.align(Alignment.TopEnd).padding(16.dp)
+                        .background(Color.Black.copy(alpha = 0.3f), CircleShape)
+                ) {
+                    Icon(Icons.Default.Close, contentDescription = "Cerrar", tint = Color.White)
+                }
 
-            when {
-                vm.isLoadingLocation -> {
-                    Box(
-                        modifier = Modifier.fillMaxWidth().height(200.dp)
-                            .background(Color.Gray.copy(alpha = 0.1f), RoundedCornerShape(16.dp)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            CircularProgressIndicator(modifier = Modifier.size(40.dp),
-                                color = Color(0xFFF39C12))
-                            Spacer(modifier = Modifier.height(12.dp))
-                            Text("Buscando lugar...", color = Color.Gray)
-                        }
-                    }
-                }
-                vm.locationError != null -> {
-                    Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFEBEE))) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Text("⚠️ Error", style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold, color = Color(0xFFC62828))
-                            Text(vm.locationError!!, style = MaterialTheme.typography.bodySmall,
-                                color = Color(0xFF7F0000))
-                        }
-                    }
-                }
-                else -> {
-                    MapDisplay(
-                        latitude = vm.capturedLat,
-                        longitude = vm.capturedLon,
-                        locationName = vm.identifiedLocation?.name ?: "Ubicación capturada"
+                // Badge de estado
+                Surface(
+                    modifier = Modifier.align(Alignment.BottomStart).padding(20.dp),
+                    color = MaterialTheme.colorScheme.primary,
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(
+                        "IDENTIFICACIÓN EXITOSA",
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White)) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text("📍 Información del Lugar", style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold, color = Color(0xFFF39C12))
-                    Spacer(modifier = Modifier.height(12.dp))
-                    if (vm.identifiedLocation != null) {
-                        Text("Nombre: ${vm.identifiedLocation!!.name}",
-                            style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text("Tipo: ${vm.identifiedLocation!!.type}",
-                            style = MaterialTheme.typography.bodySmall, color = Color.Gray)
-                        Spacer(modifier = Modifier.height(8.dp))
-                        if (vm.identifiedLocation!!.address.isNotEmpty()) {
-                            Text("Ubicación: ${vm.identifiedLocation!!.address}",
-                                style = MaterialTheme.typography.bodySmall, color = Color.Gray)
-                            Spacer(modifier = Modifier.height(8.dp))
+            Column(modifier = Modifier.padding(20.dp)) {
+                
+                // Card de Información del Monumento
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(28.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    Column(modifier = Modifier.padding(24.dp)) {
+                        if (vm.isLoadingLocation) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+                                CircularProgressIndicator(color = MaterialTheme.colorScheme.secondary)
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Text("Analizando coordenadas...", style = MaterialTheme.typography.bodyMedium)
+                            }
+                        } else if (vm.locationError != null) {
+                            Text("⚠️ Error", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
+                            Text(vm.locationError!!, style = MaterialTheme.typography.bodyMedium)
+                        } else if (vm.identifiedLocation != null) {
+                            Text(
+                                vm.identifiedLocation!!.name,
+                                style = MaterialTheme.typography.headlineSmall,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Text(
+                                vm.identifiedLocation!!.type.uppercase(),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.secondary,
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 1.sp
+                            )
+                            
+                            if (vm.identifiedLocation!!.address.isNotEmpty()) {
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Row(verticalAlignment = Alignment.Top) {
+                                    Icon(Icons.Default.LocationOn, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        vm.identifiedLocation!!.address,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        } else {
+                            Text("No se pudo identificar un monumento específico.", 
+                                style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
-                    } else if (!vm.isLoadingLocation) {
-                        Text("No se identificó el lugar específico",
-                            style = MaterialTheme.typography.bodySmall, color = Color.Gray)
-                    }
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Text("Metadatos de Captura", style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Bold)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text("Latitud:", fontWeight = FontWeight.SemiBold,
-                            fontSize = MaterialTheme.typography.bodySmall.fontSize)
-                        Text("%.6f".format(vm.capturedLat),
-                            fontSize = MaterialTheme.typography.bodySmall.fontSize)
-                    }
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text("Longitud:", fontWeight = FontWeight.SemiBold,
-                            fontSize = MaterialTheme.typography.bodySmall.fontSize)
-                        Text("%.6f".format(vm.capturedLon),
-                            fontSize = MaterialTheme.typography.bodySmall.fontSize)
-                    }
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text("Acimut:", fontWeight = FontWeight.SemiBold,
-                            fontSize = MaterialTheme.typography.bodySmall.fontSize)
-                        Text("%.1f°".format(vm.capturedAzimuth),
-                            fontSize = MaterialTheme.typography.bodySmall.fontSize)
                     }
                 }
-            }
 
-            Spacer(modifier = Modifier.weight(1f))
+                Spacer(modifier = Modifier.height(24.dp))
 
-            Button(
-                onClick = { vm.resetCapture() },
-                modifier = Modifier.fillMaxWidth().height(56.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF39C12))
-            ) {
-                Text("Volver a la cámara", fontWeight = FontWeight.Bold)
+                // Card de Mapa Interactivo
+                Text("VISTA EN MAPA", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(start = 8.dp, bottom = 12.dp))
+                Card(
+                    modifier = Modifier.fillMaxWidth().height(240.dp),
+                    shape = RoundedCornerShape(28.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                ) {
+                    MapDisplay(
+                        latitude = vm.capturedLat,
+                        longitude = vm.capturedLon,
+                        locationName = vm.identifiedLocation?.name ?: "Punto capturado"
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Datos Técnicos en una fila más compacta
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f))
+                ) {
+                    Row(modifier = Modifier.padding(16.dp).fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        TechnicalItem("LATITUD", "%.5f".format(vm.capturedLat))
+                        TechnicalItem("LONGITUD", "%.5f".format(vm.capturedLon))
+                        TechnicalItem("AZIMUTH", "%.1f°".format(vm.capturedAzimuth))
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                // Acciones Principales
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    OutlinedButton(
+                        onClick = { vm.resetCapture() },
+                        modifier = Modifier.weight(1f).height(60.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
+                    ) {
+                        Text("CERRAR")
+                    }
+                    Button(
+                        onClick = { 
+                            // Cambiamos a la pestaña de chat y reseteamos el estado de captura
+                            // para que la barra de navegación vuelva a aparecer
+                            vm.setTab(AppTab.CHAT)
+                            vm.showResult = false 
+                        },
+                        modifier = Modifier.weight(1.5f).height(60.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.secondary,
+                            contentColor = MaterialTheme.colorScheme.onSecondary // Mejora el contraste
+                        )
+                    ) {
+                        Icon(Icons.Default.HistoryEdu, null)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("VER HISTORIA IA", fontWeight = FontWeight.ExtraBold)
+                    }
+                }
+                
+                Spacer(modifier = Modifier.height(48.dp))
             }
         }
+    }
+}
 
-        IconButton(
-            onClick = { vm.resetCapture() },
-            modifier = Modifier.align(Alignment.TopEnd).padding(24.dp)
-                .background(Color.White.copy(alpha = 0.8f), RoundedCornerShape(24.dp))
-        ) {
-            Icon(Icons.Default.Close, contentDescription = "Cerrar")
-        }
+@Composable
+fun TechnicalItem(label: String, value: String) {
+    Column {
+        Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+        Text(value, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Medium)
     }
 }
 
@@ -466,7 +546,6 @@ fun CaptureResultScreen(vm: LandmarkViewModel) {
 @Composable
 fun MapTab(vm: LandmarkViewModel) {
     val context = LocalContext.current
-
     val hasLocationPermission = ContextCompat.checkSelfPermission(
         context, Manifest.permission.ACCESS_FINE_LOCATION
     ) == PackageManager.PERMISSION_GRANTED
@@ -476,79 +555,77 @@ fun MapTab(vm: LandmarkViewModel) {
     }
 
     Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
+        modifier = Modifier.fillMaxSize().padding(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Mi Ubicación", style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold, color = Color(0xFFF39C12))
-        Spacer(modifier = Modifier.height(12.dp))
+        Text("Radar de Landmark", style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
+        
+        Spacer(modifier = Modifier.height(20.dp))
 
-        Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White)) {
-            Row(modifier = Modifier.fillMaxWidth().padding(12.dp),
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f))
+        ) {
+            Row(modifier = Modifier.fillMaxWidth().padding(16.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("Latitud", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
-                    Text("%.6f".format(vm.lat), style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Bold)
-                }
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("Longitud", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
-                    Text("%.6f".format(vm.lon), style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Bold)
-                }
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("Acimut", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
-                    Text("%.1f°".format(vm.azimuth), style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Bold)
-                }
+                MapCoordItem("Latitud", vm.lat)
+                MapCoordItem("Longitud", vm.lon)
+                MapCoordItem("Acimut", vm.azimuth.toDouble())
             }
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
-        if (!hasLocationPermission) {
-            Card(modifier = Modifier.fillMaxWidth().height(350.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White)) {
+        Card(
+            modifier = Modifier.fillMaxWidth().weight(1f),
+            shape = RoundedCornerShape(28.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        ) {
+            if (!hasLocationPermission) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Sin permiso de ubicación", color = Color.Gray)
+                    Text("Se requiere permiso de ubicación", color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
-            }
-        } else if (vm.lat == 0.0 && vm.lon == 0.0) {
-            Card(modifier = Modifier.fillMaxWidth().height(350.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White)) {
+            } else if (vm.lat == 0.0 && vm.lon == 0.0) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        CircularProgressIndicator(color = Color(0xFFF39C12))
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Text("Obteniendo ubicación GPS...", color = Color.Gray)
+                        CircularProgressIndicator(color = MaterialTheme.colorScheme.secondary)
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text("Sincronizando GPS...", color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
+            } else {
+                OsmMapView(
+                    latitude = vm.lat,
+                    longitude = vm.lon,
+                    locationName = "Tú estás aquí",
+                    modifier = Modifier.fillMaxSize()
+                )
             }
-        } else {
-            OsmMapView(
-                latitude = vm.lat,
-                longitude = vm.lon,
-                locationName = "Mi posición",
-                modifier = Modifier.fillMaxWidth().height(400.dp).clip(RoundedCornerShape(16.dp))
-            )
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         Button(
             onClick = { if (hasLocationPermission) vm.updateLocationBalanced() },
-            modifier = Modifier.fillMaxWidth().height(48.dp),
-            shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF39C12)),
+            modifier = Modifier.fillMaxWidth().height(56.dp),
+            shape = RoundedCornerShape(16.dp),
             enabled = hasLocationPermission
         ) {
-            Icon(Icons.Default.LocationOn, contentDescription = null, tint = Color.White)
-            Spacer(modifier = Modifier.padding(4.dp))
-            Text("Actualizar ubicación", fontWeight = FontWeight.Bold)
+            Icon(Icons.Default.LocationOn, null)
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("Centrar Mapa", fontWeight = FontWeight.Bold)
         }
+    }
+}
+
+@Composable
+fun MapCoordItem(label: String, value: Double) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+        Text(if (label == "Acimut") "%.1f°".format(value) else "%.5f".format(value), 
+            style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
     }
 }
 
@@ -556,15 +633,29 @@ fun MapTab(vm: LandmarkViewModel) {
 @Composable
 fun MLOfflineScreen() {
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().padding(32.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Icon(Icons.Default.Construction, contentDescription = null,
-            modifier = Modifier.size(64.dp), tint = Color.Gray)
-        Spacer(Modifier.height(16.dp))
-        Text("Próximamente: Análisis ML offline",
-            style = MaterialTheme.typography.titleMedium, color = Color.Gray)
+        Surface(
+            color = MaterialTheme.colorScheme.secondaryContainer,
+            shape = CircleShape,
+            modifier = Modifier.size(120.dp)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(Icons.Default.Memory, contentDescription = null,
+                    modifier = Modifier.size(60.dp), tint = MaterialTheme.colorScheme.secondary)
+            }
+        }
+        Spacer(Modifier.height(32.dp))
+        Text("Detección Local", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+        Spacer(Modifier.height(12.dp))
+        Text(
+            "Estamos entrenando una IA local para que puedas identificar monumentos sin conexión a internet. ¡Próximamente!",
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
@@ -574,93 +665,95 @@ fun OllamaChatScreen(vm: LandmarkViewModel) {
     var expanded by remember { mutableStateOf(false) }
     val listState = rememberLazyListState()
 
-    // Carga modelos si aún no se han cargado — lógica en el ViewModel
-    LaunchedEffect(Unit) {
-        vm.loadModelsIfNeeded()
-    }
-
-    // Scroll automático al último mensaje
+    LaunchedEffect(Unit) { vm.loadModelsIfNeeded() }
     LaunchedEffect(vm.chatMessages.size) {
         if (vm.chatMessages.isNotEmpty()) listState.animateScrollToItem(vm.chatMessages.lastIndex)
     }
 
-    Column(modifier = Modifier.fillMaxSize().padding(12.dp)) {
-        Text("Modelo", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-        Spacer(modifier = Modifier.height(8.dp))
-        Box {
-            OutlinedButton(
-                onClick = { expanded = true },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                enabled = !vm.isChatLoading
-            ) {
-                Text(vm.selectedModel)
-            }
-            DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                vm.availableModels.forEach { model ->
-                    DropdownMenuItem(
-                        text = { Text(model) },
-                        onClick = { vm.selectedModel = model; expanded = false }
-                    )
+    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text("Guía IA", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
+            Spacer(modifier = Modifier.weight(1f))
+            Box {
+                OutlinedButton(
+                    onClick = { expanded = true },
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.height(40.dp)
+                ) {
+                    Text(vm.selectedModel, fontSize = 12.sp)
+                }
+                DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                    vm.availableModels.forEach { model ->
+                        DropdownMenuItem(
+                            text = { Text(model) },
+                            onClick = { vm.selectedModel = model; expanded = false }
+                        )
+                    }
                 }
             }
         }
-        Spacer(modifier = Modifier.height(12.dp))
-        Text("Conversación", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-        Spacer(modifier = Modifier.height(8.dp))
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        
         Card(
             modifier = Modifier.fillMaxWidth().weight(1f),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White)
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
         ) {
             if (vm.chatMessages.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Todavía no hay mensajes", color = Color.Gray)
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(Icons.Default.SmartToy, null, modifier = Modifier.size(48.dp), tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text("Pregúntame sobre cualquier monumento", color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f))
+                    }
                 }
             } else {
                 LazyColumn(
                     state = listState,
-                    modifier = Modifier.fillMaxSize().padding(12.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                    modifier = Modifier.fillMaxSize().padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     items(vm.chatMessages) { msg -> ChatBubble(message = msg) }
                     if (vm.isChatLoading) {
                         item {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
-                                Spacer(modifier = Modifier.padding(4.dp))
-                                Text("Generando respuesta...")
+                            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(8.dp)) {
+                                CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp, color = MaterialTheme.colorScheme.secondary)
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Text("Pensando...", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
                             }
                         }
                     }
                 }
             }
         }
-        Spacer(modifier = Modifier.height(12.dp))
-        OutlinedTextField(
-            value = vm.chatQuestion,
-            onValueChange = { vm.chatQuestion = it },
-            modifier = Modifier.fillMaxWidth().height(80.dp),
-            label = { Text("Pregunta") },
-            placeholder = { Text("Escribe tu pregunta") },
-            shape = RoundedCornerShape(12.dp),
-            enabled = !vm.isChatLoading,
-            maxLines = 3
-        )
-        Spacer(modifier = Modifier.height(10.dp))
-        Button(
-            onClick = { vm.sendChatMessage(vm.chatQuestion) },
-            modifier = Modifier.fillMaxWidth().height(60.dp),
-            shape = RoundedCornerShape(10.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFFF39C12),
-                contentColor = Color.White
-            ),
-            enabled = !vm.isChatLoading
-        ) {
-            Icon(imageVector = Icons.AutoMirrored.Filled.Send, contentDescription = "Enviar")
-            Spacer(modifier = Modifier.padding(4.dp))
-            Text("Enviar", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            OutlinedTextField(
+                value = vm.chatQuestion,
+                onValueChange = { vm.chatQuestion = it },
+                modifier = Modifier.weight(1f),
+                placeholder = { Text("¿Qué historia tiene este lugar?") },
+                shape = RoundedCornerShape(20.dp),
+                enabled = !vm.isChatLoading,
+                maxLines = 2
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            IconButton(
+                onClick = { if (vm.chatQuestion.isNotBlank()) vm.sendChatMessage(vm.chatQuestion) },
+                enabled = !vm.isChatLoading && vm.chatQuestion.isNotBlank(),
+                modifier = Modifier
+                    .size(56.dp)
+                    .background(
+                        if (vm.chatQuestion.isNotBlank()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
+                        CircleShape
+                    )
+            ) {
+                Icon(Icons.AutoMirrored.Filled.Send, "Enviar", tint = Color.White)
+            }
         }
     }
 }
@@ -669,36 +762,43 @@ fun OllamaChatScreen(vm: LandmarkViewModel) {
 @Composable
 fun ChatBubble(message: ChatMessage) {
     val isUser = message.role == "user"
+    val bubbleShape = if (isUser) {
+        RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp, bottomStart = 20.dp, bottomEnd = 4.dp)
+    } else {
+        RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp, bottomStart = 4.dp, bottomEnd = 20.dp)
+    }
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start
     ) {
-        Row(verticalAlignment = Alignment.Top, modifier = Modifier.widthIn(max = 300.dp)) {
-            if (!isUser) {
-                Icon(Icons.Default.SmartToy, "Assistant", tint = Color(0xFFF39C12),
-                    modifier = Modifier.padding(top = 6.dp, end = 6.dp))
+        if (!isUser) {
+            Surface(modifier = Modifier.size(32.dp).padding(top = 4.dp), shape = CircleShape, color = MaterialTheme.colorScheme.secondaryContainer) {
+                Icon(Icons.Default.SmartToy, null, modifier = Modifier.padding(6.dp), tint = MaterialTheme.colorScheme.secondary)
             }
-            Card(
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = if (isUser) Color(0xFFFFE0B2) else Color(0xFFF5F5F5)
-                ),
-                modifier = Modifier.border(1.dp, Color(0xFFE0E0E0), RoundedCornerShape(16.dp))
-            ) {
-                Column(modifier = Modifier.padding(12.dp)) {
-                    Text(
-                        text = if (isUser) "Pregunta" else "Respuesta",
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = if (isUser) Color(0xFFBF360C) else Color(0xFF616161)
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(text = message.text, style = MaterialTheme.typography.bodyLarge)
-                }
+            Spacer(modifier = Modifier.width(8.dp))
+        }
+
+        Card(
+            shape = bubbleShape,
+            colors = CardDefaults.cardColors(
+                containerColor = if (isUser) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f)
+            ),
+            modifier = Modifier.widthIn(max = 280.dp)
+        ) {
+            Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)) {
+                Text(
+                    text = message.text,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = if (isUser) Color.White else MaterialTheme.colorScheme.onSurface
+                )
             }
-            if (isUser) {
-                Icon(Icons.Default.Android, "User", tint = Color(0xFF6D4C41),
-                    modifier = Modifier.padding(top = 6.dp, start = 6.dp))
+        }
+
+        if (isUser) {
+            Spacer(modifier = Modifier.width(8.dp))
+            Surface(modifier = Modifier.size(32.dp).padding(top = 4.dp), shape = CircleShape, color = MaterialTheme.colorScheme.primaryContainer) {
+                Icon(Icons.Default.Android, null, modifier = Modifier.padding(6.dp), tint = MaterialTheme.colorScheme.primary)
             }
         }
     }
