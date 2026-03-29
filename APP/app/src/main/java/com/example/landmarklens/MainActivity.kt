@@ -65,12 +65,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -84,8 +81,13 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
-import kotlinx.coroutines.launch
 
+// ─── Modelos de datos ─────────────────────────────────────────────────────────
+enum class AppTab { CAMERA, MAP, CHAT, ML }
+
+data class ChatMessage(val role: String, val text: String)
+
+// ─── Activity ─────────────────────────────────────────────────────────────────
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -103,26 +105,17 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-enum class AppTab { CAMERA, MAP, CHAT, ML }
-
-data class ChatMessage(val role: String, val text: String)
-
+// ─── Raíz de la UI ───────────────────────────────────────────────────────────
 @Composable
-fun MainApp(landmarkViewModel: LandmarkViewModel = viewModel()) {
-    var currentTab by remember { mutableStateOf(AppTab.CAMERA) }
+fun MainApp(vm: LandmarkViewModel = viewModel()) {
 
-    val messages = remember { mutableStateListOf<ChatMessage>() }
-    var availableModels by remember { mutableStateOf(listOf("Loading...")) }
-    var selectedModel by remember { mutableStateOf("Loading...") }
-    var question by remember { mutableStateOf("") }
-    var isLoading by remember { mutableStateOf(false) }
+    // Todo el estado viene del ViewModel — sobrevive rotaciones
+    val currentTab = vm.currentTab
 
-    // FIX 1: Sensores solo activos en pestañas que los necesitan (CAMERA y MAP)
-    // FIX 10: No activar en CHAT ni ML
     val needsSensors = currentTab == AppTab.CAMERA || currentTab == AppTab.MAP
     DisposableEffect(needsSensors) {
-        if (needsSensors) landmarkViewModel.startSensors()
-        onDispose { landmarkViewModel.stopSensors() }
+        if (needsSensors) vm.startSensors()
+        onDispose { vm.stopSensors() }
     }
 
     Scaffold(
@@ -131,25 +124,25 @@ fun MainApp(landmarkViewModel: LandmarkViewModel = viewModel()) {
             NavigationBar(containerColor = Color.White) {
                 NavigationBarItem(
                     selected = currentTab == AppTab.CAMERA,
-                    onClick = { currentTab = AppTab.CAMERA },
+                    onClick = { vm.setTab(AppTab.CAMERA) },
                     icon = { Icon(Icons.Default.PhotoCamera, "Explorar") },
                     label = { Text("Explorar") }
                 )
                 NavigationBarItem(
                     selected = currentTab == AppTab.MAP,
-                    onClick = { currentTab = AppTab.MAP },
+                    onClick = { vm.setTab(AppTab.MAP) },
                     icon = { Icon(Icons.Default.LocationOn, "Mapa") },
                     label = { Text("Mapa") }
                 )
                 NavigationBarItem(
                     selected = currentTab == AppTab.CHAT,
-                    onClick = { currentTab = AppTab.CHAT },
+                    onClick = { vm.setTab(AppTab.CHAT) },
                     icon = { Icon(Icons.AutoMirrored.Filled.Chat, "IA") },
                     label = { Text("Guía IA") }
                 )
                 NavigationBarItem(
                     selected = currentTab == AppTab.ML,
-                    onClick = { currentTab = AppTab.ML },
+                    onClick = { vm.setTab(AppTab.ML) },
                     icon = { Icon(Icons.Default.Memory, "ML") },
                     label = { Text("Offline") }
                 )
@@ -158,34 +151,24 @@ fun MainApp(landmarkViewModel: LandmarkViewModel = viewModel()) {
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
             when (currentTab) {
-                AppTab.CAMERA -> CameraLandmarkScreen(landmarkViewModel)
-                AppTab.MAP -> MapTab(landmarkViewModel)
-                AppTab.CHAT -> OllamaChatScreen(
-                    messages = messages,
-                    availableModels = availableModels,
-                    onModelsChange = { availableModels = it },
-                    selectedModel = selectedModel,
-                    onModelChange = { selectedModel = it },
-                    question = question,
-                    onQuestionChange = { question = it },
-                    isLoading = isLoading,
-                    onLoadingChange = { isLoading = it }
-                )
-                AppTab.ML -> MLOfflineScreen()
+                AppTab.CAMERA -> CameraLandmarkScreen(vm)
+                AppTab.MAP    -> MapTab(vm)
+                AppTab.CHAT   -> OllamaChatScreen(vm)
+                AppTab.ML     -> MLOfflineScreen()
             }
         }
     }
 }
 
+// ─── Pantalla Cámara ─────────────────────────────────────────────────────────
 @Composable
-fun CameraLandmarkScreen(viewModel: LandmarkViewModel) {
+fun CameraLandmarkScreen(vm: LandmarkViewModel) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val TAG = "CameraLandmarkScreen"
 
     var previewView by remember { mutableStateOf<PreviewView?>(null) }
 
-    // FIX 2: Permisos separados — cámara y ubicación son independientes
     var hasCameraPermission by remember {
         mutableStateOf(
             ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
@@ -204,35 +187,32 @@ fun CameraLandmarkScreen(viewModel: LandmarkViewModel) {
     ) { permissions ->
         hasCameraPermission = permissions[Manifest.permission.CAMERA] ?: false
         hasLocationPermission = permissions[Manifest.permission.ACCESS_FINE_LOCATION] ?: false
-
-        // FIX 5: GPS solo si tiene permiso, y con precisión balanceada para el overlay
         if (hasLocationPermission) {
-            viewModel.updateLocationBalanced()
+            vm.updateLocationBalanced()
             Log.d(TAG, "Permiso de ubicación otorgado")
         }
     }
 
-    // Solicitar permisos al cargar. Solo una vez gracias a LaunchedEffect(Unit)
     LaunchedEffect(Unit) {
         if (!hasCameraPermission || !hasLocationPermission) {
-            permissionLauncher.launch(arrayOf(
-                Manifest.permission.CAMERA,
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ))
+            permissionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.CAMERA,
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
         } else if (hasLocationPermission) {
-            // FIX 5: Solo llamar si hay permiso, precisión balanceada para overlay
-            viewModel.updateLocationBalanced()
+            vm.updateLocationBalanced()
         }
     }
 
-    if (viewModel.showResult) {
-        CaptureResultScreen(viewModel)
+    if (vm.showResult) {
+        CaptureResultScreen(vm)
         return
     }
 
     if (!hasCameraPermission) {
-        // Pantalla de permisos requeridos
         Box(
             modifier = Modifier.fillMaxSize().background(Color(0xFFF3F3F3)),
             contentAlignment = Alignment.Center
@@ -254,11 +234,13 @@ fun CameraLandmarkScreen(viewModel: LandmarkViewModel) {
                 Spacer(modifier = Modifier.height(24.dp))
                 Button(
                     onClick = {
-                        permissionLauncher.launch(arrayOf(
-                            Manifest.permission.CAMERA,
-                            Manifest.permission.ACCESS_FINE_LOCATION,
-                            Manifest.permission.ACCESS_COARSE_LOCATION
-                        ))
+                        permissionLauncher.launch(
+                            arrayOf(
+                                Manifest.permission.CAMERA,
+                                Manifest.permission.ACCESS_FINE_LOCATION,
+                                Manifest.permission.ACCESS_COARSE_LOCATION
+                            )
+                        )
                     },
                     modifier = Modifier.fillMaxWidth().height(48.dp),
                     shape = RoundedCornerShape(12.dp),
@@ -271,7 +253,6 @@ fun CameraLandmarkScreen(viewModel: LandmarkViewModel) {
         return
     }
 
-    // Cámara disponible
     Box(modifier = Modifier.fillMaxSize()) {
         AndroidView(
             factory = { ctx ->
@@ -305,32 +286,29 @@ fun CameraLandmarkScreen(viewModel: LandmarkViewModel) {
                 .background(Color.Black.copy(alpha = 0.6f), RoundedCornerShape(8.dp))
                 .padding(12.dp)
         ) {
-            Text("Latitud: ${"%.4f".format(viewModel.lat)}", color = Color.White,
+            Text("Latitud: ${"%.4f".format(vm.lat)}", color = Color.White,
                 style = MaterialTheme.typography.labelMedium)
             Spacer(modifier = Modifier.height(4.dp))
-            Text("Longitud: ${"%.4f".format(viewModel.lon)}", color = Color.White,
+            Text("Longitud: ${"%.4f".format(vm.lon)}", color = Color.White,
                 style = MaterialTheme.typography.labelMedium)
             Spacer(modifier = Modifier.height(4.dp))
-            Text("Acimut: ${"%.1f".format(viewModel.azimuth)}°", color = Color.White,
+            Text("Acimut: ${"%.1f".format(vm.azimuth)}°", color = Color.White,
                 style = MaterialTheme.typography.labelMedium)
         }
 
-        // FIX 3: Al capturar, primero obtener GPS de alta precisión,
-        // luego capturar foto en el callback para garantizar coords actualizadas
         FloatingActionButton(
             onClick = {
                 previewView?.bitmap?.let { bitmap ->
+                    // FileUtils.saveBitmap movido aquí — es la única parte de UI que
+                    // necesita el context del Composable; todo lo demás va al ViewModel.
+                    FileUtils.saveBitmap(context, bitmap, vm.lat, vm.lon, vm.azimuth)
+                        .also { Log.d(TAG, "Foto guardada en: $it") }
+
                     if (hasLocationPermission) {
-                        // Alta precisión solo en captura, foto se guarda en el callback
-                        viewModel.captureWithHighAccuracyLocation(bitmap)
+                        vm.captureWithHighAccuracyLocation(bitmap)
                     } else {
-                        // Sin permiso de ubicación: capturar con coords que tengamos
-                        viewModel.onPhotoCaptured(bitmap)
+                        vm.onPhotoCaptured(bitmap)
                     }
-                    val filePath = FileUtils.saveBitmap(
-                        context, bitmap, viewModel.lat, viewModel.lon, viewModel.azimuth
-                    )
-                    Log.d(TAG, "Foto guardada en: $filePath")
                 }
             },
             modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 32.dp),
@@ -341,37 +319,20 @@ fun CameraLandmarkScreen(viewModel: LandmarkViewModel) {
     }
 }
 
+// ─── Pantalla Resultado de Captura ───────────────────────────────────────────
 @Composable
-fun CaptureResultScreen(viewModel: LandmarkViewModel) {
+fun CaptureResultScreen(vm: LandmarkViewModel) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
 
-    var identifiedLocation by remember { mutableStateOf<LandmarkLocation?>(null) }
-    var isLoadingLocation by remember { mutableStateOf(false) }
-    var locationError by remember { mutableStateOf<String?>(null) }
-
+    // PlacesService sigue instanciándose aquí porque necesita Context,
+    // pero la lógica de red (coroutine + estado) vive en el ViewModel.
     val placesService = remember { PlacesService(context) }
 
-    LaunchedEffect(viewModel.showResult) {
-        if (viewModel.showResult && identifiedLocation == null && !isLoadingLocation) {
-            isLoadingLocation = true
-            locationError = null
-            scope.launch {
-                try {
-                    identifiedLocation = placesService.getCompleteLocationInfo(
-                        viewModel.capturedLat, viewModel.capturedLon
-                    )
-                } catch (e: Exception) {
-                    Log.e("CaptureResultScreen", "Error: ${e.message}", e)
-                    locationError = "No se pudo identificar la ubicación: ${e.message}"
-                } finally {
-                    isLoadingLocation = false
-                }
-            }
-        }
+    LaunchedEffect(vm.showResult) {
+        if (vm.showResult) vm.fetchLocationInfo(placesService)
     }
 
-    BackHandler { viewModel.resetCapture() }
+    BackHandler { vm.resetCapture() }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -382,7 +343,7 @@ fun CaptureResultScreen(viewModel: LandmarkViewModel) {
                 fontWeight = FontWeight.Bold, color = Color(0xFFF39C12))
             Spacer(modifier = Modifier.height(16.dp))
 
-            viewModel.capturedBitmap?.let { bitmap ->
+            vm.capturedBitmap?.let { bitmap ->
                 Image(
                     bitmap = bitmap.asImageBitmap(),
                     contentDescription = "Foto capturada",
@@ -396,7 +357,7 @@ fun CaptureResultScreen(viewModel: LandmarkViewModel) {
             Spacer(modifier = Modifier.height(16.dp))
 
             when {
-                isLoadingLocation -> {
+                vm.isLoadingLocation -> {
                     Box(
                         modifier = Modifier.fillMaxWidth().height(200.dp)
                             .background(Color.Gray.copy(alpha = 0.1f), RoundedCornerShape(16.dp)),
@@ -410,22 +371,22 @@ fun CaptureResultScreen(viewModel: LandmarkViewModel) {
                         }
                     }
                 }
-                locationError != null -> {
+                vm.locationError != null -> {
                     Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp),
                         colors = CardDefaults.cardColors(containerColor = Color(0xFFFFEBEE))) {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Text("⚠️ Error", style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold, color = Color(0xFFC62828))
-                            Text(locationError!!, style = MaterialTheme.typography.bodySmall,
+                            Text(vm.locationError!!, style = MaterialTheme.typography.bodySmall,
                                 color = Color(0xFF7F0000))
                         }
                     }
                 }
                 else -> {
                     MapDisplay(
-                        latitude = viewModel.capturedLat,
-                        longitude = viewModel.capturedLon,
-                        locationName = identifiedLocation?.name ?: "Ubicación capturada"
+                        latitude = vm.capturedLat,
+                        longitude = vm.capturedLon,
+                        locationName = vm.identifiedLocation?.name ?: "Ubicación capturada"
                     )
                 }
             }
@@ -438,19 +399,19 @@ fun CaptureResultScreen(viewModel: LandmarkViewModel) {
                     Text("📍 Información del Lugar", style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold, color = Color(0xFFF39C12))
                     Spacer(modifier = Modifier.height(12.dp))
-                    if (identifiedLocation != null) {
-                        Text("Nombre: ${identifiedLocation!!.name}",
+                    if (vm.identifiedLocation != null) {
+                        Text("Nombre: ${vm.identifiedLocation!!.name}",
                             style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text("Tipo: ${identifiedLocation!!.type}",
+                        Text("Tipo: ${vm.identifiedLocation!!.type}",
                             style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                         Spacer(modifier = Modifier.height(8.dp))
-                        if (identifiedLocation!!.address.isNotEmpty()) {
-                            Text("Ubicación: ${identifiedLocation!!.address}",
+                        if (vm.identifiedLocation!!.address.isNotEmpty()) {
+                            Text("Ubicación: ${vm.identifiedLocation!!.address}",
                                 style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                             Spacer(modifier = Modifier.height(8.dp))
                         }
-                    } else {
+                    } else if (!vm.isLoadingLocation) {
                         Text("No se identificó el lugar específico",
                             style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                     }
@@ -461,19 +422,19 @@ fun CaptureResultScreen(viewModel: LandmarkViewModel) {
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         Text("Latitud:", fontWeight = FontWeight.SemiBold,
                             fontSize = MaterialTheme.typography.bodySmall.fontSize)
-                        Text("%.6f".format(viewModel.capturedLat),
+                        Text("%.6f".format(vm.capturedLat),
                             fontSize = MaterialTheme.typography.bodySmall.fontSize)
                     }
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         Text("Longitud:", fontWeight = FontWeight.SemiBold,
                             fontSize = MaterialTheme.typography.bodySmall.fontSize)
-                        Text("%.6f".format(viewModel.capturedLon),
+                        Text("%.6f".format(vm.capturedLon),
                             fontSize = MaterialTheme.typography.bodySmall.fontSize)
                     }
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         Text("Acimut:", fontWeight = FontWeight.SemiBold,
                             fontSize = MaterialTheme.typography.bodySmall.fontSize)
-                        Text("%.1f°".format(viewModel.capturedAzimuth),
+                        Text("%.1f°".format(vm.capturedAzimuth),
                             fontSize = MaterialTheme.typography.bodySmall.fontSize)
                     }
                 }
@@ -482,7 +443,7 @@ fun CaptureResultScreen(viewModel: LandmarkViewModel) {
             Spacer(modifier = Modifier.weight(1f))
 
             Button(
-                onClick = { viewModel.resetCapture() },
+                onClick = { vm.resetCapture() },
                 modifier = Modifier.fillMaxWidth().height(56.dp),
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF39C12))
@@ -492,7 +453,7 @@ fun CaptureResultScreen(viewModel: LandmarkViewModel) {
         }
 
         IconButton(
-            onClick = { viewModel.resetCapture() },
+            onClick = { vm.resetCapture() },
             modifier = Modifier.align(Alignment.TopEnd).padding(24.dp)
                 .background(Color.White.copy(alpha = 0.8f), RoundedCornerShape(24.dp))
         ) {
@@ -501,18 +462,17 @@ fun CaptureResultScreen(viewModel: LandmarkViewModel) {
     }
 }
 
+// ─── Pestaña Mapa ────────────────────────────────────────────────────────────
 @Composable
-fun MapTab(viewModel: LandmarkViewModel) {
+fun MapTab(vm: LandmarkViewModel) {
     val context = LocalContext.current
 
-    // FIX 5+6: Comprobar permiso antes de llamar GPS, y sin pasar context
     val hasLocationPermission = ContextCompat.checkSelfPermission(
         context, Manifest.permission.ACCESS_FINE_LOCATION
     ) == PackageManager.PERMISSION_GRANTED
 
     LaunchedEffect(Unit) {
-        // FIX 5: Solo si tiene permiso; FIX 8: precisión balanceada para el mapa
-        if (hasLocationPermission) viewModel.updateLocationBalanced()
+        if (hasLocationPermission) vm.updateLocationBalanced()
     }
 
     Column(
@@ -529,17 +489,17 @@ fun MapTab(viewModel: LandmarkViewModel) {
                 horizontalArrangement = Arrangement.SpaceEvenly) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text("Latitud", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
-                    Text("%.6f".format(viewModel.lat), style = MaterialTheme.typography.bodyMedium,
+                    Text("%.6f".format(vm.lat), style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold)
                 }
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text("Longitud", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
-                    Text("%.6f".format(viewModel.lon), style = MaterialTheme.typography.bodyMedium,
+                    Text("%.6f".format(vm.lon), style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold)
                 }
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text("Acimut", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
-                    Text("%.1f°".format(viewModel.azimuth), style = MaterialTheme.typography.bodyMedium,
+                    Text("%.1f°".format(vm.azimuth), style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold)
                 }
             }
@@ -555,7 +515,7 @@ fun MapTab(viewModel: LandmarkViewModel) {
                     Text("Sin permiso de ubicación", color = Color.Gray)
                 }
             }
-        } else if (viewModel.lat == 0.0 && viewModel.lon == 0.0) {
+        } else if (vm.lat == 0.0 && vm.lon == 0.0) {
             Card(modifier = Modifier.fillMaxWidth().height(350.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White)) {
@@ -568,10 +528,9 @@ fun MapTab(viewModel: LandmarkViewModel) {
                 }
             }
         } else {
-            // FIX 4: OsmMapView (no OsmMapWebView)
             OsmMapView(
-                latitude = viewModel.lat,
-                longitude = viewModel.lon,
+                latitude = vm.lat,
+                longitude = vm.lon,
                 locationName = "Mi posición",
                 modifier = Modifier.fillMaxWidth().height(400.dp).clip(RoundedCornerShape(16.dp))
             )
@@ -580,8 +539,7 @@ fun MapTab(viewModel: LandmarkViewModel) {
         Spacer(modifier = Modifier.height(12.dp))
 
         Button(
-            // FIX 6: Sin context, y solo si tiene permiso
-            onClick = { if (hasLocationPermission) viewModel.updateLocationBalanced() },
+            onClick = { if (hasLocationPermission) vm.updateLocationBalanced() },
             modifier = Modifier.fillMaxWidth().height(48.dp),
             shape = RoundedCornerShape(12.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF39C12)),
@@ -594,11 +552,14 @@ fun MapTab(viewModel: LandmarkViewModel) {
     }
 }
 
+// ─── Pestaña ML ──────────────────────────────────────────────────────────────
 @Composable
 fun MLOfflineScreen() {
-    Column(modifier = Modifier.fillMaxSize(),
+    Column(
+        modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally) {
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Icon(Icons.Default.Construction, contentDescription = null,
             modifier = Modifier.size(64.dp), tint = Color.Gray)
         Spacer(Modifier.height(16.dp))
@@ -607,63 +568,63 @@ fun MLOfflineScreen() {
     }
 }
 
+// ─── Pestaña Chat ─────────────────────────────────────────────────────────────
 @Composable
-fun OllamaChatScreen(
-    messages: SnapshotStateList<ChatMessage>,
-    availableModels: List<String>,
-    onModelsChange: (List<String>) -> Unit,
-    selectedModel: String,
-    onModelChange: (String) -> Unit,
-    question: String,
-    onQuestionChange: (String) -> Unit,
-    isLoading: Boolean,
-    onLoadingChange: (Boolean) -> Unit
-) {
+fun OllamaChatScreen(vm: LandmarkViewModel) {
     var expanded by remember { mutableStateOf(false) }
     val listState = rememberLazyListState()
-    val scope = rememberCoroutineScope()
 
+    // Carga modelos si aún no se han cargado — lógica en el ViewModel
     LaunchedEffect(Unit) {
-        if (availableModels.size <= 1 && availableModels.firstOrNull() == "Loading...") {
-            val models = OllamaClient.getModels()
-            onModelsChange(models)
-            if (selectedModel == "Loading...") onModelChange(models.firstOrNull() ?: "No models")
-        }
+        vm.loadModelsIfNeeded()
     }
 
-    LaunchedEffect(messages.size) {
-        if (messages.isNotEmpty()) listState.animateScrollToItem(messages.lastIndex)
+    // Scroll automático al último mensaje
+    LaunchedEffect(vm.chatMessages.size) {
+        if (vm.chatMessages.isNotEmpty()) listState.animateScrollToItem(vm.chatMessages.lastIndex)
     }
 
     Column(modifier = Modifier.fillMaxSize().padding(12.dp)) {
         Text("Modelo", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(8.dp))
         Box {
-            OutlinedButton(onClick = { expanded = true }, modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp), enabled = !isLoading) {
-                Text(selectedModel)
+            OutlinedButton(
+                onClick = { expanded = true },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                enabled = !vm.isChatLoading
+            ) {
+                Text(vm.selectedModel)
             }
             DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                availableModels.forEach { model ->
-                    DropdownMenuItem(text = { Text(model) },
-                        onClick = { onModelChange(model); expanded = false })
+                vm.availableModels.forEach { model ->
+                    DropdownMenuItem(
+                        text = { Text(model) },
+                        onClick = { vm.selectedModel = model; expanded = false }
+                    )
                 }
             }
         }
         Spacer(modifier = Modifier.height(12.dp))
         Text("Conversación", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(8.dp))
-        Card(modifier = Modifier.fillMaxWidth().weight(1f), shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White)) {
-            if (messages.isEmpty()) {
+        Card(
+            modifier = Modifier.fillMaxWidth().weight(1f),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White)
+        ) {
+            if (vm.chatMessages.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text("Todavía no hay mensajes", color = Color.Gray)
                 }
             } else {
-                LazyColumn(state = listState, modifier = Modifier.fillMaxSize().padding(12.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    items(messages) { msg -> ChatBubble(message = msg) }
-                    if (isLoading) {
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier.fillMaxSize().padding(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    items(vm.chatMessages) { msg -> ChatBubble(message = msg) }
+                    if (vm.isChatLoading) {
                         item {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
@@ -676,33 +637,26 @@ fun OllamaChatScreen(
             }
         }
         Spacer(modifier = Modifier.height(12.dp))
-        OutlinedTextField(value = question, onValueChange = { onQuestionChange(it) },
-            modifier = Modifier.fillMaxWidth().height(80.dp), label = { Text("Pregunta") },
-            placeholder = { Text("Escribe tu pregunta") }, shape = RoundedCornerShape(12.dp),
-            enabled = !isLoading, maxLines = 3)
+        OutlinedTextField(
+            value = vm.chatQuestion,
+            onValueChange = { vm.chatQuestion = it },
+            modifier = Modifier.fillMaxWidth().height(80.dp),
+            label = { Text("Pregunta") },
+            placeholder = { Text("Escribe tu pregunta") },
+            shape = RoundedCornerShape(12.dp),
+            enabled = !vm.isChatLoading,
+            maxLines = 3
+        )
         Spacer(modifier = Modifier.height(10.dp))
         Button(
-            onClick = {
-                val trimmedQuestion = question.trim()
-                if (trimmedQuestion.isNotEmpty() && !isLoading) {
-                    messages.add(ChatMessage(role = "user", text = trimmedQuestion))
-                    onQuestionChange("")
-                    onLoadingChange(true)
-                    scope.launch {
-                        try {
-                            val reply = OllamaClient.askModel(selectedModel, trimmedQuestion)
-                            messages.add(ChatMessage(role = "assistant", text = reply))
-                        } catch (e: Exception) {
-                            messages.add(ChatMessage(role = "assistant", text = "Error: ${e.message}"))
-                        } finally {
-                            onLoadingChange(false)
-                        }
-                    }
-                }
-            },
-            modifier = Modifier.fillMaxWidth().height(60.dp), shape = RoundedCornerShape(10.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF39C12), contentColor = Color.White),
-            enabled = !isLoading
+            onClick = { vm.sendChatMessage(vm.chatQuestion) },
+            modifier = Modifier.fillMaxWidth().height(60.dp),
+            shape = RoundedCornerShape(10.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFFF39C12),
+                contentColor = Color.White
+            ),
+            enabled = !vm.isChatLoading
         ) {
             Icon(imageVector = Icons.AutoMirrored.Filled.Send, contentDescription = "Enviar")
             Spacer(modifier = Modifier.padding(4.dp))
@@ -711,24 +665,33 @@ fun OllamaChatScreen(
     }
 }
 
+// ─── Burbuja de chat ──────────────────────────────────────────────────────────
 @Composable
 fun ChatBubble(message: ChatMessage) {
     val isUser = message.role == "user"
-    Row(modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start
+    ) {
         Row(verticalAlignment = Alignment.Top, modifier = Modifier.widthIn(max = 300.dp)) {
             if (!isUser) {
                 Icon(Icons.Default.SmartToy, "Assistant", tint = Color(0xFFF39C12),
                     modifier = Modifier.padding(top = 6.dp, end = 6.dp))
             }
-            Card(shape = RoundedCornerShape(16.dp),
+            Card(
+                shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = if (isUser) Color(0xFFFFE0B2) else Color(0xFFF5F5F5)),
-                modifier = Modifier.border(1.dp, Color(0xFFE0E0E0), RoundedCornerShape(16.dp))) {
+                    containerColor = if (isUser) Color(0xFFFFE0B2) else Color(0xFFF5F5F5)
+                ),
+                modifier = Modifier.border(1.dp, Color(0xFFE0E0E0), RoundedCornerShape(16.dp))
+            ) {
                 Column(modifier = Modifier.padding(12.dp)) {
-                    Text(text = if (isUser) "Pregunta" else "Respuesta",
-                        style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold,
-                        color = if (isUser) Color(0xFFBF360C) else Color(0xFF616161))
+                    Text(
+                        text = if (isUser) "Pregunta" else "Respuesta",
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = if (isUser) Color(0xFFBF360C) else Color(0xFF616161)
+                    )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(text = message.text, style = MaterialTheme.typography.bodyLarge)
                 }
