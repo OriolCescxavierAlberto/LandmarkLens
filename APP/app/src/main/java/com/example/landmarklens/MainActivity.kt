@@ -1,47 +1,742 @@
 package com.example.landmarklens
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.camera.core.CameraSelector
+import androidx.camera.core.Preview
+import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.view.PreviewView
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Chat
+import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.Android
+import androidx.compose.material.icons.filled.Camera
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Construction
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Memory
+import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.material.icons.filled.SmartToy
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.landmarklens.ui.theme.LandmarkLensTheme
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            LandmarkLensTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+            MaterialTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = Color(0xFFF3F3F3)
+                ) {
+                    MainApp()
                 }
             }
         }
     }
 }
 
+enum class AppTab { CAMERA, MAP, CHAT, ML }
+
+data class ChatMessage(val role: String, val text: String)
+
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
+fun MainApp(landmarkViewModel: LandmarkViewModel = viewModel()) {
+    var currentTab by remember { mutableStateOf(AppTab.CAMERA) }
+
+    val messages = remember { mutableStateListOf<ChatMessage>() }
+    var availableModels by remember { mutableStateOf(listOf("Loading...")) }
+    var selectedModel by remember { mutableStateOf("Loading...") }
+    var question by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
+
+    // FIX 1: Sensores solo activos en pestañas que los necesitan (CAMERA y MAP)
+    // FIX 10: No activar en CHAT ni ML
+    val needsSensors = currentTab == AppTab.CAMERA || currentTab == AppTab.MAP
+    DisposableEffect(needsSensors) {
+        if (needsSensors) landmarkViewModel.startSensors()
+        onDispose { landmarkViewModel.stopSensors() }
+    }
+
+    Scaffold(
+        containerColor = Color(0xFFF3F3F3),
+        bottomBar = {
+            NavigationBar(containerColor = Color.White) {
+                NavigationBarItem(
+                    selected = currentTab == AppTab.CAMERA,
+                    onClick = { currentTab = AppTab.CAMERA },
+                    icon = { Icon(Icons.Default.PhotoCamera, "Explorar") },
+                    label = { Text("Explorar") }
+                )
+                NavigationBarItem(
+                    selected = currentTab == AppTab.MAP,
+                    onClick = { currentTab = AppTab.MAP },
+                    icon = { Icon(Icons.Default.LocationOn, "Mapa") },
+                    label = { Text("Mapa") }
+                )
+                NavigationBarItem(
+                    selected = currentTab == AppTab.CHAT,
+                    onClick = { currentTab = AppTab.CHAT },
+                    icon = { Icon(Icons.AutoMirrored.Filled.Chat, "IA") },
+                    label = { Text("Guía IA") }
+                )
+                NavigationBarItem(
+                    selected = currentTab == AppTab.ML,
+                    onClick = { currentTab = AppTab.ML },
+                    icon = { Icon(Icons.Default.Memory, "ML") },
+                    label = { Text("Offline") }
+                )
+            }
+        }
+    ) { innerPadding ->
+        Box(modifier = Modifier.padding(innerPadding)) {
+            when (currentTab) {
+                AppTab.CAMERA -> CameraLandmarkScreen(landmarkViewModel)
+                AppTab.MAP -> MapTab(landmarkViewModel)
+                AppTab.CHAT -> OllamaChatScreen(
+                    messages = messages,
+                    availableModels = availableModels,
+                    onModelsChange = { availableModels = it },
+                    selectedModel = selectedModel,
+                    onModelChange = { selectedModel = it },
+                    question = question,
+                    onQuestionChange = { question = it },
+                    isLoading = isLoading,
+                    onLoadingChange = { isLoading = it }
+                )
+                AppTab.ML -> MLOfflineScreen()
+            }
+        }
+    }
 }
 
-@Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
-    LandmarkLensTheme {
-        Greeting("Android")
+fun CameraLandmarkScreen(viewModel: LandmarkViewModel) {
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val TAG = "CameraLandmarkScreen"
+
+    var previewView by remember { mutableStateOf<PreviewView?>(null) }
+
+    // FIX 2: Permisos separados — cámara y ubicación son independientes
+    var hasCameraPermission by remember {
+        mutableStateOf(
+            ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
+                    == PackageManager.PERMISSION_GRANTED
+        )
+    }
+    var hasLocationPermission by remember {
+        mutableStateOf(
+            ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
+                    == PackageManager.PERMISSION_GRANTED
+        )
+    }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        hasCameraPermission = permissions[Manifest.permission.CAMERA] ?: false
+        hasLocationPermission = permissions[Manifest.permission.ACCESS_FINE_LOCATION] ?: false
+
+        // FIX 5: GPS solo si tiene permiso, y con precisión balanceada para el overlay
+        if (hasLocationPermission) {
+            viewModel.updateLocationBalanced()
+            Log.d(TAG, "Permiso de ubicación otorgado")
+        }
+    }
+
+    // Solicitar permisos al cargar. Solo una vez gracias a LaunchedEffect(Unit)
+    LaunchedEffect(Unit) {
+        if (!hasCameraPermission || !hasLocationPermission) {
+            permissionLauncher.launch(arrayOf(
+                Manifest.permission.CAMERA,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ))
+        } else if (hasLocationPermission) {
+            // FIX 5: Solo llamar si hay permiso, precisión balanceada para overlay
+            viewModel.updateLocationBalanced()
+        }
+    }
+
+    if (viewModel.showResult) {
+        CaptureResultScreen(viewModel)
+        return
+    }
+
+    if (!hasCameraPermission) {
+        // Pantalla de permisos requeridos
+        Box(
+            modifier = Modifier.fillMaxSize().background(Color(0xFFF3F3F3)),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.padding(24.dp)
+            ) {
+                Icon(Icons.Default.Camera, contentDescription = null,
+                    modifier = Modifier.size(64.dp), tint = Color.Gray)
+                Spacer(modifier = Modifier.height(16.dp))
+                Text("Permisos requeridos", style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    "Se necesitan permisos de cámara y ubicación para usar esta función.",
+                    style = MaterialTheme.typography.bodyMedium, color = Color.Gray
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                Button(
+                    onClick = {
+                        permissionLauncher.launch(arrayOf(
+                            Manifest.permission.CAMERA,
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION
+                        ))
+                    },
+                    modifier = Modifier.fillMaxWidth().height(48.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF39C12))
+                ) {
+                    Text("Otorgar Permisos", fontWeight = FontWeight.Bold)
+                }
+            }
+        }
+        return
+    }
+
+    // Cámara disponible
+    Box(modifier = Modifier.fillMaxSize()) {
+        AndroidView(
+            factory = { ctx ->
+                PreviewView(ctx).also { preview ->
+                    previewView = preview
+                    val cameraProviderFuture = ProcessCameraProvider.getInstance(ctx)
+                    cameraProviderFuture.addListener({
+                        try {
+                            val cameraProvider = cameraProviderFuture.get()
+                            val cameraPreview = Preview.Builder().build()
+                            cameraPreview.setSurfaceProvider(preview.surfaceProvider)
+                            cameraProvider.unbindAll()
+                            cameraProvider.bindToLifecycle(
+                                lifecycleOwner, CameraSelector.DEFAULT_BACK_CAMERA, cameraPreview
+                            )
+                            Log.d(TAG, "Cámara iniciada")
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Error cámara: ${e.message}", e)
+                        }
+                    }, ContextCompat.getMainExecutor(ctx))
+                }
+            },
+            modifier = Modifier.fillMaxSize()
+        )
+
+        // Overlay GPS + brújula
+        Column(
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(16.dp)
+                .background(Color.Black.copy(alpha = 0.6f), RoundedCornerShape(8.dp))
+                .padding(12.dp)
+        ) {
+            Text("Latitud: ${"%.4f".format(viewModel.lat)}", color = Color.White,
+                style = MaterialTheme.typography.labelMedium)
+            Spacer(modifier = Modifier.height(4.dp))
+            Text("Longitud: ${"%.4f".format(viewModel.lon)}", color = Color.White,
+                style = MaterialTheme.typography.labelMedium)
+            Spacer(modifier = Modifier.height(4.dp))
+            Text("Acimut: ${"%.1f".format(viewModel.azimuth)}°", color = Color.White,
+                style = MaterialTheme.typography.labelMedium)
+        }
+
+        // FIX 3: Al capturar, primero obtener GPS de alta precisión,
+        // luego capturar foto en el callback para garantizar coords actualizadas
+        FloatingActionButton(
+            onClick = {
+                previewView?.bitmap?.let { bitmap ->
+                    if (hasLocationPermission) {
+                        // Alta precisión solo en captura, foto se guarda en el callback
+                        viewModel.captureWithHighAccuracyLocation(bitmap)
+                    } else {
+                        // Sin permiso de ubicación: capturar con coords que tengamos
+                        viewModel.onPhotoCaptured(bitmap)
+                    }
+                    val filePath = FileUtils.saveBitmap(
+                        context, bitmap, viewModel.lat, viewModel.lon, viewModel.azimuth
+                    )
+                    Log.d(TAG, "Foto guardada en: $filePath")
+                }
+            },
+            modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 32.dp),
+            containerColor = Color(0xFFF39C12)
+        ) {
+            Icon(Icons.Default.Camera, contentDescription = "Capturar", tint = Color.White)
+        }
+    }
+}
+
+@Composable
+fun CaptureResultScreen(viewModel: LandmarkViewModel) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
+    var identifiedLocation by remember { mutableStateOf<LandmarkLocation?>(null) }
+    var isLoadingLocation by remember { mutableStateOf(false) }
+    var locationError by remember { mutableStateOf<String?>(null) }
+
+    val placesService = remember { PlacesService(context) }
+
+    LaunchedEffect(viewModel.showResult) {
+        if (viewModel.showResult && identifiedLocation == null && !isLoadingLocation) {
+            isLoadingLocation = true
+            locationError = null
+            scope.launch {
+                try {
+                    identifiedLocation = placesService.getCompleteLocationInfo(
+                        viewModel.capturedLat, viewModel.capturedLon
+                    )
+                } catch (e: Exception) {
+                    Log.e("CaptureResultScreen", "Error: ${e.message}", e)
+                    locationError = "No se pudo identificar la ubicación: ${e.message}"
+                } finally {
+                    isLoadingLocation = false
+                }
+            }
+        }
+    }
+
+    BackHandler { viewModel.resetCapture() }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier.fillMaxSize().padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text("Monumento Detectado", style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold, color = Color(0xFFF39C12))
+            Spacer(modifier = Modifier.height(16.dp))
+
+            viewModel.capturedBitmap?.let { bitmap ->
+                Image(
+                    bitmap = bitmap.asImageBitmap(),
+                    contentDescription = "Foto capturada",
+                    modifier = Modifier.fillMaxWidth().height(250.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .border(2.dp, Color(0xFFF39C12), RoundedCornerShape(16.dp)),
+                    contentScale = ContentScale.Crop
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            when {
+                isLoadingLocation -> {
+                    Box(
+                        modifier = Modifier.fillMaxWidth().height(200.dp)
+                            .background(Color.Gray.copy(alpha = 0.1f), RoundedCornerShape(16.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            CircularProgressIndicator(modifier = Modifier.size(40.dp),
+                                color = Color(0xFFF39C12))
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Text("Buscando lugar...", color = Color.Gray)
+                        }
+                    }
+                }
+                locationError != null -> {
+                    Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFEBEE))) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text("⚠️ Error", style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold, color = Color(0xFFC62828))
+                            Text(locationError!!, style = MaterialTheme.typography.bodySmall,
+                                color = Color(0xFF7F0000))
+                        }
+                    }
+                }
+                else -> {
+                    MapDisplay(
+                        latitude = viewModel.capturedLat,
+                        longitude = viewModel.capturedLon,
+                        locationName = identifiedLocation?.name ?: "Ubicación capturada"
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White)) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text("📍 Información del Lugar", style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold, color = Color(0xFFF39C12))
+                    Spacer(modifier = Modifier.height(12.dp))
+                    if (identifiedLocation != null) {
+                        Text("Nombre: ${identifiedLocation!!.name}",
+                            style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text("Tipo: ${identifiedLocation!!.type}",
+                            style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        if (identifiedLocation!!.address.isNotEmpty()) {
+                            Text("Ubicación: ${identifiedLocation!!.address}",
+                                style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+                    } else {
+                        Text("No se identificó el lugar específico",
+                            style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text("Metadatos de Captura", style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        Text("Latitud:", fontWeight = FontWeight.SemiBold,
+                            fontSize = MaterialTheme.typography.bodySmall.fontSize)
+                        Text("%.6f".format(viewModel.capturedLat),
+                            fontSize = MaterialTheme.typography.bodySmall.fontSize)
+                    }
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        Text("Longitud:", fontWeight = FontWeight.SemiBold,
+                            fontSize = MaterialTheme.typography.bodySmall.fontSize)
+                        Text("%.6f".format(viewModel.capturedLon),
+                            fontSize = MaterialTheme.typography.bodySmall.fontSize)
+                    }
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        Text("Acimut:", fontWeight = FontWeight.SemiBold,
+                            fontSize = MaterialTheme.typography.bodySmall.fontSize)
+                        Text("%.1f°".format(viewModel.capturedAzimuth),
+                            fontSize = MaterialTheme.typography.bodySmall.fontSize)
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            Button(
+                onClick = { viewModel.resetCapture() },
+                modifier = Modifier.fillMaxWidth().height(56.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF39C12))
+            ) {
+                Text("Volver a la cámara", fontWeight = FontWeight.Bold)
+            }
+        }
+
+        IconButton(
+            onClick = { viewModel.resetCapture() },
+            modifier = Modifier.align(Alignment.TopEnd).padding(24.dp)
+                .background(Color.White.copy(alpha = 0.8f), RoundedCornerShape(24.dp))
+        ) {
+            Icon(Icons.Default.Close, contentDescription = "Cerrar")
+        }
+    }
+}
+
+@Composable
+fun MapTab(viewModel: LandmarkViewModel) {
+    val context = LocalContext.current
+
+    // FIX 5+6: Comprobar permiso antes de llamar GPS, y sin pasar context
+    val hasLocationPermission = ContextCompat.checkSelfPermission(
+        context, Manifest.permission.ACCESS_FINE_LOCATION
+    ) == PackageManager.PERMISSION_GRANTED
+
+    LaunchedEffect(Unit) {
+        // FIX 5: Solo si tiene permiso; FIX 8: precisión balanceada para el mapa
+        if (hasLocationPermission) viewModel.updateLocationBalanced()
+    }
+
+    Column(
+        modifier = Modifier.fillMaxSize().padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text("Mi Ubicación", style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold, color = Color(0xFFF39C12))
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White)) {
+            Row(modifier = Modifier.fillMaxWidth().padding(12.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("Latitud", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+                    Text("%.6f".format(viewModel.lat), style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold)
+                }
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("Longitud", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+                    Text("%.6f".format(viewModel.lon), style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold)
+                }
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("Acimut", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+                    Text("%.1f°".format(viewModel.azimuth), style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold)
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        if (!hasLocationPermission) {
+            Card(modifier = Modifier.fillMaxWidth().height(350.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White)) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("Sin permiso de ubicación", color = Color.Gray)
+                }
+            }
+        } else if (viewModel.lat == 0.0 && viewModel.lon == 0.0) {
+            Card(modifier = Modifier.fillMaxWidth().height(350.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White)) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        CircularProgressIndicator(color = Color(0xFFF39C12))
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text("Obteniendo ubicación GPS...", color = Color.Gray)
+                    }
+                }
+            }
+        } else {
+            // FIX 4: OsmMapView (no OsmMapWebView)
+            OsmMapView(
+                latitude = viewModel.lat,
+                longitude = viewModel.lon,
+                locationName = "Mi posición",
+                modifier = Modifier.fillMaxWidth().height(400.dp).clip(RoundedCornerShape(16.dp))
+            )
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Button(
+            // FIX 6: Sin context, y solo si tiene permiso
+            onClick = { if (hasLocationPermission) viewModel.updateLocationBalanced() },
+            modifier = Modifier.fillMaxWidth().height(48.dp),
+            shape = RoundedCornerShape(12.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF39C12)),
+            enabled = hasLocationPermission
+        ) {
+            Icon(Icons.Default.LocationOn, contentDescription = null, tint = Color.White)
+            Spacer(modifier = Modifier.padding(4.dp))
+            Text("Actualizar ubicación", fontWeight = FontWeight.Bold)
+        }
+    }
+}
+
+@Composable
+fun MLOfflineScreen() {
+    Column(modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally) {
+        Icon(Icons.Default.Construction, contentDescription = null,
+            modifier = Modifier.size(64.dp), tint = Color.Gray)
+        Spacer(Modifier.height(16.dp))
+        Text("Próximamente: Análisis ML offline",
+            style = MaterialTheme.typography.titleMedium, color = Color.Gray)
+    }
+}
+
+@Composable
+fun OllamaChatScreen(
+    messages: SnapshotStateList<ChatMessage>,
+    availableModels: List<String>,
+    onModelsChange: (List<String>) -> Unit,
+    selectedModel: String,
+    onModelChange: (String) -> Unit,
+    question: String,
+    onQuestionChange: (String) -> Unit,
+    isLoading: Boolean,
+    onLoadingChange: (Boolean) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val listState = rememberLazyListState()
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(Unit) {
+        if (availableModels.size <= 1 && availableModels.firstOrNull() == "Loading...") {
+            val models = OllamaClient.getModels()
+            onModelsChange(models)
+            if (selectedModel == "Loading...") onModelChange(models.firstOrNull() ?: "No models")
+        }
+    }
+
+    LaunchedEffect(messages.size) {
+        if (messages.isNotEmpty()) listState.animateScrollToItem(messages.lastIndex)
+    }
+
+    Column(modifier = Modifier.fillMaxSize().padding(12.dp)) {
+        Text("Modelo", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.height(8.dp))
+        Box {
+            OutlinedButton(onClick = { expanded = true }, modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp), enabled = !isLoading) {
+                Text(selectedModel)
+            }
+            DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                availableModels.forEach { model ->
+                    DropdownMenuItem(text = { Text(model) },
+                        onClick = { onModelChange(model); expanded = false })
+                }
+            }
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+        Text("Conversación", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.height(8.dp))
+        Card(modifier = Modifier.fillMaxWidth().weight(1f), shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White)) {
+            if (messages.isEmpty()) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("Todavía no hay mensajes", color = Color.Gray)
+                }
+            } else {
+                LazyColumn(state = listState, modifier = Modifier.fillMaxSize().padding(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    items(messages) { msg -> ChatBubble(message = msg) }
+                    if (isLoading) {
+                        item {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
+                                Spacer(modifier = Modifier.padding(4.dp))
+                                Text("Generando respuesta...")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+        OutlinedTextField(value = question, onValueChange = { onQuestionChange(it) },
+            modifier = Modifier.fillMaxWidth().height(80.dp), label = { Text("Pregunta") },
+            placeholder = { Text("Escribe tu pregunta") }, shape = RoundedCornerShape(12.dp),
+            enabled = !isLoading, maxLines = 3)
+        Spacer(modifier = Modifier.height(10.dp))
+        Button(
+            onClick = {
+                val trimmedQuestion = question.trim()
+                if (trimmedQuestion.isNotEmpty() && !isLoading) {
+                    messages.add(ChatMessage(role = "user", text = trimmedQuestion))
+                    onQuestionChange("")
+                    onLoadingChange(true)
+                    scope.launch {
+                        try {
+                            val reply = OllamaClient.askModel(selectedModel, trimmedQuestion)
+                            messages.add(ChatMessage(role = "assistant", text = reply))
+                        } catch (e: Exception) {
+                            messages.add(ChatMessage(role = "assistant", text = "Error: ${e.message}"))
+                        } finally {
+                            onLoadingChange(false)
+                        }
+                    }
+                }
+            },
+            modifier = Modifier.fillMaxWidth().height(60.dp), shape = RoundedCornerShape(10.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF39C12), contentColor = Color.White),
+            enabled = !isLoading
+        ) {
+            Icon(imageVector = Icons.AutoMirrored.Filled.Send, contentDescription = "Enviar")
+            Spacer(modifier = Modifier.padding(4.dp))
+            Text("Enviar", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+        }
+    }
+}
+
+@Composable
+fun ChatBubble(message: ChatMessage) {
+    val isUser = message.role == "user"
+    Row(modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start) {
+        Row(verticalAlignment = Alignment.Top, modifier = Modifier.widthIn(max = 300.dp)) {
+            if (!isUser) {
+                Icon(Icons.Default.SmartToy, "Assistant", tint = Color(0xFFF39C12),
+                    modifier = Modifier.padding(top = 6.dp, end = 6.dp))
+            }
+            Card(shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = if (isUser) Color(0xFFFFE0B2) else Color(0xFFF5F5F5)),
+                modifier = Modifier.border(1.dp, Color(0xFFE0E0E0), RoundedCornerShape(16.dp))) {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    Text(text = if (isUser) "Pregunta" else "Respuesta",
+                        style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold,
+                        color = if (isUser) Color(0xFFBF360C) else Color(0xFF616161))
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(text = message.text, style = MaterialTheme.typography.bodyLarge)
+                }
+            }
+            if (isUser) {
+                Icon(Icons.Default.Android, "User", tint = Color(0xFF6D4C41),
+                    modifier = Modifier.padding(top = 6.dp, start = 6.dp))
+            }
+        }
     }
 }
