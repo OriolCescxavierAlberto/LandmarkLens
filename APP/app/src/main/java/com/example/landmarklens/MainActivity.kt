@@ -17,6 +17,8 @@ import androidx.camera.view.PreviewView
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -43,11 +45,15 @@ import androidx.compose.material.icons.filled.Android
 import androidx.compose.material.icons.filled.Camera
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Construction
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.DeleteForever
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.HistoryEdu
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.SmartToy
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -57,8 +63,10 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LargeFloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -68,6 +76,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -85,6 +94,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -92,6 +102,10 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.landmarklens.ui.theme.LandmarkLensTheme
+import org.osmdroid.config.Configuration
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 // ─── Modelos de datos ─────────────────────────────────────────────────────────
 enum class AppTab { CAMERA, MAP, CHAT, ML }
@@ -102,6 +116,11 @@ data class ChatMessage(val role: String, val text: String)
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // Inicializar configuración de OSMDroid para evitar pantalla blanca
+        Configuration.getInstance().load(this, getSharedPreferences("osmdroid", MODE_PRIVATE))
+        Configuration.getInstance().userAgentValue = "LandmarkLens/1.0"
+
         enableEdgeToEdge()
         setContent {
             LandmarkLensTheme {
@@ -130,7 +149,6 @@ fun MainApp(vm: LandmarkViewModel = viewModel()) {
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
-            // Ocultamos la barra solo si estamos viendo el resultado DENTRO de la pestaña cámara
             if (!vm.showResult || currentTab != AppTab.CAMERA) {
                 NavigationBar(
                     containerColor = MaterialTheme.colorScheme.surface,
@@ -149,7 +167,6 @@ fun MainApp(vm: LandmarkViewModel = viewModel()) {
                             selected = currentTab == tab,
                             onClick = { 
                                 vm.setTab(tab)
-                                // Si cambiamos de pestaña manualmente, cerramos cualquier overlay de resultado
                                 if (vm.showResult) vm.resetCapture()
                             },
                             icon = { Icon(icon, label) },
@@ -204,7 +221,7 @@ fun CameraLandmarkScreen(vm: LandmarkViewModel) {
         hasCameraPermission = permissions[Manifest.permission.CAMERA] ?: false
         hasLocationPermission = permissions[Manifest.permission.ACCESS_FINE_LOCATION] ?: false
         if (hasLocationPermission) {
-            vm.updateLocationBalanced()
+            vm.startLocationUpdates()
         }
     }
 
@@ -218,7 +235,7 @@ fun CameraLandmarkScreen(vm: LandmarkViewModel) {
                 )
             )
         } else if (hasLocationPermission) {
-            vm.updateLocationBalanced()
+            vm.startLocationUpdates()
         }
     }
 
@@ -330,7 +347,7 @@ fun CameraLandmarkScreen(vm: LandmarkViewModel) {
             shape = CircleShape,
             containerColor = MaterialTheme.colorScheme.secondary,
             contentColor = MaterialTheme.colorScheme.onSecondary,
-            elevation = FloatingActionButtonDefaults.elevation(12.dp)
+            elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 12.dp)
         ) {
             Icon(Icons.Default.PhotoCamera, contentDescription = "Capturar", modifier = Modifier.size(40.dp))
         }
@@ -370,7 +387,7 @@ fun CaptureResultScreen(vm: LandmarkViewModel) {
                 .fillMaxSize()
                 .verticalScroll(scrollState)
         ) {
-            // Header con Imagen a pantalla completa de ancho
+            // Header con Imagen
             Box(modifier = Modifier.fillMaxWidth().height(320.dp)) {
                 vm.capturedBitmap?.let { bitmap ->
                     Image(
@@ -381,7 +398,6 @@ fun CaptureResultScreen(vm: LandmarkViewModel) {
                     )
                 }
                 
-                // Degradado superior para el botón de cerrar
                 Box(modifier = Modifier
                     .fillMaxWidth()
                     .height(80.dp)
@@ -396,7 +412,6 @@ fun CaptureResultScreen(vm: LandmarkViewModel) {
                     Icon(Icons.Default.Close, contentDescription = "Cerrar", tint = Color.White)
                 }
 
-                // Badge de estado
                 Surface(
                     modifier = Modifier.align(Alignment.BottomStart).padding(20.dp),
                     color = MaterialTheme.colorScheme.primary,
@@ -413,8 +428,6 @@ fun CaptureResultScreen(vm: LandmarkViewModel) {
             }
 
             Column(modifier = Modifier.padding(20.dp)) {
-                
-                // Card de Información del Monumento
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(28.dp),
@@ -467,7 +480,6 @@ fun CaptureResultScreen(vm: LandmarkViewModel) {
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Card de Mapa Interactivo
                 Text("VISTA EN MAPA", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(start = 8.dp, bottom = 12.dp))
                 Card(
                     modifier = Modifier.fillMaxWidth().height(240.dp),
@@ -483,7 +495,6 @@ fun CaptureResultScreen(vm: LandmarkViewModel) {
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Datos Técnicos en una fila más compacta
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(20.dp),
@@ -498,7 +509,6 @@ fun CaptureResultScreen(vm: LandmarkViewModel) {
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                // Acciones Principales
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                     OutlinedButton(
                         onClick = { vm.resetCapture() },
@@ -510,8 +520,6 @@ fun CaptureResultScreen(vm: LandmarkViewModel) {
                     }
                     Button(
                         onClick = { 
-                            // Cambiamos a la pestaña de chat y reseteamos el estado de captura
-                            // para que la barra de navegación vuelva a aparecer
                             vm.setTab(AppTab.CHAT)
                             vm.showResult = false 
                         },
@@ -519,7 +527,7 @@ fun CaptureResultScreen(vm: LandmarkViewModel) {
                         shape = RoundedCornerShape(16.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.secondary,
-                            contentColor = MaterialTheme.colorScheme.onSecondary // Mejora el contraste
+                            contentColor = Color.Black
                         )
                     ) {
                         Icon(Icons.Default.HistoryEdu, null)
@@ -550,72 +558,157 @@ fun MapTab(vm: LandmarkViewModel) {
         context, Manifest.permission.ACCESS_FINE_LOCATION
     ) == PackageManager.PERMISSION_GRANTED
 
-    LaunchedEffect(Unit) {
-        if (hasLocationPermission) vm.updateLocationBalanced()
+    var showDeleteDialog by remember { mutableStateOf(false) }
+
+    DisposableEffect(Unit) {
+        if (hasLocationPermission) vm.startLocationUpdates()
+        onDispose { vm.stopLocationUpdates() }
     }
 
-    Column(
-        modifier = Modifier.fillMaxSize().padding(20.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text("Radar de Landmark", style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
-        
-        Spacer(modifier = Modifier.height(20.dp))
-
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(24.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f))
-        ) {
-            Row(modifier = Modifier.fillMaxWidth().padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly) {
-                MapCoordItem("Latitud", vm.lat)
-                MapCoordItem("Longitud", vm.lon)
-                MapCoordItem("Acimut", vm.azimuth.toDouble())
-            }
-        }
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        Card(
-            modifier = Modifier.fillMaxWidth().weight(1f),
-            shape = RoundedCornerShape(28.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-        ) {
-            if (!hasLocationPermission) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Se requiere permiso de ubicación", color = MaterialTheme.colorScheme.onSurfaceVariant)
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text("Borrar Historial") },
+            text = { Text("¿Estás seguro de que quieres borrar todas tus capturas registradas?") },
+            confirmButton = {
+                TextButton(onClick = { vm.clearAllHistory(); showDeleteDialog = false }) {
+                    Text("BORRAR TODO", color = MaterialTheme.colorScheme.error)
                 }
-            } else if (vm.lat == 0.0 && vm.lon == 0.0) {
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = false }) {
+                    Text("CANCELAR")
+                }
+            }
+        )
+    }
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier.weight(1.2f)) {
+            // Solo mostramos el mapa si tenemos una ubicación inicial o historial
+            if (vm.lat == 0.0 && vm.lon == 0.0 && vm.history.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         CircularProgressIndicator(color = MaterialTheme.colorScheme.secondary)
                         Spacer(modifier = Modifier.height(16.dp))
-                        Text("Sincronizando GPS...", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("Obteniendo ubicación...", style = MaterialTheme.typography.bodyMedium)
                     }
                 }
             } else {
-                OsmMapView(
-                    latitude = vm.lat,
-                    longitude = vm.lon,
-                    locationName = "Tú estás aquí",
+                MapWithHistoryMarkers(
+                    currentLat = vm.lat,
+                    currentLon = vm.lon,
+                    history = vm.history,
+                    onMarkerClick = { vm.viewHistoryItem(it) },
                     modifier = Modifier.fillMaxSize()
                 )
             }
+            
+            Column(
+                modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                LargeFloatingActionButton(
+                    onClick = { if (hasLocationPermission) vm.updateLocationBalanced() },
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = Color.White
+                ) {
+                    Icon(Icons.Default.LocationOn, null)
+                }
+            }
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
-
-        Button(
-            onClick = { if (hasLocationPermission) vm.updateLocationBalanced() },
-            modifier = Modifier.fillMaxWidth().height(56.dp),
-            shape = RoundedCornerShape(16.dp),
-            enabled = hasLocationPermission
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .background(MaterialTheme.colorScheme.surface)
+                .padding(top = 16.dp)
         ) {
-            Icon(Icons.Default.LocationOn, null)
-            Spacer(modifier = Modifier.width(8.dp))
-            Text("Centrar Mapa", fontWeight = FontWeight.Bold)
+            Row(
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Default.History, null, tint = MaterialTheme.colorScheme.primary)
+                Spacer(modifier = Modifier.width(12.dp))
+                Text(
+                    "Exploraciones",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.weight(1f)
+                )
+                if (vm.history.isNotEmpty()) {
+                    IconButton(onClick = { showDeleteDialog = true }) {
+                        Icon(Icons.Default.DeleteForever, "Borrar todo", tint = MaterialTheme.colorScheme.error)
+                    }
+                }
+            }
+            
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 20.dp), thickness = 1.dp, color = MaterialTheme.colorScheme.outlineVariant)
+
+            if (vm.history.isEmpty()) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("Aún no has capturado monumentos", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            } else {
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    items(vm.history, key = { it.id }) { item ->
+                        HistoryListEntry(
+                            item = item,
+                            onClick = { vm.viewHistoryItem(item) },
+                            onDelete = { vm.deleteHistoryItem(item) }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun HistoryListEntry(item: LandmarkHistoryItem, onClick: () -> Unit, onDelete: () -> Unit) {
+    val date = SimpleDateFormat("dd MMM, HH:mm", Locale.getDefault()).format(Date(item.timestamp))
+    
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .padding(horizontal = 20.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Image(
+            bitmap = item.bitmap.asImageBitmap(),
+            contentDescription = null,
+            modifier = Modifier
+                .size(64.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp)),
+            contentScale = ContentScale.Crop
+        )
+        
+        Spacer(modifier = Modifier.width(16.dp))
+        
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = item.location?.name ?: "Lugar desconocido",
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                text = date,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        
+        IconButton(onClick = onDelete) {
+            Icon(
+                imageVector = Icons.Default.Delete,
+                contentDescription = "Borrar",
+                tint = MaterialTheme.colorScheme.error.copy(alpha = 0.6f),
+                modifier = Modifier.size(20.dp)
+            )
         }
     }
 }
