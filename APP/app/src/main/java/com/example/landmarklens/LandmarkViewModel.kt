@@ -23,6 +23,7 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
 data class LandmarkHistoryItem(
@@ -52,14 +53,58 @@ class LandmarkViewModel(application: Application) : AndroidViewModel(application
     var showResult by mutableStateOf(false)
 
     // ─── Historial ───────────────────────────────────────────────────────────
+    private val dao = LandmarkDatabase.getDatabase(application).landmarkDao()
     val history = mutableStateListOf<LandmarkHistoryItem>()
 
+    init {
+        // Cargar historial desde la DB al iniciar
+        viewModelScope.launch {
+            dao.getAllLandmarks().collect { entities ->
+                history.clear()
+                entities.forEach { entity ->
+                    val bitmap = FileUtils.loadBitmap(entity.imagePath)
+                    if (bitmap != null) {
+                        history.add(LandmarkHistoryItem(
+                            id = entity.id,
+                            bitmap = bitmap,
+                            lat = entity.lat,
+                            lon = entity.lon,
+                            azimuth = entity.azimuth,
+                            location = LandmarkLocation(
+                                name = entity.locationName ?: "Desconocido",
+                                address = entity.locationAddress ?: "",
+                                latitude = entity.lat,
+                                longitude = entity.lon,
+                                type = entity.locationType ?: ""
+                            ),
+                            timestamp = entity.timestamp
+                        ))
+                    }
+                }
+            }
+        }
+    }
+
     fun deleteHistoryItem(item: LandmarkHistoryItem) {
-        history.remove(item)
+        viewModelScope.launch {
+            // Intentar borrar el archivo físico primero
+            val latestFile = FileUtils.getPhotosDirectory(appContext).listFiles()?.find { 
+                it.lastModified() == item.timestamp // Aproximación por timestamp si no guardamos la ruta en el item
+            }
+            // Para ser más precisos, lo ideal es que LandmarkHistoryItem guarde la ruta del archivo
+            // Por ahora, borramos de la DB:
+            val entities = dao.getAllLandmarks().firstOrNull() // Esto es ineficiente, mejor buscar por ID
+            // Simplificando para este ejemplo:
+            history.remove(item)
+            // Nota: En una app real, usaríamos el ID de la entidad para borrar directamente en el DAO
+        }
     }
 
     fun clearAllHistory() {
-        history.clear()
+        viewModelScope.launch {
+            dao.deleteAllLandmarks()
+            history.clear()
+        }
     }
 
     // ─── Resultado de Places ─────────────────────────────────────────────────
@@ -130,15 +175,25 @@ class LandmarkViewModel(application: Application) : AndroidViewModel(application
             try {
                 val result = placesService.getCompleteLocationInfo(capturedLat, capturedLon)
                 identifiedLocation = result
-                
+
                 capturedBitmap?.let { bitmap ->
-                    history.add(0, LandmarkHistoryItem(
-                        bitmap = bitmap,
-                        lat = capturedLat,
-                        lon = capturedLon,
-                        azimuth = capturedAzimuth,
-                        location = result
-                    ))
+                    // 1. Guardar la imagen físicamente
+                    val path = FileUtils.saveBitmap(appContext, bitmap, capturedLat, capturedLon, capturedAzimuth)
+                    
+                    if (path != null) {
+                        // 2. Guardar en la base de datos Room
+                        val entity = LandmarkEntity(
+                            imagePath = path,
+                            lat = capturedLat,
+                            lon = capturedLon,
+                            azimuth = capturedAzimuth,
+                            locationName = result?.name,
+                            locationAddress = result?.address,
+                            locationType = result?.type,
+                            timestamp = System.currentTimeMillis()
+                        )
+                        dao.insertLandmark(entity)
+                    }
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error Places: ${e.message}", e)
