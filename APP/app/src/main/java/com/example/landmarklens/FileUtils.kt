@@ -28,7 +28,7 @@ object FileUtils {
     }
 
     /**
-     * Guarda un Bitmap como PNG en almacenamiento local
+     * Guarda un Bitmap como PNG en almacenamiento local --Crud
      */
     fun saveBitmap(context: Context, bitmap: Bitmap, lat: Double, lon: Double, azimuth: Float): String? {
         return try {
@@ -53,7 +53,7 @@ object FileUtils {
     }
 
     /**
-     * Obtiene la ruta de la foto más reciente
+     * Obtiene la ruta de la foto más reciente --cRud
      */
     fun getLatestPhoto(context: Context): File? {
         val dir = getPhotosDirectory(context)
@@ -61,7 +61,7 @@ object FileUtils {
     }
 
     /**
-     * Elimina una foto específica
+     * Elimina una foto específica --cruD
      */
     fun deletePhoto(file: File): Boolean {
         return try {
@@ -73,6 +73,18 @@ object FileUtils {
         } catch (e: Exception) {
             Log.e(TAG, "Error al eliminar foto", e)
             false
+        }
+    }
+
+    /**
+     * Carga un Bitmap desde una ruta de archivo
+     */
+    fun loadBitmap(path: String): Bitmap? {
+        return try {
+            android.graphics.BitmapFactory.decodeFile(path)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error al cargar bitmap desde $path", e)
+            null
         }
     }
 }
