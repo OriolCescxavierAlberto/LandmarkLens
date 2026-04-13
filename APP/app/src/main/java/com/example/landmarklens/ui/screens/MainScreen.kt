@@ -1,14 +1,10 @@
-package com.example.landmarklens
+package com.example.landmarklens.ui.screens
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.os.Bundle
 import android.util.Log
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.Preview
@@ -19,18 +15,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -41,49 +26,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.filled.Android
-import androidx.compose.material.icons.filled.Camera
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Construction
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.DeleteForever
-import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.HistoryEdu
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Memory
-import androidx.compose.material.icons.filled.PhotoCamera
-import androidx.compose.material.icons.filled.SmartToy
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.FloatingActionButtonDefaults
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LargeFloatingActionButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -101,41 +46,17 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.landmarklens.ui.theme.LandmarkLensTheme
-import org.osmdroid.config.Configuration
+import com.example.landmarklens.data.model.AppTab
+import com.example.landmarklens.data.model.ChatMessage
+import com.example.landmarklens.data.model.LandmarkHistoryItem
+import com.example.landmarklens.data.remote.PlacesService
+import com.example.landmarklens.ui.components.MapDisplay
+import com.example.landmarklens.ui.components.MapWithHistoryMarkers
+import com.example.landmarklens.ui.viewmodel.LandmarkViewModel
+import com.example.landmarklens.util.FileUtils
 import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import java.util.*
 
-// ─── Modelos de datos ─────────────────────────────────────────────────────────
-enum class AppTab { CAMERA, MAP, CHAT, ML }
-
-data class ChatMessage(val role: String, val text: String)
-
-// ─── Activity ─────────────────────────────────────────────────────────────────
-class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        
-        // Inicializar configuración de OSMDroid para evitar pantalla blanca
-        Configuration.getInstance().load(this, getSharedPreferences("osmdroid", MODE_PRIVATE))
-        Configuration.getInstance().userAgentValue = "LandmarkLens/1.0"
-
-        enableEdgeToEdge()
-        setContent {
-            LandmarkLensTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    MainApp()
-                }
-            }
-        }
-    }
-}
-
-// ─── Raíz de la UI ───────────────────────────────────────────────────────────
 @Composable
 fun MainApp(vm: LandmarkViewModel = viewModel()) {
     val currentTab = vm.currentTab
@@ -193,7 +114,6 @@ fun MainApp(vm: LandmarkViewModel = viewModel()) {
     }
 }
 
-// ─── Pantalla Cámara ─────────────────────────────────────────────────────────
 @Composable
 fun CameraLandmarkScreen(vm: LandmarkViewModel) {
     val context = LocalContext.current
@@ -308,14 +228,12 @@ fun CameraLandmarkScreen(vm: LandmarkViewModel) {
             modifier = Modifier.fillMaxSize()
         )
 
-        // Scrim superior para info
         Box(modifier = Modifier
             .fillMaxWidth()
             .height(160.dp)
             .background(Brush.verticalGradient(listOf(Color.Black.copy(alpha = 0.7f), Color.Transparent)))
         )
 
-        // Overlay Sensores
         Column(
             modifier = Modifier
                 .align(Alignment.TopStart)
@@ -328,11 +246,9 @@ fun CameraLandmarkScreen(vm: LandmarkViewModel) {
             InfoChip(label = "AZI", value = "%.1f°".format(vm.azimuth))
         }
 
-        // Botón Captura
         FloatingActionButton(
             onClick = {
                 previewView?.bitmap?.let { bitmap ->
-                    FileUtils.saveBitmap(context, bitmap, vm.lat, vm.lon, vm.azimuth)
                     if (hasLocationPermission) {
                         vm.captureWithHighAccuracyLocation(bitmap)
                     } else {
@@ -368,7 +284,6 @@ fun InfoChip(label: String, value: String) {
     }
 }
 
-// ─── Pantalla Resultado de Captura ───────────────────────────────────────────
 @Composable
 fun CaptureResultScreen(vm: LandmarkViewModel) {
     val context = LocalContext.current
@@ -387,7 +302,6 @@ fun CaptureResultScreen(vm: LandmarkViewModel) {
                 .fillMaxSize()
                 .verticalScroll(scrollState)
         ) {
-            // Header con Imagen
             Box(modifier = Modifier.fillMaxWidth().height(320.dp)) {
                 vm.capturedBitmap?.let { bitmap ->
                     Image(
@@ -550,7 +464,6 @@ fun TechnicalItem(label: String, value: String) {
     }
 }
 
-// ─── Pestaña Mapa ────────────────────────────────────────────────────────────
 @Composable
 fun MapTab(vm: LandmarkViewModel) {
     val context = LocalContext.current
@@ -585,7 +498,6 @@ fun MapTab(vm: LandmarkViewModel) {
 
     Column(modifier = Modifier.fillMaxSize()) {
         Box(modifier = Modifier.weight(1.2f)) {
-            // Solo mostramos el mapa si tenemos una ubicación inicial o historial
             if (vm.lat == 0.0 && vm.lon == 0.0 && vm.history.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -714,16 +626,6 @@ fun HistoryListEntry(item: LandmarkHistoryItem, onClick: () -> Unit, onDelete: (
 }
 
 @Composable
-fun MapCoordItem(label: String, value: Double) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
-        Text(if (label == "Acimut") "%.1f°".format(value) else "%.5f".format(value), 
-            style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
-    }
-}
-
-// ─── Pestaña ML ──────────────────────────────────────────────────────────────
-@Composable
 fun MLOfflineScreen() {
     Column(
         modifier = Modifier.fillMaxSize().padding(32.dp),
@@ -752,7 +654,6 @@ fun MLOfflineScreen() {
     }
 }
 
-// ─── Pestaña Chat ─────────────────────────────────────────────────────────────
 @Composable
 fun OllamaChatScreen(vm: LandmarkViewModel) {
     var expanded by remember { mutableStateOf(false) }
@@ -851,7 +752,6 @@ fun OllamaChatScreen(vm: LandmarkViewModel) {
     }
 }
 
-// ─── Burbuja de chat ──────────────────────────────────────────────────────────
 @Composable
 fun ChatBubble(message: ChatMessage) {
     val isUser = message.role == "user"
