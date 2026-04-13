@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import com.example.landmarklens.MainApp
+import com.example.landmarklens.ui.screens.MainApp
 import com.example.landmarklens.ui.theme.LandmarkLensTheme
 import org.osmdroid.config.Configuration
 
