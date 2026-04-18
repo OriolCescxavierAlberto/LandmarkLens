@@ -58,7 +58,10 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 @Composable
-fun MainApp(vm: LandmarkViewModel = viewModel()) {
+fun MainApp(
+    onLogout: () -> Unit = {},
+    vm: LandmarkViewModel = viewModel()
+) {
     val currentTab = vm.currentTab
 
     val needsSensors = currentTab == AppTab.CAMERA || currentTab == AppTab.MAP
@@ -82,11 +85,12 @@ fun MainApp(vm: LandmarkViewModel = viewModel()) {
                         AppTab.ML to ("Offline" to Icons.Default.Memory)
                     )
 
+                    // ✅ CORREGIDO: cada tab usa su propio label, icon y acción
                     items.forEach { (tab, info) ->
                         val (label, icon) = info
                         NavigationBarItem(
                             selected = currentTab == tab,
-                            onClick = { 
+                            onClick = {
                                 vm.setTab(tab)
                                 if (vm.showResult) vm.resetCapture()
                             },
@@ -99,6 +103,18 @@ fun MainApp(vm: LandmarkViewModel = viewModel()) {
                             )
                         )
                     }
+
+                    // ✅ Botón de logout SEPARADO, fuera del forEach
+                    NavigationBarItem(
+                        selected = false,
+                        onClick = onLogout,
+                        icon = { Icon(Icons.Default.ExitToApp, "Salir") },
+                        label = { Text("Salir", style = MaterialTheme.typography.labelSmall) },
+                        colors = NavigationBarItemDefaults.colors(
+                            unselectedIconColor = MaterialTheme.colorScheme.error.copy(alpha = 0.7f),
+                            unselectedTextColor = MaterialTheme.colorScheme.error.copy(alpha = 0.7f)
+                        )
+                    )
                 }
             }
         }
@@ -311,7 +327,7 @@ fun CaptureResultScreen(vm: LandmarkViewModel) {
                         contentScale = ContentScale.Crop
                     )
                 }
-                
+
                 Box(modifier = Modifier
                     .fillMaxWidth()
                     .height(80.dp)
@@ -372,7 +388,7 @@ fun CaptureResultScreen(vm: LandmarkViewModel) {
                                 fontWeight = FontWeight.Bold,
                                 letterSpacing = 1.sp
                             )
-                            
+
                             if (vm.identifiedLocation!!.address.isNotEmpty()) {
                                 Spacer(modifier = Modifier.height(16.dp))
                                 Row(verticalAlignment = Alignment.Top) {
@@ -386,7 +402,7 @@ fun CaptureResultScreen(vm: LandmarkViewModel) {
                                 }
                             }
                         } else {
-                            Text("No se pudo identificar un monumento específico.", 
+                            Text("No se pudo identificar un monumento específico.",
                                 style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
@@ -433,9 +449,9 @@ fun CaptureResultScreen(vm: LandmarkViewModel) {
                         Text("CERRAR")
                     }
                     Button(
-                        onClick = { 
+                        onClick = {
                             vm.setTab(AppTab.CHAT)
-                            vm.showResult = false 
+                            vm.showResult = false
                         },
                         modifier = Modifier.weight(1.5f).height(60.dp),
                         shape = RoundedCornerShape(16.dp),
@@ -449,7 +465,7 @@ fun CaptureResultScreen(vm: LandmarkViewModel) {
                         Text("VER HISTORIA IA", fontWeight = FontWeight.ExtraBold)
                     }
                 }
-                
+
                 Spacer(modifier = Modifier.height(48.dp))
             }
         }
@@ -515,7 +531,7 @@ fun MapTab(vm: LandmarkViewModel) {
                     modifier = Modifier.fillMaxSize()
                 )
             }
-            
+
             Column(
                 modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -554,7 +570,7 @@ fun MapTab(vm: LandmarkViewModel) {
                     }
                 }
             }
-            
+
             HorizontalDivider(modifier = Modifier.padding(horizontal = 20.dp), thickness = 1.dp, color = MaterialTheme.colorScheme.outlineVariant)
 
             if (vm.history.isEmpty()) {
@@ -579,7 +595,7 @@ fun MapTab(vm: LandmarkViewModel) {
 @Composable
 fun HistoryListEntry(item: LandmarkHistoryItem, onClick: () -> Unit, onDelete: () -> Unit) {
     val date = SimpleDateFormat("dd MMM, HH:mm", Locale.getDefault()).format(Date(item.timestamp))
-    
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -596,9 +612,9 @@ fun HistoryListEntry(item: LandmarkHistoryItem, onClick: () -> Unit, onDelete: (
                 .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp)),
             contentScale = ContentScale.Crop
         )
-        
+
         Spacer(modifier = Modifier.width(16.dp))
-        
+
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = item.location?.name ?: "Lugar desconocido",
@@ -613,7 +629,7 @@ fun HistoryListEntry(item: LandmarkHistoryItem, onClick: () -> Unit, onDelete: (
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-        
+
         IconButton(onClick = onDelete) {
             Icon(
                 imageVector = Icons.Default.Delete,
@@ -686,9 +702,9 @@ fun OllamaChatScreen(vm: LandmarkViewModel) {
                 }
             }
         }
-        
+
         Spacer(modifier = Modifier.height(16.dp))
-        
+
         Card(
             modifier = Modifier.fillMaxWidth().weight(1f),
             shape = RoundedCornerShape(24.dp),
@@ -722,9 +738,9 @@ fun OllamaChatScreen(vm: LandmarkViewModel) {
                 }
             }
         }
-        
+
         Spacer(modifier = Modifier.height(16.dp))
-        
+
         Row(verticalAlignment = Alignment.CenterVertically) {
             OutlinedTextField(
                 value = vm.chatQuestion,
