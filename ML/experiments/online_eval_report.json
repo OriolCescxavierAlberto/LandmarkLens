@@ -1,0 +1,373 @@
+{
+  "model": "landmark-finder-e4",
+  "samples_requested": 20,
+  "samples_called": 19,
+  "metrics": {
+    "json_valid_rate": 0.9474,
+    "predictions_in_candidates_rate": 0.8947,
+    "non_empty_prediction_rate": 0.9474,
+    "latency_avg_ms": 5408.58,
+    "latency_p95_ms": null
+  },
+  "samples": [
+    {
+      "index": 1,
+      "error": "HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=60.0)"
+    },
+    {
+      "index": 2,
+      "latency_ms": 40466,
+      "json_valid": true,
+      "predicted_names": [
+        "Parc de l'Espanya Industrial"
+      ],
+      "allowed_candidates": [
+        "Estació de Barcelona - Sants",
+        "Neptú",
+        "Parc de l'Espanya Industrial",
+        "Tors de dona",
+        "Venus moderna"
+      ],
+      "all_predicted_in_candidates": true,
+      "raw_output_preview": "[{\"name\":\"Parc de l'Espanya Industrial\",\"distance\":74,\"confidence\":\"high\"}]"
+    },
+    {
+      "index": 3,
+      "latency_ms": 2691,
+      "json_valid": true,
+      "predicted_names": [
+        "Museu d'Art Contemporani de Barcelona"
+      ],
+      "allowed_candidates": [
+        "Barcelona, mural G-333",
+        "Capella nova de la Casa de la Misericòrdia",
+        "Caritat per los pobres del hospital de Nostra Senyora dela Ynfans Orfans",
+        "Museu d'Art Contemporani de Barcelona",
+        "Plaça de les Caramelles"
+      ],
+      "all_predicted_in_candidates": true,
+      "raw_output_preview": "[{\"name\":\"Museu d'Art Contemporani de Barcelona\",\"distance\":40,\"confidence\":\"high\"}]"
+    },
+    {
+      "index": 4,
+      "latency_ms": 3902,
+      "json_valid": true,
+      "predicted_names": [
+        "Can Trilla",
+        "Casa Vicens",
+        "Ona Llibres",
+        "Federació fe Colles de Sant Medir",
+        "Farmàcia Guerra"
+      ],
+      "allowed_candidates": [
+        "Can Trilla",
+        "Casa Vicens",
+        "Farmàcia Guerra",
+        "Federació fe Colles de Sant Medir",
+        "Ona Llibres"
+      ],
+      "all_predicted_in_candidates": true,
+      "raw_output_preview": "[{\"name\":\"Can Trilla\",\"distance\":65,\"confidence\":\"high\"},{\"name\":\"Casa Vicens\",\"distance\":80,\"confidence\":\"high\"},{\"name\":\"Ona Llibres\",\"distance\":82,\"confidence\":\"high\"},{\"name\":\"Federació fe Colles de Sant Medir\",\"distance\":93,\"confidence\":\"high\"},{\"name\":\"Farmàcia Guerra\",\"distance\":200,\"confiden"
+    },
+    {
+      "index": 5,
+      "latency_ms": 3333,
+      "json_valid": false,
+      "predicted_names": [],
+      "allowed_candidates": [
+        "La Rambla",
+        "Monument a Frederic Soler (Serafí Pitarra)",
+        "Palau Güell",
+        "untitled"
+      ],
+      "all_predicted_in_candidates": false,
+      "raw_output_preview": "[{\"name\":\"Palau Güell\",\"distance\":0,\"confidence\":\"high\"},{\"name\":\"La Rambla\",\"distance:79,\"confidence\":\"high\"},{\"name\":\"Monument a Frederic Soler (Serafí Pitarra)\",\"distance\":120,\"confidence\":\"high\"}]"
+    },
+    {
+      "index": 6,
+      "latency_ms": 4497,
+      "json_valid": true,
+      "predicted_names": [
+        "Barcelona Teatre Musical",
+        "Jardins de Fabià Puigserver",
+        "Teatre Mercat de les Flors",
+        "sala Ovidi Montllor",
+        "Unitat Territorial de la Guàrdia Urbana del Districte de Sants-Montjuïc"
+      ],
+      "allowed_candidates": [
+        "Barcelona Teatre Musical",
+        "Jardins de Fabià Puigserver",
+        "Teatre Mercat de les Flors",
+        "Unitat Territorial de la Guàrdia Urbana del Districte de Sants-Montjuïc",
+        "sala Ovidi Montllor"
+      ],
+      "all_predicted_in_candidates": true,
+      "raw_output_preview": "[{\"name\":\"Barcelona Teatre Musical\",\"distance\":0,\"confidence\":\"high\"},{\"name\":\"Jardins de Fabià Puigserver\",\"distance\":110,\"confidence\":\"high\"},{\"name\":\"Teatre Mercat de les Flors\",\"distance\":130,\"confidence\":\"high\"},{\"name\":\"sala Ovidi Montllor\",\"distance\":140,\"confidence\":\"medium\"},{\"name\":\"Unitat"
+    },
+    {
+      "index": 7,
+      "latency_ms": 4195,
+      "json_valid": true,
+      "predicted_names": [
+        "Els Mistos",
+        "Pavelló de la República",
+        "Jardins de Can Brasó",
+        "Jardins de Rosa Luxemburg",
+        "Plaça de les Sibil·les"
+      ],
+      "allowed_candidates": [
+        "Els Mistos",
+        "Jardins de Can Brasó",
+        "Jardins de Rosa Luxemburg",
+        "Pavelló de la República",
+        "Plaça de les Sibil·les"
+      ],
+      "all_predicted_in_candidates": true,
+      "raw_output_preview": "[{\"name\":\"Els Mistos\",\"distance\":47,\"confidence\":\"high\"}, {\"name\":\"Pavelló de la República\",\"distance\":51,\"confidence\":\"high\"}, {\"name\":\"Jardins de Can Brasó\",\"distance\":250,\"confidence\":\"medium\"}, {\"name\":\"Jardins de Rosa Luxemburg\",\"distance\":260,\"confidence\":\"medium\"}, {\"name\":\"Plaça de les Sibil"
+    },
+    {
+      "index": 8,
+      "latency_ms": 4397,
+      "json_valid": true,
+      "predicted_names": [
+        "Barcelona, mural G-333",
+        "Capella nova de la Casa de la Misericòrdia",
+        "Caritat per los pobres del hospital de Nostra Senyora dela Ynfans Orfans",
+        "Facultat de Comunicació i Relacions Internacionals Blanquerna"
+      ],
+      "allowed_candidates": [
+        "Barcelona, mural G-333",
+        "Capella nova de la Casa de la Misericòrdia",
+        "Caritat per los pobres del hospital de Nostra Senyora dela Ynfans Orfans",
+        "Facultat de Comunicació i Relacions Internacionals Blanquerna",
+        "Museu d'Art Contemporani de Barcelona"
+      ],
+      "all_predicted_in_candidates": true,
+      "raw_output_preview": "[{\"name\":\"Barcelona, mural G-333\",\"distance\":78,\"confidence\":\"high\"}, {\"name\":\"Capella nova de la Casa de la Misericòrdia\",\"distance\":78,\"confidence\":\"high\"}, {\"name\":\"Caritat per los pobres del hospital de Nostra Senyora dela Ynfans Orfans\",\"distance\":94,\"confidence\":\"high\"}, {\"name\":\"Facultat de C"
+    },
+    {
+      "index": 9,
+      "latency_ms": 4195,
+      "json_valid": true,
+      "predicted_names": [
+        "Refugi Antiaeri de la Guerra Civil",
+        "Antonio Conesa Montes",
+        "Alfredo Rionda Menèndez",
+        "José Álvarez Menéndez",
+        "Monument a Francesc Macià"
+      ],
+      "allowed_candidates": [
+        "Alfredo Rionda Menèndez",
+        "Antonio Conesa Montes",
+        "José Álvarez Menéndez",
+        "Monument a Francesc Macià",
+        "Refugi Antiaeri de la Guerra Civil"
+      ],
+      "all_predicted_in_candidates": true,
+      "raw_output_preview": "[{\"name\":\"Refugi Antiaeri de la Guerra Civil\",\"distance\":17,\"confidence\":\"high\"},{\"name\":\"Antonio Conesa Montes\",\"distance\":19,\"confidence\":\"high\"},{\"name\":\"Alfredo Rionda Menèndez\",\"distance\":19,\"confidence\":\"high\"},{\"name\":\"José Álvarez Menéndez\",\"distance\":19,\"confidence\":\"high\"},{\"name\":\"Monumen"
+    },
+    {
+      "index": 10,
+      "latency_ms": 2546,
+      "json_valid": true,
+      "predicted_names": [
+        "A Joan Peñella"
+      ],
+      "allowed_candidates": [
+        "A Joan Peñella",
+        "Escales de Forestier",
+        "La Fertilitat",
+        "La Serenitat",
+        "Tir Olímpic"
+      ],
+      "all_predicted_in_candidates": true,
+      "raw_output_preview": "[{\"name\":\"A Joan Peñella\",\"distance\":46,\"confidence\":\"high\"}]"
+    },
+    {
+      "index": 11,
+      "latency_ms": 2568,
+      "json_valid": true,
+      "predicted_names": [
+        "Poble Espanyol"
+      ],
+      "allowed_candidates": [
+        "Ajuntament de Vall-de-roures",
+        "Gradas de Santiago",
+        "Museu Fran Daurel",
+        "Poble Espanyol",
+        "Torre de Utebo"
+      ],
+      "all_predicted_in_candidates": true,
+      "raw_output_preview": "[{\"name\":\"Poble Espanyol\",\"distance\":0,\"confidence\":\"high\"}]"
+    },
+    {
+      "index": 12,
+      "latency_ms": 4211,
+      "json_valid": true,
+      "predicted_names": [
+        "Palau Sant Jordi",
+        "Torre de comunicacions de Montjuïc",
+        "Memorial de la Sida a Barcelona",
+        "Jardins de Ramon Margalef i López",
+        "Campana de la Pau"
+      ],
+      "allowed_candidates": [
+        "Campana de la Pau",
+        "Jardins de Ramon Margalef i López",
+        "Memorial de la Sida a Barcelona",
+        "Palau Sant Jordi",
+        "Torre de comunicacions de Montjuïc"
+      ],
+      "all_predicted_in_candidates": true,
+      "raw_output_preview": "[{\"name\":\"Palau Sant Jordi\",\"distance\":0,\"confidence\":\"high\"},{\"name\":\"Torre de comunicacions de Montjuïc\",\"distance\":180,\"confidence\":\"high\"},{\"name\":\"Memorial de la Sida a Barcelona\",\"distance\":240,\"confidence\":\"high\"},{\"name\":\"Jardins de Ramon Margalef i López\",\"distance\":270,\"confidence\":\"medium"
+    },
+    {
+      "index": 13,
+      "latency_ms": 4391,
+      "json_valid": true,
+      "predicted_names": [
+        "Ca l'Ordal",
+        "Centre d'Interpretació i Acollida",
+        "Cripta de la Colònia Güell",
+        "Parc Isidre Grañé i Castanera",
+        "Biblioteca Joaquim Folguer"
+      ],
+      "allowed_candidates": [
+        "Biblioteca Joaquim Folguera",
+        "Ca l'Ordal",
+        "Centre d'Interpretació i Acollida",
+        "Cripta de la Colònia Güell",
+        "Parc Isidre Grañé i Castanera"
+      ],
+      "all_predicted_in_candidates": false,
+      "raw_output_preview": "[{\"name\":\"Ca l'Ordal\",\"distance\":57,\"confidence\":\"high\"}, {\"name\":\"Centre d'Interpretació i Acollida\",\"distance\":98,\"confidence\":\"high\"}, {\"name\":\"Cripta de la Colònia Güell\",\"distance\":120,\"confidence\":\"medium\"}, {\"name\":\"Parc Isidre Grañé i Castanera\",\"distance\":130,\"confidence\":\"low\"}, {\"name\":\"B"
+    },
+    {
+      "index": 14,
+      "latency_ms": 2508,
+      "json_valid": true,
+      "predicted_names": [
+        "La Rambla"
+      ],
+      "allowed_candidates": [
+        "Andreu Nin",
+        "Biblioteca Gòtic - Andreu Nin",
+        "ELISAVA",
+        "Font de les Tres Gràcies",
+        "La Rambla"
+      ],
+      "all_predicted_in_candidates": true,
+      "raw_output_preview": "[{\"name\":\"La Rambla\",\"distance\":94,\"confidence\":\"high\"}]"
+    },
+    {
+      "index": 15,
+      "latency_ms": 2799,
+      "json_valid": true,
+      "predicted_names": [
+        "L'Escola del Mar i el seu llegat pedagògic"
+      ],
+      "allowed_candidates": [
+        "Emília Llorea Martin \"Emiliona\"",
+        "Evocació Marinera",
+        "L'Escola del Mar i el seu llegat pedagògic",
+        "L'Estel Ferit",
+        "Una Habitació on sempre Plou"
+      ],
+      "all_predicted_in_candidates": true,
+      "raw_output_preview": "[{\"name\":\"L'Escola del Mar i el seu llegat pedagògic\",\"distance\":140,\"confidence\":\"high\"}]"
+    },
+    {
+      "index": 16,
+      "latency_ms": 2577,
+      "json_valid": true,
+      "predicted_names": [
+        "Pavelló 1"
+      ],
+      "allowed_candidates": [
+        "Biblioteca Artur Martorell",
+        "Font de la Plaça d'Espanya",
+        "Pavelló 1",
+        "Pavelló 3",
+        "Torres Venecianes"
+      ],
+      "all_predicted_in_candidates": true,
+      "raw_output_preview": "[{\"name\":\"Pavelló 1\",\"distance\":100,\"confidence\":\"high\"}]"
+    },
+    {
+      "index": 17,
+      "latency_ms": 4334,
+      "json_valid": true,
+      "predicted_names": [
+        "Palau Sant Jordi",
+        "Torre de comunicacions de Montjuïc",
+        "Camp Municipal de Beisbol Carlos Pérez de Rozas",
+        "Memorial de la Sida a Barcelona",
+        "Campana de la Pau"
+      ],
+      "allowed_candidates": [
+        "Camp Municipal de Beisbol Carlos Pérez de Rozas",
+        "Campana de la Pau",
+        "Memorial de la Sida a Barcelona",
+        "Palau Sant Jordi",
+        "Torre de comunicacions de Montjuïc"
+      ],
+      "all_predicted_in_candidates": true,
+      "raw_output_preview": "[{\"name\":\"Palau Sant Jordi\",\"distance\":70,\"confidence\":\"high\"}, {\"name\":\"Torre de comunicacions de Montjuïc\",\"distance\":110,\"confidence\":\"high\"}, {\"name\":\"Camp Municipal de Beisbol Carlos Pérez de Rozas\",\"distance\":230,\"confidence\":\"medium\"}, {\"name\":\"Memorial de la Sida a Barcelona\",\"distance\":250,"
+    },
+    {
+      "index": 18,
+      "latency_ms": 2568,
+      "json_valid": true,
+      "predicted_names": [
+        "Ona Llibres"
+      ],
+      "allowed_candidates": [
+        "Can Trilla",
+        "Casa Vicens",
+        "Farmàcia Guerra",
+        "Federació fe Colles de Sant Medir",
+        "Ona Llibres"
+      ],
+      "all_predicted_in_candidates": true,
+      "raw_output_preview": "[{\"name\":\"Ona Llibres\",\"distance\":130,\"confidence\":\"high\"}]"
+    },
+    {
+      "index": 19,
+      "latency_ms": 2619,
+      "json_valid": true,
+      "predicted_names": [
+        "Museu Nacional d'Art de Catalunya"
+      ],
+      "allowed_candidates": [
+        "A Frederic Mistral",
+        "Ermita de Santa Madrona",
+        "Francesc Ferrer i Guàrdia",
+        "Museu Nacional d'Art de Catalunya",
+        "Serena"
+      ],
+      "all_predicted_in_candidates": true,
+      "raw_output_preview": "[{\"name\":\"Museu Nacional d'Art de Catalunya\",\"distance\":0,\"confidence\":\"high\"}]"
+    },
+    {
+      "index": 20,
+      "latency_ms": 3966,
+      "json_valid": true,
+      "predicted_names": [
+        "Biblioteca Balmes",
+        "Cercle Artistic de Sant lluc",
+        "Eugenio d'Ors",
+        "Casa Martí",
+        "Aquaeductus Romanus"
+      ],
+      "allowed_candidates": [
+        "Aquaeductus Romanus",
+        "Biblioteca Balmes",
+        "Casa Martí",
+        "Cercle Artistic de Sant lluc",
+        "Eugenio d'Ors"
+      ],
+      "all_predicted_in_candidates": true,
+      "raw_output_preview": "[{\"name\":\"Biblioteca Balmes\",\"distance\":35,\"confidence\":\"high\"},{\"name\":\"Cercle Artistic de Sant lluc\",\"distance\":33,\"confidence\":\"high\"},{\"name\":\"Eugenio d'Ors\",\"distance\":48,\"confidence\":\"medium\"},{\"name\":\"Casa Martí\",\"distance\":49,\"confidence\":\"low\"},{\"name\":\"Aquaeductus Romanus\",\"distance\":56,\"c"
+    }
+  ]
+}

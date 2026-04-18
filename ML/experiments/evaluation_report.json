@@ -1,0 +1,10 @@
+{
+  "test_samples": 20,
+  "metrics": {
+    "five_candidates_rate": 1.0,
+    "coordinates_available_rate": 1.0,
+    "probability_phrase_rate": 1.0,
+    "untitled_rate": 0.05,
+    "avg_candidates": 5.0
+  }
+}

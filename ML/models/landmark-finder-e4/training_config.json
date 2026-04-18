@@ -1,0 +1,22 @@
+{
+  "run_name": "landmark-finder-e4",
+  "model_name": "landmark-finder-e4",
+  "base_model": "qwen2.5:7b",
+  "created_at_utc": "2026-04-18T09:41:55.892333+00:00",
+  "dataset": {
+    "stats_file": "ml\\data\\processed\\dataset_stats.json",
+    "raw_samples": 200,
+    "clean_samples": 200,
+    "split_sizes": {
+      "train": 160,
+      "val": 20,
+      "test": 20
+    }
+  },
+  "inference_parameters": {
+    "temperature": 0.1,
+    "top_p": 0.9,
+    "num_ctx": 8192,
+    "num_predict": 512
+  }
+}
