@@ -1,0 +1,27 @@
+{
+  "input_path": "ml\\data\\training_examples.json",
+  "input_size_bytes": 218258,
+  "input_sha256": "eb120561d70b885967c6dd9a957a0a47a0a553f119f6857baa77c4b0c23ef4fa",
+  "raw_samples": 200,
+  "clean_samples": 200,
+  "dropped_empty": 0,
+  "dropped_duplicates": 0,
+  "split_sizes": {
+    "train": 160,
+    "val": 20,
+    "test": 20
+  },
+  "feature_summary": {
+    "lat_range": [
+      41.094218,
+      42.68141
+    ],
+    "lon_range": [
+      0.640883,
+      3.286009
+    ],
+    "avg_candidates_per_sample": 4.99,
+    "samples_with_untitled": 2,
+    "samples_with_probability_phrase": 194
+  }
+}
