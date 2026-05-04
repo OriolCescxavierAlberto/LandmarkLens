@@ -1,332 +1,294 @@
-# Documentación de Experimentación ML - LandmarkLens
+# Documentacion de Experimentacion ML - LandmarkLens
 
-## Información General
+## 1. Problema
 
-**Proyecto:** LandmarkLens - Sistema de identificación de puntos de interés en España  
-**Fecha de Inicio:** 2026  
-**Objetivo Principal:** Desarrollar un modelo de IA que identifique landmarks a partir de coordenadas GPS y orientación de cámara
+El objetivo del sistema es identificar puntos de interes visibles desde una posicion GPS dada y, opcionalmente, una orientacion de camara. El problema se divide en dos partes:
 
----
+1. Recuperacion local de candidatos cercanos al usuario.
+2. Ranking de esos candidatos para seleccionar el landmark mas probable.
 
-## Problema a Resolver
-
-Identificar de manera precisa y confiable puntos de interés (landmarks) en España a partir de:
-- **Coordenadas GPS** del usuario
-- **Orientación de la cámara** (azimuth/ángulo)
-- **Radio de búsqueda** definido
-
-El sistema debe:
-1. Procesar datos geoespaciales de múltiples regiones españolas
-2. Proporcionar respuestas en JSON con alta precisión
-3. Evitar alucinaciones (inventar landmarks no existentes)
-4. Funcionar con modelos ligeros de IA (optimizados para GPU con memoria limitada)
-5. Responder en tiempo real con baja latencia
+El sistema debe funcionar con baja latencia, evitar alucinaciones y ser reproducible con los datos del repositorio.
 
 ---
 
-## 🔬 Modelos Candidatos
+## 2. Dataset utilizado
 
-### 1. **Llama 3.2 (3B parameters)**
-- **Estado:** SELECCIONADO
-- **Razón:** Modelo ligero, eficiente en memoria (VRAM), capaz de seguir instrucciones de JSON
-- **Configuración:** Parámetros optimizados para RTX 3060 (6GB VRAM)
-- **Ventajas:**
-  - Bajo consumo de memoria - permite inferencia local
-  - Fine-tuning mediante prompt engineering
-  - Excelente seguimiento de instrucciones estructuradas
-  - Soporte para contexto de 8192 tokens
+La fuente principal es OpenStreetMap en formato `.osm.pbf` para las regiones incluidas en el repositorio:
 
-### 2. **Llama 2 (7B parameters)**
-- **Estado:** DESCARTADO
-- **Razón:** Alto consumo de VRAM (>8GB), no optimizado para instrucciones JSON
+- Cataluña
+- Madrid
+- Valencia
+- Pais Vasco
 
-### 3. **Mistral 7B**
-- **Estado:** EVALUADO
-- **Razón:** Buen desempeño pero requiere más memoria que Llama 3.2
+Los archivos se convierten a `data/landmarks_*.json` y luego se fusionan en `data/landmarks.json`.
 
----
+### Contenido del dataset
 
-## 🛠️ Herramientas Utilizadas
+Cada landmark contiene, cuando existe:
 
-### Fuentes de Datos
-| Herramienta | Propósito | Versión |
-|------------|----------|---------|
-| **OSM (OpenStreetMap)** | Base de datos geoespacial de puntos de interés | PBF Format |
-| **osmium/pyosmium** | Parsing y procesamiento de archivos OSM.pbf | Latest |
-| **geopy** | Cálculos de distancia y geolocalización | v2.x |
+- nombre
+- latitud y longitud
+- `fame_score`
+- categorias OSM
+- descripcion
+- Wikipedia / Wikidata
+- arquitecto, ano, estilo y direccion
 
-### Infraestructura de IA
-| Herramienta | Propósito |
-|------------|----------|
-| **Ollama** | Orquestación y deployement de modelos LLM locales |
-| **llama3.2:3b** | Modelo base para identificación de landmarks |
+### Datos generados para entrenamiento
 
-### Dependencias Python
-```
-osmium           - Procesamiento eficiente de archivos OSM
-pyosmium         - Bindings Python para osmium
-requests         - Consultas HTTP
-geopy            - Cálculos geoespaciales
-```
+El script `train_models.py` crea ejemplos sinteticos de ranking a partir de `data/landmarks.json`:
+
+- se seleccionan landmarks reales con coordenadas
+- se generan queries sinteticas alrededor del landmark objetivo
+- se construyen candidatos cercanos con el indice espacial
+- se etiquetan como positivos o negativos segun si el candidato es el objetivo
+
+La corrida de validacion reproducible incluida en este repositorio genero:
+
+- 20 landmarks objetivo
+- 40 queries sinteticas
+- 94 filas de entrenamiento/evaluacion
 
 ---
 
-## Fuentes de Datos Geoespaciales
+## 3. Preprocesamiento
 
-### Archivos OSM.pbf utilizados
+El preprocesamiento se realiza en dos niveles.
 
-El sistema procesa datos de **OpenStreetMap** en formato comprimido PBF (Protocol Buffer) de las siguientes regiones españolas:
+### 3.1 Extraccion geoespacial
 
-| Región | Archivo | Contenido |
-|--------|---------|----------|
-| **Cataluña** | catalonia.osm.pbf | ~2.5M nodos, landmarks urbanos e históricos |
-| **Valencia** | valencia.osm.pbf | ~1.8M nodos, monumentos costeros |
-| **País Vasco** | basque_country.osm.pbf | ~1.2M nodos, patrimonio industrial |
-| **Madrid** | madrid.osm.pbf | ~3.1M nodos, landmarks metropolitanos |
+`extract_landmarks.py` filtra nodos y ways OSM relevantes usando tags como `historic`, `tourism`, `amenity`, `building`, `leisure` y `man_made`.
 
-**Total de datos:** ~8.6M nodos OSM procesados
+### 3.2 Feature engineering para ranking
 
-### Proceso de Extracción de Datos
+Cada candidato se transforma en un vector con estas variables:
 
-1. **Parse de PBF:** Se leen los archivos OSM.pbf
-2. **Filtrado de tipos:** Se extraen solo tags de tipos POI relevantes
-   - `tourism=*` (museos, monumentos)
-   - `historic=*` (sitios históricos)
-   - `amenity=*` (servicios públicos destacados)
-   - `building=*` (estructuras arquitectónicas)
-3. **Enriquecimiento:** Cada landmark se georeferencia con coordenadas exactas
-4. **Serialización JSON:** Generación de base de conocimiento estructurada
+- distancia en metros y kilometros
+- seno y coseno del bearing
+- desviacion angular respecto al centro de la camara
+- flag de presencia de azimuth
+- FOV usado en la query
+- `fame_score`
+- numero de categorias
+- banderas de descripcion, Wikipedia y Wikidata
+
+Estas features son ligeras y faciles de recomputar en la app.
 
 ---
 
-## 🔄 Pipeline de Entrenamiento
+## 4. Modelos evaluados
 
-### Fase 1: Preparación de Datos
-```
-OSM.pbf files → extract_landmarks.py → landmarks.json
-```
-- Extracción de POI de archivos PBF
-- Normalización de coordenadas (lat/lon)
-- Validación de integridad de datos
+Se evaluaron tres enfoques:
 
-### Fase 2: Generación de Base de Conocimiento
-```
-landmarks.json + system_prompt.txt → generate_knowledge.py → training_examples.json
-```
-- Creación de pares pregunta-respuesta
-- Formateo de ejemplos de entrenamiento
-- Estructuración de datos para RAG (Retrieval-Augmented Generation)
+1. `heuristic_ranker`: baseline manual basado en distancia, fama y angulo.
+2. `linear_logistic`: ranker lineal entrenado con perdida logistica.
+3. `linear_hinge`: ranker lineal entrenado con perdida hinge.
 
-### Fase 3: Construcción del Modelo
-```
-Modelfile + llama3.2:3b → ollama create → landmark-finder
-```
-- Definición de parámetros del modelo
-- Carga de system prompt optimizado
-- Inicialización del modelo en Ollama
-
-### Fase 4: Despliegue e Inferencia
-```
-query_model.py + landmark-finder → JSON responses
-```
-- API de consulta del modelo
-- Procesamiento de GPS + azimuth
-- Respuesta en tiempo real
+El modelo final seleccionado fue `linear_hinge`.
 
 ---
 
-## Experimentos Iniciales Realizados
+## 5. Proceso de entrenamiento
 
-### Experimento E1: Extracción Base de Landmarks
+El entrenamiento se ejecuta con `train_models.py`.
 
-**Script utilizado:** `extract_landmarks.py`
+### Flujo
 
-**Parámetros principales:**
-```python
-REGIONS = ["catalonia", "valencia", "basque_country", "madrid"]
-MIN_RELEVANCE = 0.7
-CACHE_DIR = "./data/cache"
-OUTPUT_FORMAT = "json"
-```
+1. Carga `data/landmarks.json`.
+2. Genera queries sinteticas y candidatos locales.
+3. Divide los ejemplos por `query_id` para evitar fuga de informacion.
+4. Ajusta hiperparametros por modelo.
+5. Compara resultados en validacion y test.
+6. Reentrena el mejor modelo con train + validation.
+7. Exporta el bundle final a `artifacts/selected_model_bundle.joblib`.
 
-**Proceso:**
-- Lectura de 4 archivos OSM.pbf
-- Filtrado de ~8.6M nodos a ~45K landmarks relevantes
-- Extracción de atributos: name, lat, lon, type, tags
+### Hiperparametros ajustados
 
-**Resultados obtenidos:**
-- Total de landmarks extraídos: **45,230**
-- Cobertura geográfica: 4 regiones principales
-- Tiempo de procesamiento: ~18 minutos
-- Archivo output: `data/landmarks.json` (8.2 MB)
-- Hallazgo: 2.3% de duplicados por variación de nombres
+- `heuristic_ranker`:
+  - `distance_weight`
+  - `fame_weight`
+  - `angle_weight`
+  - `azimuth_weight`
 
----
-
-### Experimento E2: Generación de Base de Conocimiento
-
-**Script utilizado:** `generate_knowledge.py`
-
-**Parámetros principales:**
-```python
-INPUT_LANDMARKS = "./data/landmarks.json"
-SYSTEM_PROMPT = "./data/system_prompt.txt"
-OUTPUT_EXAMPLES = "./data/training_examples.json"
-EXAMPLES_PER_LANDMARK = 3
-SEARCH_RADIUS_M = [50, 100, 500, 1000]
-AZIMUTH_VARIATIONS = [0, 45, 90, 135, 180, 225, 270, 315]
-```
-
-**Proceso:**
-- Carga de 45K landmarks
-- Generación de ejemplos sintéticos con variaciones de:
-  - Ángulos de cámara (8 direcciones)
-  - Radios de búsqueda (4 distancias)
-  - Consultas con y sin orientación
-- Formateo JSON: `{"query": "...", "response": {...}, "region": "..."}`
-
-**Resultados obtenidos:**
-- Total de ejemplos generados: **1,080,720**
-- Distribución por región: Uniforme
-- Validación de formato: 100% conformidad JSON
-- Archivo output: `data/training_examples.json` (285 MB)
+- `linear_logistic` y `linear_hinge`:
+  - `learning_rate`
+  - `epochs`
+  - `l2`
 
 ---
 
-### Experimento E3: Inicialización del Modelo Ollama
+## 6. Metricas utilizadas
 
-**Script utilizado:** `setup.py` (fase de model creation)
+Las metricas calculadas son:
 
-**Parámetros principales del Modelfile:**
-```
-BASE_MODEL = llama3.2:3b
-TEMPERATURE = 0.1 (determinístico, bajo hallucination)
-TOP_P = 0.9
-NUM_CTX = 8192 (contexto amplio para landmarks)
-NUM_PREDICT = 512 (respuestas controladas)
-SYSTEM_PROMPT = "system_prompt.txt"
-```
+- precision
+- recall
+- F1
+- accuracy
+- average precision
+- top-1 por query
 
-**Configuración de Hardware:**
-```
-GPU: RTX 3060 (6GB VRAM)
-RAM: 16GB DDR4
-VRAM Usado: ~4.2GB (modelo + contexto)
-```
-
-**Proceso:**
-1. Descarga de base llama3.2:3b
-2. Carga de system prompt optimizado para JSON
-3. Configuración de parámetros de inferencia
-4. Registro del modelo: `landmark-finder:latest`
-
-**Resultados obtenidos:**
-- Modelo creado exitosamente
-- Nombre registrado: `landmark-finder:latest`
-- Tamaño en memoria: 2.1 GB
-- Tiempo de carga: 3.2 segundos
-- Latencia de inferencia: 200-400ms por consulta
+La metrica mas importante para el caso de uso es `query_top1`, porque mide si el primer candidato devuelto es el landmark correcto.
 
 ---
 
-### Experimento E4: Validación de Respuestas JSON
+## 7. Comparacion entre modelos
 
-**Script utilizado:** `query_model.py`
+Resultados de la corrida reproducible registrada en `artifacts/experiment_summary.json`:
 
-**Parámetros principales de consulta:**
-```python
-TEST_QUERIES = 50
-MODEL_NAME = "landmark-finder"
-TIMEOUT = 10.0  # segundos
-VALIDATE_JSON = True
+| Modelo | Validation top-1 | Validation F1 | Test top-1 | Test F1 |
+|---|---:|---:|---:|---:|
+| heuristic_ranker | 0.875 | 0.500 | 0.750 | 0.200 |
+| linear_logistic | 0.875 | 0.556 | 0.625 | 0.462 |
+| linear_hinge | 0.875 | 0.556 | 0.750 | 0.364 |
+
+### Modelo final seleccionado
+
+- Modelo: `linear_hinge`
+- Parametros: `learning_rate=0.01`, `epochs=8`, `l2=0.0`
+- Motivo: empata en validation top-1 con el resto y obtiene el mejor balance para el ranking final exportado.
+
+---
+
+## 8. Exportacion del modelo para la aplicacion
+
+El modelo final se exporta como un bundle serializado en:
+
+- `landmark_model/artifacts/selected_model_bundle.joblib`
+
+Contenido del bundle:
+
+- el ranker seleccionado
+- sus hiperparametros
+- lista de features usadas
+
+La aplicacion consulta este bundle desde `query_model.py` para reordenar los candidatos locales antes de construir el prompt para Ollama.
+
+---
+
+## 9. Optimizacion para movilidad
+
+La optimizacion para uso en movil se basa en tres decisiones:
+
+1. El ranking final es un modelo lineal compacto, sin dependencias pesadas de inferencia.
+2. El coste de calcular features es bajo y solo se aplica a candidatos cercanos.
+3. El LLM se usa solo como capa de generacion de JSON, mientras que la seleccion geografica se resuelve localmente.
+
+Esto reduce memoria, latencia y complejidad de despliegue.
+
+---
+
+## 10. RAG para la aplicacion
+
+### Problema y abordaje
+
+El problema RAG consiste en evitar que el modelo invente landmarks y, al mismo tiempo, darle suficiente contexto espacial para responder con precision.
+
+El abordaje actual es:
+
+1. recuperar landmarks cercanos con un indice espacial
+2. rankearlos con el modelo exportado
+3. construir un contexto compacto
+4. enviar ese contexto a Ollama para producir la respuesta JSON final
+
+### Datos usados o generados en el RAG
+
+- `data/landmarks.json` como base de conocimiento
+- `data/system_prompt.txt` como instruccion estricta
+- `data/training_examples.json` como ejemplos sinteticos de contexto/respuesta
+- `artifacts/selected_model_bundle.joblib` como ranker local
+
+### Estructura de carpetas
+
+- `landmark_model/`
+  - `extract_landmarks.py`
+  - `generate_knowledge.py`
+  - `train_models.py`
+  - `query_model.py`
+  - `setup.py`
+  - `Modelfile`
+- `landmark_model/data/`
+  - `landmarks.json`
+  - `landmarks_*.json`
+  - `training_examples.json`
+  - `system_prompt.txt`
+  - `experiment_results.json`
+- `landmark_model/artifacts/`
+  - `selected_model_bundle.joblib`
+  - `model_comparison.csv`
+  - `experiment_summary.json`
+
+### Tecnologia usada
+
+- Python
+- OpenStreetMap / osmium
+- Ollama
+- modelo base Llama 3.2 3B
+- serializacion con `pickle`
+
+### Experimentacion RAG
+
+La experimentacion del RAG consiste en verificar que:
+
+- el indice espacial devuelva candidatos cercanos
+- el ranking local ordene correctamente el contexto
+- el prompt final use nombres completos y validos
+- la respuesta de Ollama sea JSON valido y sin inventar landmarks
+
+### Comparacion entre modelos usando el RAG
+
+En esta version del proyecto, la comparacion relevante es la del ranker local que alimenta el RAG. Los tres enfoques evaluados fueron:
+
+- baseline heuristico
+- ranker lineal logistico
+- ranker lineal hinge
+
+### Resultados experimentales
+
+La corrida de validacion generada por el repositorio produce:
+
+- 0 queries perdidas en la muestra pequena validada
+- 0.875 de top-1 en validacion para los tres enfoques
+- mejor generalizacion test para `linear_hinge` y `heuristic_ranker` en top-1
+
+### Discusion de resultados
+
+- El baseline heuristico es fuerte porque la distancia domina el problema.
+- El modelo lineal agrega una decision mas flexible para escenarios densos o ambiguos.
+- `linear_hinge` quedo seleccionado por su balance entre simplicidad, rendimiento y portabilidad.
+
+---
+
+## 11. Reproducibilidad
+
+Para reproducir el flujo completo:
+
+```bash
+python extract_landmarks.py
+python generate_knowledge.py
+python train_models.py
+python setup.py
 ```
 
-**Casos de prueba:**
-- Query con GPS + azimuth (8 direcciones)
-- Query solo con GPS
-- Queries cercanas a límites de región
-- Queries en zonas con alta densidad de landmarks
+Para probar una consulta:
 
-**Resultados obtenidos:**
-- 100% de respuestas en formato JSON válido
-- Cero hallucinations (0 landmarks inventados)
-- Precisión media: 94.2%
-- Cobertura (landmarks encontrados): 96.1%
-- Latencia máxima observada: 1.2 segundos (contexto con 200+ landmarks)
-
-**Métrica de Confianza por Distancia:**
-```
-< 50m:    confidence="high" (99.8% precisión)
-50-300m:  confidence="high" (97.5% precisión)
-300m-1km: confidence="medium" (91.2% precisión)
-> 1km:    confidence="low" (82.1% precisión)
+```bash
+python query_model.py 41.4036 2.1744
+python query_model.py 41.4036 2.1744 0
 ```
 
 ---
 
-## Análisis de Resultados
+## 12. Conclusiones
 
-### Hallazgos Clave
+El proyecto ya cubre el flujo final esperado:
 
-| Aspecto | Valor | Análisis |
-|--------|-------|----------|
-| **Cobertura de Landmarks** | 45,230 POIs | Suficiente para uso inicial |
-| **Precisión del Modelo** | 94.2% | Excelente desempeño |
-| **Hallucinations** | 0% | Control perfecto del modelo |
-| **Latencia Promedio** | 280ms | Aceptable para tiempo real |
-| **Utilización VRAM** | 4.2GB / 6GB | Margen de 1.8GB disponible |
+- extraccion y fusion de landmarks
+- generacion de ejemplos sinteticos
+- entrenamiento de varios modelos
+- ajuste de hiperparametros
+- exportacion del modelo final
+- uso del modelo exportado en la aplicacion
+- RAG local con contexto compacto y respuesta JSON
 
-### Limitaciones Identificadas
-
-1. **Gestión de zonas densas:** Response time se incrementa con >200 landmarks
-2. **Cobertura regional:** Solo 4 regiones cubiertas inicialmente
-3. **Actualizaciones de datos:** Control manual de PBF files
-4. **Multiidioma:** Actualmente solo soporta español
-
-### Recomendaciones para Mejora
-
-1. Expandir a más regiones españolas
-2. Fine-tuning del modelo con ejemplos reales
-3. Optimización de queries para zonas densas
-4. Soporte para múltiples idiomas
-
----
-
-## Conclusiones
-
-El pipeline ML ha sido exitosamente implementado y validado:
-
-- Modelo base operativo con 0% hallucinations
-- Procesamiento robusto de datos OSM
-- Respuestas rápidas y precisas (<500ms)
-- Cobertura geográfica significativa (4 regiones)
-- Listo para despliegue en producción
-
-El modelo `landmark-finder` está operativo y optimizado para equipos con GPU limitada, proporcionando un balance ideal entre precisión, latencia y consumo de recursos.
-
----
-
-## Referencias de Archivos
-
-- **Código:** `/ML/landmark_model/`
-  - `extract_landmarks.py` - Extracción de datos OSM
-  - `generate_knowledge.py` - Generación de base de conocimiento
-  - `query_model.py` - Interfaz de consulta del modelo
-  - `setup.py` - Script de setup automatizado
-  
-- **Datos:** `/ML/landmark_model/data/`
-  - `system_prompt.txt` - Prompt del sistema para Ollama
-  - `training_examples.json` - Base de conocimiento generada
-  
-- **Configuración:** `/ML/landmark_model/`
-  - `Modelfile` - Definición del modelo Ollama
-  - `requirements.txt` - Dependencias Python
-
-- **Fuentes OSM:** `/data/`
-  - `catalonia.osm.pbf`
-  - `valencia.osm.pbf`
-  - `basque_country.osm.pbf`
-  - `madrid.osm.pbf`
-
----
-**Versión del Modelo:** landmark-finder:latest (Ollama)
+El resultado es un sistema reproducible, ligero y orientado a despliegue en una aplicacion movil o de baja memoria.

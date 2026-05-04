@@ -1,0 +1,4 @@
+name,best_params,validation_candidate_f1,validation_candidate_precision,validation_candidate_recall,validation_candidate_accuracy,validation_query_top1,validation_average_precision,test_candidate_f1,test_candidate_precision,test_candidate_recall,test_candidate_accuracy,test_query_top1,test_average_precision
+heuristic_ranker,"{""distance_weight"": 0.8, ""fame_weight"": 0.1, ""angle_weight"": 0.8, ""azimuth_weight"": 0.1}",0.0,0.0,0.0,0.8,0.0,0.26666666666666666,0.0,0.0,0.0,0.7142857142857143,1.0,0.75
+linear_logistic,"{""learning_rate"": 0.02, ""epochs"": 12, ""l2"": 0.0}",0.4,0.3333333333333333,0.5,0.7,0.0,0.375,0.0,0.0,0.0,0.5714285714285714,0.0,0.26785714285714285
+linear_hinge,"{""learning_rate"": 0.01, ""epochs"": 8, ""l2"": 0.0}",0.3333333333333333,0.25,0.5,0.6,0.0,0.375,0.0,0.0,0.0,0.5714285714285714,0.0,0.26785714285714285

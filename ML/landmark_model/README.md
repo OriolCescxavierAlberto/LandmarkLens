@@ -38,10 +38,11 @@ python setup.py
 
 **Nota:** `setup.py` ejecutará automáticamente:
 1. Instalación de dependencias
-2. Descarga de modelo llama3.2:3b (si no existe)
-3. Extracción de landmarks de OSM
-4. Generación de base de conocimiento
-5. Registro del modelo en Ollama
+2. Extracción de landmarks de OSM
+3. Generación de base de conocimiento
+4. Entrenamiento y exportación del modelo para la app
+5. Descarga de modelo llama3.2:3b (si no existe)
+6. Registro del modelo en Ollama
 
 **Tiempo estimado:** 20-30 minutos en primera ejecución
 
@@ -143,9 +144,11 @@ python setup.py
 
 **Qué hace:**
 - Instala dependencias de `requirements.txt`
-- Descarga llama3.2:3b (si no existe)
 - Ejecuta `extract_landmarks.py`
 - Ejecuta `generate_knowledge.py`
+- Ejecuta `train_models.py`
+- Exporta el modelo final en `artifacts/selected_model_bundle.joblib`
+- Descarga llama3.2:3b (si no existe)
 - Crea modelo en Ollama
 - Valida la configuración
 
@@ -195,6 +198,27 @@ python generate_knowledge.py
 
 ---
 
+### `train_models.py` — Entrenamiento y Exportación
+
+Entrena varios modelos ligeros, ajusta hiperparámetros y exporta el mejor.
+
+```bash
+python train_models.py
+```
+
+**Salida:**
+- `artifacts/selected_model_bundle.joblib` - bundle serializado para la app
+- `artifacts/model_comparison.csv` - comparación entre modelos
+- `artifacts/experiment_summary.json` - resumen del experimento
+- `data/experiment_results.json` - copia del resumen para documentación
+
+**Características:**
+- Divide por `query_id` para evitar fuga de información
+- Compara varios modelos ligeros
+- Exporta el modelo final seleccionado con sus hiperparámetros
+
+---
+
 ### `query_model.py` — Consulta del Modelo
 
 Interfaz principal para consultar landmarks.
@@ -214,6 +238,7 @@ python query_model.py <lat> <lon> [azimuth] [fov]
 **Características:**
 - Índice espacial con grid para búsqueda O(1)
 - Filtrado por campo de visión (FOV)
+- Usa el bundle exportado en `artifacts/selected_model_bundle.joblib` si existe
 - Cálculo de confianza por distancia
 - Respuesta en JSON puro (sin hallucinations)
 
@@ -368,13 +393,12 @@ print(f"Latencia: {elapsed:.2f}s")
 
 Para detalles técnicos y resultados de experimentación, ver:
 
- **[ML_EXPERIMENTS.md](ML_EXPERIMENTS.md)**
-- Definición del problema
-- Modelos candidatos
-- Pipeline de entrenamiento
-- Resultados de 4 experimentos iniciales
-- Análisis de limitaciones
-- Métricas de precisión
+**[ML_EXPERIMENTS.md](ML_EXPERIMENTS.md)**
+- Definición del problema y RAG
+- Dataset y preprocesamiento
+- Modelos evaluados y tuning
+- Exportación del modelo final
+- Resultados experimentales reproducibles
 
 ---
 
