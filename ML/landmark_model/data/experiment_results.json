@@ -1,0 +1,114 @@
+{
+  "generated_at": "2026-05-04T13:59:41.899019+00:00",
+  "seed": 2,
+  "dataset": {
+    "target_landmarks": 10,
+    "generated_queries": 10,
+    "skipped_queries": 0,
+    "rows": 32
+  },
+  "selected_model": {
+    "name": "heuristic_ranker",
+    "best_params": {
+      "distance_weight": 0.8,
+      "fame_weight": 0.1,
+      "angle_weight": 0.8,
+      "azimuth_weight": 0.1
+    },
+    "validation_candidate_f1": 0.0,
+    "validation_candidate_precision": 0.0,
+    "validation_candidate_recall": 0.0,
+    "validation_candidate_accuracy": 0.8,
+    "validation_query_top1": 0.0,
+    "validation_average_precision": 0.26666666666666666,
+    "test_candidate_f1": 0.0,
+    "test_candidate_precision": 0.0,
+    "test_candidate_recall": 0.0,
+    "test_candidate_accuracy": 0.7142857142857143,
+    "test_query_top1": 1.0,
+    "test_average_precision": 0.75
+  },
+  "feature_columns": [
+    "distance_m",
+    "distance_km",
+    "bearing_sin",
+    "bearing_cos",
+    "angle_offset_deg",
+    "azimuth_present",
+    "fov_deg",
+    "fame_score",
+    "category_count",
+    "has_description",
+    "has_wikipedia",
+    "has_wikidata"
+  ],
+  "artifacts": {
+    "bundle": "C:\\Users\\oriol\\Desktop\\LandmarkLens\\ML\\landmark_model\\artifacts\\selected_model_bundle.joblib",
+    "comparison_csv": "C:\\Users\\oriol\\Desktop\\LandmarkLens\\ML\\landmark_model\\artifacts\\model_comparison.csv",
+    "summary_json": "C:\\Users\\oriol\\Desktop\\LandmarkLens\\ML\\landmark_model\\artifacts\\experiment_summary.json",
+    "results_json": "C:\\Users\\oriol\\Desktop\\LandmarkLens\\ML\\landmark_model\\data\\experiment_results.json"
+  },
+  "comparison": [
+    {
+      "name": "heuristic_ranker",
+      "best_params": {
+        "distance_weight": 0.8,
+        "fame_weight": 0.1,
+        "angle_weight": 0.8,
+        "azimuth_weight": 0.1
+      },
+      "validation_candidate_f1": 0.0,
+      "validation_candidate_precision": 0.0,
+      "validation_candidate_recall": 0.0,
+      "validation_candidate_accuracy": 0.8,
+      "validation_query_top1": 0.0,
+      "validation_average_precision": 0.26666666666666666,
+      "test_candidate_f1": 0.0,
+      "test_candidate_precision": 0.0,
+      "test_candidate_recall": 0.0,
+      "test_candidate_accuracy": 0.7142857142857143,
+      "test_query_top1": 1.0,
+      "test_average_precision": 0.75
+    },
+    {
+      "name": "linear_logistic",
+      "best_params": {
+        "learning_rate": 0.02,
+        "epochs": 12,
+        "l2": 0.0
+      },
+      "validation_candidate_f1": 0.4,
+      "validation_candidate_precision": 0.3333333333333333,
+      "validation_candidate_recall": 0.5,
+      "validation_candidate_accuracy": 0.7,
+      "validation_query_top1": 0.0,
+      "validation_average_precision": 0.375,
+      "test_candidate_f1": 0.0,
+      "test_candidate_precision": 0.0,
+      "test_candidate_recall": 0.0,
+      "test_candidate_accuracy": 0.5714285714285714,
+      "test_query_top1": 0.0,
+      "test_average_precision": 0.26785714285714285
+    },
+    {
+      "name": "linear_hinge",
+      "best_params": {
+        "learning_rate": 0.01,
+        "epochs": 8,
+        "l2": 0.0
+      },
+      "validation_candidate_f1": 0.3333333333333333,
+      "validation_candidate_precision": 0.25,
+      "validation_candidate_recall": 0.5,
+      "validation_candidate_accuracy": 0.6,
+      "validation_query_top1": 0.0,
+      "validation_average_precision": 0.375,
+      "test_candidate_f1": 0.0,
+      "test_candidate_precision": 0.0,
+      "test_candidate_recall": 0.0,
+      "test_candidate_accuracy": 0.5714285714285714,
+      "test_query_top1": 0.0,
+      "test_average_precision": 0.26785714285714285
+    }
+  ]
+}

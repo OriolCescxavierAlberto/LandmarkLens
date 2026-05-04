@@ -16,6 +16,8 @@ import subprocess
 import sys
 import os
 import shutil
+import json
+from urllib import error, request
 
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -45,7 +47,9 @@ def check_prerequisites():
 
     # Archivos PBF
     import glob
-    pbf_files = glob.glob(os.path.join(PARENT_DIR, '*.osm.pbf'))
+    pbf_files = glob.glob(os.path.join(SCRIPT_DIR, '*.osm.pbf'))
+    if not pbf_files:
+        pbf_files = glob.glob(os.path.join(PARENT_DIR, '*.osm.pbf'))
     if pbf_files:
         total_mb = sum(os.path.getsize(f) for f in pbf_files) / (1024 * 1024)
         print(f"  ✅ {len(pbf_files)} archivos OSM encontrados ({total_mb:.0f} MB total)")
@@ -64,12 +68,11 @@ def check_prerequisites():
 
     # Verificar si Ollama está corriendo
     try:
-        import requests
-        r = requests.get("http://localhost:11434/api/tags", timeout=3)
-        if r.status_code == 200:
-            print("  ✅ Ollama está corriendo")
-        else:
-            errors.append("  ⚠️  Ollama no responde correctamente")
+        with request.urlopen("http://localhost:11434/api/tags", timeout=3) as response:
+            if response.status == 200:
+                print("  ✅ Ollama está corriendo")
+            else:
+                errors.append("  ⚠️  Ollama no responde correctamente")
     except Exception:
         errors.append("  ⚠️  Ollama no está corriendo. Inícialo con: ollama serve")
 
@@ -88,7 +91,7 @@ def step1_install_deps():
     print("📦 PASO 1: Instalando dependencias Python...")
     print(f"{'='*60}")
 
-    deps = ['osmium', 'requests', 'geopy']
+    deps = ['osmium']
     for dep in deps:
         subprocess.run([sys.executable, '-m', 'pip', 'install', dep],
                       capture_output=True)
@@ -125,16 +128,24 @@ def step3_generate_knowledge():
     )
 
 
-def step4_pull_base_model():
-    """Paso 4: Descargar modelo base si no existe."""
+def step4_train_models():
+    """Paso 4: Entrenar y exportar el modelo final para la aplicación."""
+    return run_command(
+        [sys.executable, os.path.join(SCRIPT_DIR, 'train_models.py')],
+        "PASO 4: Entrenando varios modelos y exportando el seleccionado..."
+    )
+
+
+def step5_pull_base_model():
+    """Paso 5: Descargar modelo base si no existe."""
     print(f"\n{'='*60}")
-    print("📥 PASO 4: Verificando modelo base llama3.2:3b...")
+    print("📥 PASO 5: Verificando modelo base llama3.2:3b...")
     print(f"{'='*60}")
 
     try:
-        import requests
-        r = requests.get("http://localhost:11434/api/tags", timeout=5)
-        models = [m['name'] for m in r.json().get('models', [])]
+        with request.urlopen("http://localhost:11434/api/tags", timeout=5) as response:
+            payload = json.loads(response.read().decode("utf-8"))
+        models = [m['name'] for m in payload.get('models', [])]
         
         if any('llama3.2:3b' in m for m in models):
             print("  ✅ llama3.2:3b ya está descargado")
@@ -147,8 +158,8 @@ def step4_pull_base_model():
                       "Descargando modelo base llama3.2:3b...")
 
 
-def step5_create_model():
-    """Paso 5: Crear el modelo personalizado en Ollama."""
+def step6_create_model():
+    """Paso 6: Crear el modelo personalizado en Ollama."""
     modelfile_path = os.path.join(SCRIPT_DIR, 'Modelfile')
     
     if not os.path.exists(modelfile_path):
@@ -157,7 +168,7 @@ def step5_create_model():
 
     return run_command(
         f'cd "{SCRIPT_DIR}" && ollama create {MODEL_NAME} -f Modelfile',
-        f"PASO 5: Creando modelo '{MODEL_NAME}' en Ollama..."
+        f"PASO 6: Creando modelo '{MODEL_NAME}' en Ollama..."
     )
 
 
@@ -182,8 +193,9 @@ def main():
         ("Instalar dependencias", step1_install_deps),
         ("Extraer landmarks", step2_extract_landmarks),
         ("Generar conocimiento", step3_generate_knowledge),
-        ("Descargar modelo base", step4_pull_base_model),
-        ("Crear modelo Ollama", step5_create_model),
+        ("Entrenar modelos", step4_train_models),
+        ("Descargar modelo base", step5_pull_base_model),
+        ("Crear modelo Ollama", step6_create_model),
     ]
 
     for name, func in steps:

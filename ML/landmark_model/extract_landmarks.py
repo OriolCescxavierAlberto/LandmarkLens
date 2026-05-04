@@ -366,8 +366,10 @@ if __name__ == '__main__':
     data_dir = os.path.join(script_dir, 'data')
     os.makedirs(data_dir, exist_ok=True)
 
-    # Buscar TODOS los archivos .osm.pbf en el directorio padre
-    pbf_files = sorted(glob.glob(os.path.join(parent_dir, '*.osm.pbf')))
+    # Buscar TODOS los archivos .osm.pbf en el directorio actual y como fallback en el padre
+    pbf_files = sorted(glob.glob(os.path.join(script_dir, '*.osm.pbf')))
+    if not pbf_files:
+        pbf_files = sorted(glob.glob(os.path.join(parent_dir, '*.osm.pbf')))
 
     if not pbf_files:
         print(f"❌ No se encontraron archivos .osm.pbf en: {parent_dir}")
