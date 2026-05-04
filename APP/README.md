@@ -10,11 +10,20 @@ LandmarkLens permite al usuario apuntar la camara hacia un lugar, capturar una f
 
 El proyecto es un prototipo funcional desarrollado como parte de una asignatura universitaria. El objetivo de esta entrega es demostrar una arquitectura solida, navegacion entre pantallas, integracion de sensores y una primera version funcional de la aplicacion.
 
+### Flujo de datos del sistema
+1. **Captura:** El usuario toma una foto. Se obtienen simultáneamente coordenadas GPS (Lat/Lon) y orientación (Acimut).
+2. **Identificación:** Las coordenadas se envían a `PlacesService` para identificar el monumento más cercano.
+3. **Persistencia (CRUD):** 
+   - La imagen se guarda físicamente en el almacenamiento interno como PNG (`FileUtils`).
+   - Los metadatos y la ruta de la imagen se insertan en la base de datos **Room** (`LandmarkDatabase`).
+4. **Consulta IA (Backend):** El usuario puede preguntar al asistente. El `OllamaClient` envía el contexto al backend local (Ollama) y recibe la respuesta, gestionando la sincronización de mensajes.
+5. **Visualización:** La UI recupera los datos de la DB y las imágenes del disco para mostrar el historial y el mapa.
+
 ---
 
 ## Arquitectura general
 
-La aplicacion sigue el patron MVVM (Model-View-ViewModel), adaptado a Jetpack Compose:
+La aplicacion sigue el patron **MVVM (Model-View-ViewModel)**, adaptado a Jetpack Compose y principios de **Clean Architecture**:
 
 ```
 UI (Composables)
@@ -28,9 +37,13 @@ ViewModel (LandmarkViewModel)
 Servicios / Clientes (PlacesService, OllamaClient, FileUtils)
 ```
 
-- La capa de UI esta formada exclusivamente por funciones Composable. No contiene logica de negocio ni llamadas de red.
-- El ViewModel centraliza todo el estado de la aplicacion mediante Compose State. Al sobrevivir los cambios de configuracion (rotacion de pantalla), el estado de navegacion, el historial del chat y los resultados de GPS se mantienen sin necesidad de restauracion manual.
-- Los servicios son clases o singletons sin dependencia del ciclo de vida de Android.
+- **Capa de UI (`ui/`):** Formada exclusivamente por funciones Composable. No contiene logica de negocio ni llamadas de red. Se divide en `screens`, `components` y el punto de entrada `MainActivity.kt`.
+- **ViewModel (`ui/viewmodel/`):** Centraliza todo el estado de la aplicacion mediante Compose State. Al sobrevivir los cambios de configuracion, mantiene la navegacion, el chat y los resultados de GPS.
+- **Capa de Datos (`data/`):**
+    - `local/`: Persistencia con Room (Database, DAO, Entities).
+    - `remote/`: Clientes de red para APIs y el backend (Ollama, Places).
+    - `model/`: Clases de datos que representan el dominio.
+- **Utilidades (`util/`):** Clases auxiliares para manejo de archivos y persistencia física.
 
 ---
 
@@ -40,26 +53,31 @@ Servicios / Clientes (PlacesService, OllamaClient, FileUtils)
 Unico ViewModel de la aplicacion. Gestiona:
 - Estado de navegacion entre pestanas (`currentTab`)
 - Lectura de sensores: sensor de rotacion (TYPE_ROTATION_VECTOR) para el acimut
-- GPS mediante FusedLocationProviderClient con dos niveles de precision: balanceada para el overlay y alta precision en el momento de la captura
+- GPS mediante FusedLocationProviderClient con dos niveles de precision
 - Ciclo de vida de la captura: bitmap, coordenadas y resultado de Places
 - Estado completo del chat: historial de mensajes, modelo seleccionado, carga de modelos y envio de preguntas
+- **Operaciones CRUD:** Implementa la lógica para crear (insertar captura), leer (cargar historial) y borrar (individual o total) registros de la base de datos Room.
 
 ### PlacesService
 Consulta una API de lugares a partir de latitud y longitud. Devuelve un objeto `LandmarkLocation` con nombre, tipo y direccion del sitio. Es invocado desde el ViewModel mediante `viewModelScope`.
 
-### OllamaClient
-Cliente HTTP (OkHttp) que se comunica con una instancia local de Ollama. Expone dos funciones suspendidas: `getModels()` para listar los modelos disponibles y `askModel()` para enviar una pregunta y recibir la respuesta.
+### OllamaClient (Integración de Backend)
+Cliente HTTP (OkHttp) que se comunica con una instancia local de **Ollama** (backend de modelos de lenguaje). 
+- Expone funciones para listar modelos y generar respuestas.
+- Sincroniza las preguntas del usuario con el backend local para actuar como guía histórico.
 
-### FileUtils
-Guarda el bitmap capturado en el almacenamiento del dispositivo incluyendo metadatos de GPS y acimut en el nombre del archivo.
+### FileUtils (Persistencia de datos)
+Gestiona la **persistencia de datos binarios** guardando los bitmaps capturados en el almacenamiento interno del dispositivo, asegurando que las imágenes estén disponibles para el historial sin saturar la base de datos SQLite.
 
-### Pantallas (Composables)
+---
+
+## Pantallas (Composables)
 
 | Composable | Descripcion |
 |---|---|
 | `CameraLandmarkScreen` | Previsualizacion de camara en tiempo real con overlay de GPS y brujula. Boton de captura. |
 | `CaptureResultScreen` | Muestra la foto capturada, el mapa del lugar y la informacion obtenida de PlacesService. |
-| `MapTab` | Mapa OSMDroid centrado en la posicion actual del usuario. |
+| `MapTab` | Mapa OSMDroid centrado en la posicion actual del usuario. Muestra marcadores del historial. |
 | `OllamaChatScreen` | Chat con el modelo Ollama seleccionado. Historial persistente durante la sesion. |
 | `MLOfflineScreen` | Pantalla reservada para clasificacion offline (en desarrollo). |
 
@@ -72,7 +90,7 @@ Guarda el bitmap capturado en el almacenamiento del dispositivo incluyendo metad
 - **Brujula / orientacion**: SensorManager con TYPE_ROTATION_VECTOR y calculo de acimut mediante matriz de rotacion.
 - **Mapa**: OSMDroid, mapa de codigo abierto sin necesidad de API Key.
 - **Identificacion de lugares**: PlacesService con peticion HTTP a partir de coordenadas.
-- **Chat IA**: Ollama ejecutado localmente en la misma red que el dispositivo.
+- **Chat IA**: Ollama ejecutado localmente en la misma red que el dispositivo (Backend).
 
 ---
 
@@ -88,7 +106,7 @@ Guarda el bitmap capturado en el almacenamiento del dispositivo incluyendo metad
 
 ## Requisitos previos
 
-- Android Studio Hedgehog o superior
+- Android Studio Ladybug o superior
 - Dispositivo o emulador con Android 7.0 (API 24) o superior
 - SDK de compilacion: API 36
 - Para el chat: instancia de Ollama accesible desde el dispositivo (misma red local o localhost si se usa un emulador)
@@ -97,22 +115,15 @@ Guarda el bitmap capturado en el almacenamiento del dispositivo incluyendo metad
 
 ## Instrucciones para ejecutar la app
 
-1. Clonar el repositorio:
-   ```
+1. **Clonar el repositorio:**
+   ```bash
    git clone https://github.com/usuario/LandmarkLens.git
    ```
-
-2. Abrir la carpeta `APP` con Android Studio (File > Open > seleccionar la carpeta APP).
-
-3. Esperar a que Gradle sincronice las dependencias.
-
-4. Conectar un dispositivo fisico por USB con depuracion activada, o iniciar un emulador con soporte de camara y GPS.
-
-5. Pulsar Run (Shift + F10) o el boton de play en Android Studio.
-
-6. En el primer arranque, aceptar los permisos de camara y ubicacion cuando el sistema los solicite.
-
-7. Para usar el chat con Ollama, asegurarse de que el servidor Ollama esta corriendo y es accesible desde el dispositivo. Si se usa un emulador, Ollama debe escuchar en `0.0.0.0` y la URL configurada en `OllamaClient` debe apuntar a `10.0.2.2` (IP del host desde el emulador).
+2. **Abrir el proyecto:** Abrir la carpeta `APP` con Android Studio.
+3. **Sincronizar:** Esperar a que Gradle sincronice las dependencias.
+4. **Dispositivo:** Conectar un dispositivo fisico o iniciar un emulador con soporte de camara y GPS.
+5. **Ejecutar:** Pulsar Run (Shift + F10).
+6. **Backend:** Para usar el chat, asegurarse de que el servidor Ollama esta corriendo. Si se usa un emulador, la URL en `OllamaClient` debe apuntar a `10.0.2.2`.
 
 ---
 
@@ -124,12 +135,11 @@ APP/
     src/
       main/
         java/com/example/landmarklens/
-          MainActivity.kt          # UI: Composables y navegacion
-          LandmarkViewModel.kt     # ViewModel central
-          PlacesService.kt         # Identificacion de lugares por GPS
-          OllamaClient.kt          # Cliente HTTP para Ollama
-          FileUtils.kt             # Guardado de imagenes
-        res/                       # Recursos: temas, iconos, strings
+          data/            # Capa de datos: Room, Modelos y APIs (Backend)
+          ui/              # Capa de UI: Screens, ViewModels y Components
+          util/            # Utilidades: Persistencia de archivos (FileUtils)
+          MainActivity.kt  # Entry point y navegación
+        res/               # Recursos: temas, iconos, strings
         AndroidManifest.xml
 ```
 

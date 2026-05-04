@@ -1,0 +1,13 @@
+{
+  "attempted": true,
+  "success": true,
+  "command": [
+    "ollama",
+    "create",
+    "landmark-finder-e4",
+    "-f",
+    "ml\\models\\landmark-finder-e4\\Modelfile"
+  ],
+  "error": null,
+  "stdout": ""
+}
