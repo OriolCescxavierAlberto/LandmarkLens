@@ -1,0 +1,5194 @@
+{
+  "metadata": {
+    "source": "andorra-latest.osm.pbf",
+    "total_landmarks": 400,
+    "region": "Andorra Latest"
+  },
+  "landmarks": [
+    {
+      "name": "Estació Nacional d'Autobussos",
+      "lat": 42.504694,
+      "lon": 1.521337,
+      "fame_score": 8,
+      "name_es": "Estación Nacional de Autobuses",
+      "name_ca": "Estació Nacional d'Autobussos",
+      "name_en": "National Bus Station",
+      "categories": [
+        "amenity=bus_station",
+        "building=yes"
+      ],
+      "wikipedia": "ca:Estació Nacional d'Autobusos",
+      "wikidata": "Q98387430",
+      "osm_type": "way",
+      "osm_id": 604030704
+    },
+    {
+      "name": "Vall del Madriu-Perafita-Claror",
+      "lat": 42.489646,
+      "lon": 1.602945,
+      "fame_score": 6,
+      "name_ca": "Vall del Madriu-Perafita-Claror",
+      "name_en": "Madriu-Perafita-Claror Valley",
+      "categories": [
+        "tourism=attraction"
+      ],
+      "wikipedia": "en:Madriu-Perafita-Claror Valley",
+      "wikidata": "Q332800",
+      "osm_type": "node",
+      "osm_id": 4516461789
+    },
+    {
+      "name": "Museu del Tabac",
+      "lat": 42.464528,
+      "lon": 1.491538,
+      "fame_score": 6,
+      "name_es": "museo del tabaco",
+      "name_ca": "Museu del Tabac",
+      "categories": [
+        "tourism=museum",
+        "building=yes"
+      ],
+      "wikipedia": "ca:Museu del Tabac",
+      "wikidata": "Q2912611",
+      "address": "carrer Casa Comuna, 1",
+      "osm_type": "way",
+      "osm_id": 202593695
+    },
+    {
+      "name": "Santuari de Nostra Senyora de Meritxell",
+      "lat": 42.554702,
+      "lon": 1.590921,
+      "fame_score": 6,
+      "name_ca": "Santuari de Nostra Senyora de Meritxell",
+      "name_en": "Our Lady of Meritxell",
+      "categories": [
+        "amenity=place_of_worship",
+        "building=church"
+      ],
+      "wikipedia": "ca:Basílica Santuari de Nostra Senyora de Meritxell",
+      "wikidata": "Q1024946",
+      "address": "Meritxell",
+      "religion": "christian",
+      "denomination": "catholic",
+      "osm_type": "way",
+      "osm_id": 202635437
+    },
+    {
+      "name": "Museu Casa d'Areny-Plandolit",
+      "lat": 42.556652,
+      "lon": 1.534033,
+      "fame_score": 6,
+      "name_ca": "Museu Casa d'Areny-Plandolit",
+      "categories": [
+        "historic=manor",
+        "tourism=museum",
+        "building=yes"
+      ],
+      "wikipedia": "en:Casa d'Areny-Plandolit",
+      "wikidata": "Q2912621",
+      "address": "Ordino",
+      "osm_type": "way",
+      "osm_id": 202638053
+    },
+    {
+      "name": "Consell General d'Andorra",
+      "lat": 42.506544,
+      "lon": 1.521035,
+      "fame_score": 6,
+      "name_es": "Consejo General de Andorra",
+      "name_ca": "Consell General d'Andorra",
+      "categories": [
+        "building=yes"
+      ],
+      "wikipedia": "ca:Casa de la Vall",
+      "wikidata": "Q1046548",
+      "osm_type": "way",
+      "osm_id": 512803159
+    },
+    {
+      "name": "Cabana Pleta Serrera",
+      "lat": 42.621158,
+      "lon": 1.579747,
+      "fame_score": 6,
+      "name_ca": "Cabana Pleta Serrera",
+      "categories": [
+        "tourism=wilderness_hut",
+        "building=yes"
+      ],
+      "wikipedia": "fr:Cabane de la Serrera",
+      "wikidata": "Q17588564",
+      "osm_type": "way",
+      "osm_id": 852611722
+    },
+    {
+      "name": "Refugi de l'Illa",
+      "lat": 42.49503,
+      "lon": 1.656391,
+      "fame_score": 5,
+      "name_ca": "Refugi de l'Illa",
+      "categories": [
+        "tourism=alpine_hut",
+        "building=yes"
+      ],
+      "wikipedia": "ca:Refugi de l'Illa",
+      "wikidata": "Q3931666",
+      "osm_type": "way",
+      "osm_id": 190239291
+    },
+    {
+      "name": "Esglesia Sant Esteve de Andorra la Vella",
+      "lat": 42.507177,
+      "lon": 1.521727,
+      "fame_score": 5,
+      "name_es": "Iglesia San Esteban de Andorra la Vella",
+      "name_ca": "Església de Sant Esteve d'Andorra",
+      "categories": [
+        "amenity=place_of_worship",
+        "building=yes"
+      ],
+      "wikipedia": "ca:Sant Esteve d'Andorra la Vella",
+      "wikidata": "Q63789",
+      "address": "Rambla Molines",
+      "religion": "christian",
+      "osm_type": "way",
+      "osm_id": 191582655
+    },
+    {
+      "name": "Museu Postal",
+      "lat": 42.556554,
+      "lon": 1.534158,
+      "fame_score": 5,
+      "name_es": "museo postal",
+      "name_ca": "Museu Postal",
+      "categories": [
+        "tourism=museum",
+        "building=yes"
+      ],
+      "wikipedia": "ca:Museu Postal d'Andorra",
+      "wikidata": "Q2912535",
+      "address": "Ordino",
+      "osm_type": "way",
+      "osm_id": 202638054
+    },
+    {
+      "name": "Església de Sant Corneli i Sant Cebrià d'Ordino",
+      "lat": 42.55688,
+      "lon": 1.532881,
+      "fame_score": 5,
+      "name_ca": "Església de Sant Corneli i Sant Cebrià d'Ordino",
+      "categories": [
+        "amenity=place_of_worship",
+        "building=yes"
+      ],
+      "wikipedia": "en:Església de Sant Corneli i Sant Cebrià d'Ordino",
+      "wikidata": "Q21077406",
+      "address": "Ordino",
+      "religion": "christian",
+      "denomination": "catholic",
+      "osm_type": "way",
+      "osm_id": 202640608
+    },
+    {
+      "name": "Refugi de Perafita",
+      "lat": 42.479753,
+      "lon": 1.578259,
+      "fame_score": 5,
+      "name_ca": "Refugi de Perafita",
+      "categories": [
+        "tourism=wilderness_hut",
+        "building=yes"
+      ],
+      "wikipedia": "ca:Refugi de Perafita",
+      "wikidata": "Q517092",
+      "osm_type": "way",
+      "osm_id": 382248559
+    },
+    {
+      "name": "Refugi del Pla de l'Estany",
+      "lat": 42.594031,
+      "lon": 1.460511,
+      "fame_score": 5,
+      "name_ca": "Refugi del Pla de l'Estany",
+      "categories": [
+        "tourism=wilderness_hut",
+        "building=yes"
+      ],
+      "wikipedia": "ca:Refugi del Pla de l'Estany",
+      "wikidata": "Q11945106",
+      "osm_type": "way",
+      "osm_id": 432400655
+    },
+    {
+      "name": "Refugi de Montmalús",
+      "lat": 42.499199,
+      "lon": 1.680701,
+      "fame_score": 5,
+      "name_ca": "Refugi de Montmalús",
+      "categories": [
+        "tourism=wilderness_hut",
+        "building=yes"
+      ],
+      "wikipedia": "ca:Refugi de Montmalús",
+      "wikidata": "Q3935695",
+      "osm_type": "way",
+      "osm_id": 523729934
+    },
+    {
+      "name": "Caldea",
+      "osm_type": "relation",
+      "osm_id": 14119593,
+      "categories": [
+        "building=yes"
+      ],
+      "fame_score": 5,
+      "wikipedia": "ca:Centre Termolúdic Caldea",
+      "wikidata": "Q2933723",
+      "needs_geocoding": true
+    },
+    {
+      "name": "Cascade",
+      "lat": 42.610275,
+      "lon": 1.671462,
+      "fame_score": 4,
+      "name_en": "Waterfall",
+      "categories": [
+        "tourism=attraction"
+      ],
+      "osm_type": "node",
+      "osm_id": 4899662921
+    },
+    {
+      "name": "Centre de Congressos d’Andorra la Vella",
+      "lat": 42.506918,
+      "lon": 1.52251,
+      "fame_score": 4,
+      "name_es": "Centro de congresos de Andorra la Vella",
+      "name_en": "Congress centre of Andorra la Vella",
+      "categories": [
+        "amenity=theatre"
+      ],
+      "address": "Plaça del Poble, Andorra la Vella",
+      "osm_type": "node",
+      "osm_id": 5439635921
+    },
+    {
+      "name": "Rock",
+      "lat": 42.559122,
+      "lon": 1.518605,
+      "fame_score": 4,
+      "name_en": "Rock",
+      "categories": [
+        "tourism=viewpoint"
+      ],
+      "osm_type": "node",
+      "osm_id": 5688825925
+    },
+    {
+      "name": "Capella de Casa Rossell",
+      "lat": 42.556317,
+      "lon": 1.534002,
+      "fame_score": 4,
+      "name_ca": "Capella de Casa Rossell",
+      "categories": [
+        "historic=church",
+        "amenity=place_of_worship",
+        "building=church"
+      ],
+      "wikipedia": "ca:Capella de casa Rossell",
+      "wikidata": "Q27048709",
+      "religion": "christian",
+      "osm_type": "node",
+      "osm_id": 8963774805
+    },
+    {
+      "name": "Museu Casa Rull",
+      "lat": 42.532324,
+      "lon": 1.514196,
+      "fame_score": 4,
+      "name_ca": "Museu Casa Rull",
+      "categories": [
+        "tourism=museum",
+        "building=yes"
+      ],
+      "wikipedia": "ca:Museu Casa Rull",
+      "wikidata": "Q2124368",
+      "address": "Sispony",
+      "osm_type": "way",
+      "osm_id": 202614660
+    },
+    {
+      "name": "Museu Etnogràfic Casa Cristo",
+      "lat": 42.535151,
+      "lon": 1.582383,
+      "fame_score": 4,
+      "name_ca": "Museu Etnogràfic Casa Cristo",
+      "categories": [
+        "tourism=museum",
+        "building=yes"
+      ],
+      "wikipedia": "ca:Museu Casa Cristo",
+      "wikidata": "Q5047802",
+      "address": "Carrer dels Cavallers, 2, Encamp",
+      "osm_type": "way",
+      "osm_id": 202617257
+    },
+    {
+      "name": "Refugi de Claror",
+      "lat": 42.470166,
+      "lon": 1.563847,
+      "fame_score": 4,
+      "name_ca": "Refugi de Claror",
+      "categories": [
+        "tourism=wilderness_hut",
+        "building=yes"
+      ],
+      "wikipedia": "ca:Refugi de Claror",
+      "wikidata": "Q3931655",
+      "osm_type": "way",
+      "osm_id": 208401245
+    },
+    {
+      "name": "Hostal Palanques",
+      "lat": 42.545725,
+      "lon": 1.514431,
+      "fame_score": 4,
+      "name_ca": "Hostal Palanques",
+      "categories": [
+        "tourism=hostel",
+        "building=yes"
+      ],
+      "wikipedia": "en:Hostal Palanques",
+      "wikidata": "Q5909326",
+      "address": "Avinguda Sant Antoni, La Massana",
+      "osm_type": "way",
+      "osm_id": 293147584
+    },
+    {
+      "name": "Refugi Riu dels Orris",
+      "lat": 42.485013,
+      "lon": 1.639797,
+      "fame_score": 4,
+      "name_ca": "Refugi Riu dels Orris",
+      "categories": [
+        "tourism=wilderness_hut",
+        "building=yes"
+      ],
+      "wikipedia": "ca:Refugi del Riu dels Orris",
+      "wikidata": "Q18006186",
+      "osm_type": "way",
+      "osm_id": 358047858
+    },
+    {
+      "name": "Refugi de Cabana Sorda",
+      "lat": 42.611511,
+      "lon": 1.672318,
+      "fame_score": 4,
+      "name_ca": "Refugi de Cabana Sorda",
+      "categories": [
+        "tourism=wilderness_hut",
+        "building=yes"
+      ],
+      "description": "nice refuge with toilet and pharmacy",
+      "wikipedia": "ca:Refugi de Cabana Sorda",
+      "wikidata": "Q3931658",
+      "osm_type": "way",
+      "osm_id": 368480225
+    },
+    {
+      "name": "Refugi de la Portella",
+      "lat": 42.572064,
+      "lon": 1.720472,
+      "fame_score": 4,
+      "name_ca": "Refugi de la Portella",
+      "categories": [
+        "tourism=wilderness_hut",
+        "building=yes"
+      ],
+      "wikipedia": "ca:Refugi de la Portella",
+      "wikidata": "Q3931667",
+      "osm_type": "way",
+      "osm_id": 381186674
+    },
+    {
+      "name": "Refugi de Francolí",
+      "lat": 42.489909,
+      "lon": 1.426314,
+      "fame_score": 4,
+      "name_ca": "Refugi de Francolí",
+      "categories": [
+        "tourism=wilderness_hut",
+        "amenity=shelter",
+        "building=yes"
+      ],
+      "wikipedia": "ca:Refugi de Francolí",
+      "wikidata": "Q3931661",
+      "osm_type": "way",
+      "osm_id": 392063295
+    },
+    {
+      "name": "Refugi de Prat Primer",
+      "lat": 42.478506,
+      "lon": 1.550271,
+      "fame_score": 4,
+      "name_ca": "Refugi de Prat Primer",
+      "categories": [
+        "tourism=wilderness_hut",
+        "building=yes"
+      ],
+      "wikipedia": "ca:Refugi de Prat Primer",
+      "wikidata": "Q11945088",
+      "osm_type": "way",
+      "osm_id": 392137331
+    },
+    {
+      "name": "Santa Creu de Canillo",
+      "lat": 42.565848,
+      "lon": 1.599734,
+      "fame_score": 4,
+      "name_ca": "Santa Creu de Canillo",
+      "categories": [
+        "tourism=attraction",
+        "amenity=place_of_worship",
+        "building=chapel"
+      ],
+      "wikipedia": "ca:Santa Creu de Canillo",
+      "wikidata": "Q5397748",
+      "religion": "christian",
+      "denomination": "roman_catholic",
+      "osm_type": "way",
+      "osm_id": 545445553
+    },
+    {
+      "name": "Insitu Eurotel Andorra",
+      "lat": 42.513766,
+      "lon": 1.532932,
+      "fame_score": 4,
+      "name_en": "Insitu Eurotel Andorra",
+      "categories": [
+        "tourism=hotel",
+        "building=yes"
+      ],
+      "wikidata": "Q111877835",
+      "osm_type": "way",
+      "osm_id": 558591023
+    },
+    {
+      "name": "Refugi Pla de les Pedres",
+      "lat": 42.553695,
+      "lon": 1.678855,
+      "fame_score": 4,
+      "name_ca": "Refugi Pla de les Pedres",
+      "categories": [
+        "tourism=wilderness_hut",
+        "building=yes"
+      ],
+      "wikipedia": "ca:Refugi del Pla de les Pedres",
+      "wikidata": "Q3935693",
+      "osm_type": "way",
+      "osm_id": 667958227
+    },
+    {
+      "name": "Mirador Roc del Quer",
+      "lat": 42.567164,
+      "lon": 1.591028,
+      "fame_score": 4,
+      "name_ca": "Mirador Roc del Quer",
+      "categories": [
+        "tourism=viewpoint"
+      ],
+      "description": "Panoramic view from valls de Montaup and  Valira d'Orient, from Soldeu until Encamp",
+      "wikipedia": "ca:Mirador del Roc del Quer",
+      "wikidata": "Q66384866",
+      "year": "2016",
+      "osm_type": "way",
+      "osm_id": 908107551
+    },
+    {
+      "name": "Refugi de les Fonts",
+      "lat": 42.590131,
+      "lon": 1.478953,
+      "fame_score": 4,
+      "name_ca": "Refugi de les Fonts",
+      "categories": [
+        "tourism=wilderness_hut",
+        "building=yes"
+      ],
+      "wikipedia": "ca:Refugi de les Fonts",
+      "wikidata": "Q2569829",
+      "osm_type": "way",
+      "osm_id": 978057700
+    },
+    {
+      "name": "Refugi de la Vall del Riu",
+      "lat": 42.595628,
+      "lon": 1.613219,
+      "fame_score": 4,
+      "name_ca": "Refugi de la Vall del Riu",
+      "categories": [
+        "tourism=wilderness_hut",
+        "amenity=shelter",
+        "building=yes"
+      ],
+      "wikipedia": "ca:Refugi de la Vall del Riu",
+      "wikidata": "Q18006178",
+      "osm_type": "way",
+      "osm_id": 978058671
+    },
+    {
+      "name": "Sant Serni",
+      "osm_type": "relation",
+      "osm_id": 7790584,
+      "categories": [
+        "tourism=attraction",
+        "amenity=place_of_worship",
+        "building=yes"
+      ],
+      "fame_score": 4,
+      "wikipedia": "ca:Sant Serni de Canillo",
+      "wikidata": "Q5397747",
+      "needs_geocoding": true
+    },
+    {
+      "name": "Auditori Nacional d'Andorra",
+      "lat": 42.556918,
+      "lon": 1.534774,
+      "fame_score": 3,
+      "name_ca": "Auditori Nacional d'Andorra",
+      "categories": [
+        "amenity=arts_centre"
+      ],
+      "wikipedia": "ca:Auditori Nacional d'Andorra",
+      "wikidata": "Q17587283",
+      "osm_type": "node",
+      "osm_id": 283680492
+    },
+    {
+      "name": "La noblesse du temps",
+      "lat": 42.508763,
+      "lon": 1.529484,
+      "fame_score": 3,
+      "name_ca": "La noblesa del temps",
+      "categories": [
+        "tourism=artwork"
+      ],
+      "year": "1977",
+      "osm_type": "node",
+      "osm_id": 4780988321
+    },
+    {
+      "name": "Vall del Madriu Perafita Claror",
+      "lat": 42.497879,
+      "lon": 1.56172,
+      "fame_score": 3,
+      "name_en": "Madriu Perafita Claror Valley",
+      "categories": [
+        "tourism=attraction"
+      ],
+      "description": "UNESCO Weltkulturerbe",
+      "osm_type": "node",
+      "osm_id": 4882848021
+    },
+    {
+      "name": "Mirador Riu Runer (1.500m)",
+      "lat": 42.434849,
+      "lon": 1.493855,
+      "fame_score": 3,
+      "name_en": "Riu Runer Viewpoint (1.500m)",
+      "categories": [
+        "tourism=viewpoint"
+      ],
+      "osm_type": "node",
+      "osm_id": 5699737544
+    },
+    {
+      "name": "Museu Carmen Thyssen",
+      "lat": 42.50876,
+      "lon": 1.542006,
+      "fame_score": 3,
+      "categories": [
+        "tourism=museum"
+      ],
+      "wikipedia": "ca:Museu Carmen Thyssen Andorra",
+      "wikidata": "Q36374033",
+      "address": "Avinguda Carlemany, 37, Escaldes-Engordany",
+      "osm_type": "node",
+      "osm_id": 7091170367
+    },
+    {
+      "name": "Roc de les Bruixes",
+      "lat": 42.554187,
+      "lon": 1.596624,
+      "fame_score": 3,
+      "categories": [
+        "historic=archaeological_site"
+      ],
+      "wikipedia": "ca:Gravats del Roc de les Bruixes",
+      "wikidata": "Q20106734",
+      "osm_type": "node",
+      "osm_id": 8963780177
+    },
+    {
+      "name": "Parc Central",
+      "lat": 42.505945,
+      "lon": 1.525756,
+      "fame_score": 3,
+      "name_ca": "Parc Central",
+      "categories": [
+        "leisure=park"
+      ],
+      "wikipedia": "ca:Parc Central d'Andorra",
+      "wikidata": "Q7136369",
+      "osm_type": "way",
+      "osm_id": 6275507
+    },
+    {
+      "name": "Refugi de Juclar",
+      "lat": 42.60738,
+      "lon": 1.715615,
+      "fame_score": 3,
+      "categories": [
+        "tourism=alpine_hut",
+        "building=yes"
+      ],
+      "wikipedia": "ca:Refugi de Juclar",
+      "wikidata": "Q3931662",
+      "osm_type": "way",
+      "osm_id": 127125424
+    },
+    {
+      "name": "Sant Andreu",
+      "lat": 42.51033,
+      "lon": 1.5308,
+      "fame_score": 3,
+      "name_ca": "Sant Andreu",
+      "categories": [
+        "amenity=place_of_worship",
+        "building=chapel"
+      ],
+      "wikipedia": "ca:Sant Andreu d'Andorra la Vella",
+      "wikidata": "Q27043086",
+      "religion": "christian",
+      "osm_type": "way",
+      "osm_id": 191582654
+    },
+    {
+      "name": "Sant Cerni de Nagol",
+      "lat": 42.469515,
+      "lon": 1.50091,
+      "fame_score": 3,
+      "name_ca": "Sant Cerni de Nagol",
+      "categories": [
+        "amenity=place_of_worship",
+        "building=chapel"
+      ],
+      "wikipedia": "ca:Sant Serni de Nagol",
+      "wikidata": "Q3819483",
+      "religion": "christian",
+      "osm_type": "way",
+      "osm_id": 202594793
+    },
+    {
+      "name": "Sant Pere d'Aixirivall",
+      "lat": 42.462993,
+      "lon": 1.502089,
+      "fame_score": 3,
+      "name_ca": "Sant Pere d'Aixirivall",
+      "categories": [
+        "amenity=place_of_worship",
+        "building=chapel"
+      ],
+      "wikipedia": "ca:Sant Pere d'Aixirivall",
+      "wikidata": "Q63787",
+      "address": "Aixirivall",
+      "religion": "christian",
+      "osm_type": "way",
+      "osm_id": 202595653
+    },
+    {
+      "name": "Museu del Perfum",
+      "lat": 42.508404,
+      "lon": 1.534802,
+      "fame_score": 3,
+      "name_es": "museo del perfume",
+      "name_ca": "Museu del Perfum",
+      "categories": [
+        "tourism=museum",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 202606316
+    },
+    {
+      "name": "Sant Pere Màrtir",
+      "lat": 42.508895,
+      "lon": 1.541601,
+      "fame_score": 3,
+      "name_ca": "Sant Pere Màrtir",
+      "categories": [
+        "amenity=place_of_worship",
+        "building=yes"
+      ],
+      "wikipedia": "ca:Sant Pere Màrtir (Escaldes)",
+      "wikidata": "Q5397737",
+      "religion": "christian",
+      "denomination": "catholic",
+      "osm_type": "way",
+      "osm_id": 202606880
+    },
+    {
+      "name": "Església de Santa Coloma",
+      "lat": 42.494135,
+      "lon": 1.497597,
+      "fame_score": 3,
+      "name_ca": "Església de Santa Coloma",
+      "categories": [
+        "amenity=place_of_worship",
+        "building=yes"
+      ],
+      "wikipedia": "ca:Església de Santa Coloma (Andorra la Vella)",
+      "wikidata": "Q3780675",
+      "style": "romanesque",
+      "religion": "christian",
+      "denomination": "roman_catholic",
+      "osm_type": "way",
+      "osm_id": 202612771
+    },
+    {
+      "name": "Sant Climent",
+      "lat": 42.545944,
+      "lon": 1.475188,
+      "fame_score": 3,
+      "name_ca": "Sant Climent",
+      "categories": [
+        "amenity=place_of_worship",
+        "building=church"
+      ],
+      "wikipedia": "ca:Sant Climent de Pal",
+      "wikidata": "Q3775060",
+      "address": "Pal",
+      "religion": "christian",
+      "osm_type": "way",
+      "osm_id": 202614956
+    },
+    {
+      "name": "Sant Andreu d’Arinsal",
+      "lat": 42.572123,
+      "lon": 1.484036,
+      "fame_score": 3,
+      "name_ca": "Sant Andreu d’Arinsal",
+      "categories": [
+        "amenity=place_of_worship",
+        "building=yes"
+      ],
+      "wikipedia": "ca:Sant Andreu d'Arinsal",
+      "wikidata": "Q5397724",
+      "address": "Carretera d'Arinsal, Arinsal",
+      "religion": "christian",
+      "denomination": "catholic",
+      "osm_type": "way",
+      "osm_id": 202616749
+    },
+    {
+      "name": "Sant Iscle i Santa Victòria",
+      "lat": 42.544998,
+      "lon": 1.514105,
+      "fame_score": 3,
+      "name_ca": "Sant Iscle i Santa Victòria",
+      "categories": [
+        "amenity=place_of_worship",
+        "building=church"
+      ],
+      "wikipedia": "ca:Sant Iscle i Santa Victòria de la Massana",
+      "wikidata": "Q5397726",
+      "religion": "christian",
+      "osm_type": "way",
+      "osm_id": 202616752
+    },
+    {
+      "name": "Santa Romà de les Bons",
+      "lat": 42.538872,
+      "lon": 1.587217,
+      "fame_score": 3,
+      "name_ca": "Santa Romà de les Bons",
+      "categories": [
+        "amenity=place_of_worship",
+        "building=yes"
+      ],
+      "wikipedia": "ca:Sant Romà de les Bons",
+      "wikidata": "Q3819319",
+      "religion": "christian",
+      "denomination": "catholic",
+      "osm_type": "way",
+      "osm_id": 202617439
+    },
+    {
+      "name": "Sant Miquel i Sant Joan de la Mosquera",
+      "lat": 42.535107,
+      "lon": 1.581778,
+      "fame_score": 3,
+      "name_ca": "Sant Miquel i Sant Joan de la Mosquera",
+      "categories": [
+        "amenity=place_of_worship",
+        "building=yes"
+      ],
+      "wikipedia": "en:Església de Sant Miquel de la Mosquera",
+      "wikidata": "Q17651611",
+      "address": "Encamp",
+      "religion": "christian",
+      "denomination": "catholic",
+      "osm_type": "way",
+      "osm_id": 202617451
+    },
+    {
+      "name": "Santa Eulàlia",
+      "lat": 42.534745,
+      "lon": 1.576728,
+      "fame_score": 3,
+      "name_ca": "Santa Eulàlia",
+      "categories": [
+        "amenity=place_of_worship",
+        "building=church"
+      ],
+      "wikipedia": "ca:Santa Eulàlia d'Encamp",
+      "wikidata": "Q11947521",
+      "religion": "christian",
+      "denomination": "catholic",
+      "osm_type": "way",
+      "osm_id": 202617506
+    },
+    {
+      "name": "Sant Romà de Vila",
+      "lat": 42.531242,
+      "lon": 1.567738,
+      "fame_score": 3,
+      "name_ca": "Sant Romà de Vila",
+      "categories": [
+        "amenity=place_of_worship",
+        "building=church"
+      ],
+      "wikipedia": "ca:Sant Romà de Vila",
+      "wikidata": "Q18007335",
+      "religion": "christian",
+      "denomination": "catholic",
+      "osm_type": "way",
+      "osm_id": 202618668
+    },
+    {
+      "name": "Sant Joan de Caselles",
+      "lat": 42.570831,
+      "lon": 1.607826,
+      "fame_score": 3,
+      "name_ca": "Sant Joan de Caselles",
+      "categories": [
+        "amenity=place_of_worship",
+        "building=yes"
+      ],
+      "wikipedia": "ca:Sant Joan de Caselles",
+      "wikidata": "Q3781320",
+      "religion": "christian",
+      "denomination": "catholic",
+      "osm_type": "way",
+      "osm_id": 202634375
+    },
+    {
+      "name": "Sant Pere del Tarter",
+      "lat": 42.578691,
+      "lon": 1.65316,
+      "fame_score": 3,
+      "name_ca": "Sant Pere del Tarter",
+      "categories": [
+        "amenity=place_of_worship",
+        "building=yes"
+      ],
+      "wikipedia": "ca:Sant Pere del Tarter",
+      "wikidata": "Q5397740",
+      "address": "El Tarter",
+      "religion": "christian",
+      "denomination": "catholic",
+      "osm_type": "way",
+      "osm_id": 202636510
+    },
+    {
+      "name": "Sant Bartomeu de Soldeu",
+      "lat": 42.576835,
+      "lon": 1.667607,
+      "fame_score": 3,
+      "name_ca": "Sant Bartomeu de Soldeu",
+      "categories": [
+        "amenity=place_of_worship",
+        "building=church"
+      ],
+      "wikipedia": "ca:Sant Bartomeu de Soldeu",
+      "wikidata": "Q5397722",
+      "address": "Carretera General 2, Soldeu",
+      "religion": "christian",
+      "denomination": "catholic",
+      "osm_type": "way",
+      "osm_id": 202636511
+    },
+    {
+      "name": "Església de Sant Martí de la Cortinada",
+      "lat": 42.576651,
+      "lon": 1.51778,
+      "fame_score": 3,
+      "name_ca": "Església de Sant Martí de la Cortinada",
+      "categories": [
+        "amenity=place_of_worship",
+        "building=yes"
+      ],
+      "wikipedia": "ca:Sant Martí de la Cortinada",
+      "wikidata": "Q3819245",
+      "address": "La Cortinada",
+      "religion": "christian",
+      "denomination": "catholic",
+      "osm_type": "way",
+      "osm_id": 202641565
+    },
+    {
+      "name": "Santuari vell de Meritxell",
+      "lat": 42.555172,
+      "lon": 1.590773,
+      "fame_score": 3,
+      "name_ca": "Santuari vell de Meritxell",
+      "categories": [
+        "historic=ruins",
+        "amenity=place_of_worship",
+        "building=church"
+      ],
+      "wikipedia": "ca:Santuari vell de Meritxell",
+      "wikidata": "Q11947716",
+      "address": "Meritxell",
+      "religion": "christian",
+      "denomination": "catholic",
+      "osm_type": "way",
+      "osm_id": 203038860
+    },
+    {
+      "name": "Refugi Borda de Sorteny",
+      "lat": 42.622642,
+      "lon": 1.564197,
+      "fame_score": 3,
+      "categories": [
+        "tourism=alpine_hut",
+        "building=yes"
+      ],
+      "wikipedia": "ca:Refugi de Sorteny",
+      "wikidata": "Q3931665",
+      "osm_type": "way",
+      "osm_id": 206379041
+    },
+    {
+      "name": "Castell de les Bons (Torre dels Moros)",
+      "lat": 42.539326,
+      "lon": 1.587105,
+      "fame_score": 3,
+      "name_ca": "Castell de les Bons (Torre dels Moros)",
+      "categories": [
+        "historic=castle",
+        "building=ruins",
+        "man_made=tower"
+      ],
+      "wikipedia": "ca:Castell de les Bons",
+      "wikidata": "Q28710886",
+      "osm_type": "way",
+      "osm_id": 208595135
+    },
+    {
+      "name": "Palau de Gel",
+      "lat": 42.566374,
+      "lon": 1.597793,
+      "fame_score": 3,
+      "name_ca": "Palau de Gel",
+      "categories": [
+        "building=yes",
+        "leisure=ice_rink"
+      ],
+      "wikipedia": "ca:Palau de Gel d'Andorra",
+      "wikidata": "Q9054498",
+      "address": "Canillo",
+      "osm_type": "way",
+      "osm_id": 219556004
+    },
+    {
+      "name": "Universitat d'Andorra",
+      "lat": 42.465184,
+      "lon": 1.490337,
+      "fame_score": 3,
+      "name_ca": "Universitat d'Andorra",
+      "categories": [
+        "amenity=university",
+        "building=university"
+      ],
+      "wikipedia": "ca:Universitat d'Andorra",
+      "wikidata": "Q648838",
+      "address": "Plaça de la Germandat, 7, Sant Julià de Lòria",
+      "osm_type": "way",
+      "osm_id": 270902310
+    },
+    {
+      "name": "Piscina Prat del Molí",
+      "lat": 42.544994,
+      "lon": 1.516517,
+      "fame_score": 3,
+      "name_ca": "Piscina Prat del Molí",
+      "name_en": "La Massana outdoor swimming pool",
+      "categories": [
+        "leisure=park"
+      ],
+      "osm_type": "way",
+      "osm_id": 293106080
+    },
+    {
+      "name": "Sant Antoni de la Grella",
+      "lat": 42.527587,
+      "lon": 1.520671,
+      "fame_score": 3,
+      "name_ca": "Sant Antoni de la Grella",
+      "categories": [
+        "amenity=place_of_worship",
+        "building=chapel"
+      ],
+      "wikipedia": "ca:Sant Antoni de la Grella",
+      "wikidata": "Q2203417",
+      "religion": "christian",
+      "denomination": "catholic",
+      "osm_type": "way",
+      "osm_id": 293127711
+    },
+    {
+      "name": "Estadi Comunal Joan Samarra",
+      "lat": 42.50142,
+      "lon": 1.513869,
+      "fame_score": 3,
+      "name_ca": "Estadi Comunal Joan Samarra",
+      "categories": [
+        "leisure=sports_centre"
+      ],
+      "wikipedia": "ca:Estadi Comunal d'Andorra la Vella",
+      "wikidata": "Q546027",
+      "osm_type": "way",
+      "osm_id": 334463613
+    },
+    {
+      "name": "Poliesportiu d'Andorra",
+      "lat": 42.504863,
+      "lon": 1.516719,
+      "fame_score": 3,
+      "name_ca": "Poliesportiu d'Andorra",
+      "categories": [
+        "building=yes",
+        "leisure=sports_centre"
+      ],
+      "wikipedia": "ca:Poliesportiu d'Andorra",
+      "wikidata": "Q7209730",
+      "osm_type": "way",
+      "osm_id": 334464445
+    },
+    {
+      "name": "Refugi de Fontverd",
+      "lat": 42.492114,
+      "lon": 1.594519,
+      "fame_score": 3,
+      "categories": [
+        "tourism=wilderness_hut",
+        "building=yes"
+      ],
+      "wikipedia": "ca:Refugi de Fontverd",
+      "wikidata": "Q3931660",
+      "osm_type": "way",
+      "osm_id": 351920542
+    },
+    {
+      "name": "Refugi d'Ensagents",
+      "lat": 42.516989,
+      "lon": 1.64208,
+      "fame_score": 3,
+      "categories": [
+        "tourism=wilderness_hut",
+        "amenity=shelter",
+        "building=yes"
+      ],
+      "wikipedia": "ca:Refugi dels Estanys d'Ensagents",
+      "wikidata": "Q3931670",
+      "year": "1981",
+      "osm_type": "way",
+      "osm_id": 358129350
+    },
+    {
+      "name": "Plaça del Poble",
+      "lat": 42.506701,
+      "lon": 1.522351,
+      "fame_score": 3,
+      "name_ca": "Plaça del Poble",
+      "categories": [
+        "leisure=park"
+      ],
+      "wikipedia": "ca:Plaça del Poble",
+      "wikidata": "Q18005708",
+      "osm_type": "way",
+      "osm_id": 361846817
+    },
+    {
+      "name": "Naturlandia (cota 1600)",
+      "lat": 42.44278,
+      "lon": 1.503093,
+      "fame_score": 3,
+      "categories": [
+        "tourism=theme_park"
+      ],
+      "wikipedia": "ca:Naturland",
+      "wikidata": "Q11938462",
+      "osm_type": "way",
+      "osm_id": 371164435
+    },
+    {
+      "name": "Refugi de Comapedrosa",
+      "lat": 42.578996,
+      "lon": 1.449351,
+      "fame_score": 3,
+      "categories": [
+        "tourism=alpine_hut",
+        "building=yes"
+      ],
+      "wikipedia": "ca:Refugi de Coma Pedrosa",
+      "wikidata": "Q2009270",
+      "osm_type": "way",
+      "osm_id": 371478743
+    },
+    {
+      "name": "Cabana de Perafita",
+      "lat": 42.481107,
+      "lon": 1.575775,
+      "fame_score": 3,
+      "name_ca": "Cabana de Perafita",
+      "categories": [
+        "amenity=shelter",
+        "building=yes"
+      ],
+      "wikidata": "Q3649140",
+      "osm_type": "way",
+      "osm_id": 382248558
+    },
+    {
+      "name": "Refugi de Ribaescorjada",
+      "lat": 42.565883,
+      "lon": 1.64078,
+      "fame_score": 3,
+      "categories": [
+        "tourism=wilderness_hut",
+        "amenity=shelter",
+        "building=yes"
+      ],
+      "wikipedia": "ca:Refugi de Riba Escorjada",
+      "wikidata": "Q11945091",
+      "osm_type": "way",
+      "osm_id": 385225383
+    },
+    {
+      "name": "Sant Miquel de Prats",
+      "lat": 42.560359,
+      "lon": 1.593999,
+      "fame_score": 3,
+      "name_ca": "Sant Miquel de Prats",
+      "categories": [
+        "amenity=place_of_worship",
+        "building=yes"
+      ],
+      "wikipedia": "ca:Sant Miquel de Prats",
+      "wikidata": "Q5397738",
+      "religion": "christian",
+      "denomination": "catholic",
+      "osm_type": "way",
+      "osm_id": 385383500
+    },
+    {
+      "name": "Cabana de Besalí",
+      "lat": 42.629076,
+      "lon": 1.537544,
+      "fame_score": 3,
+      "categories": [
+        "tourism=wilderness_hut",
+        "building=yes"
+      ],
+      "wikipedia": "ca:Refugi de Besali",
+      "wikidata": "Q3931657",
+      "osm_type": "way",
+      "osm_id": 391568717
+    },
+    {
+      "name": "Sant Joan de Sispony",
+      "lat": 42.533626,
+      "lon": 1.515998,
+      "fame_score": 3,
+      "name_ca": "Sant Joan de Sispony",
+      "categories": [
+        "amenity=place_of_worship",
+        "building=yes"
+      ],
+      "wikipedia": "ca:Sant Joan de Sispony",
+      "wikidata": "Q2668145",
+      "religion": "christian",
+      "osm_type": "way",
+      "osm_id": 439890579
+    },
+    {
+      "name": "Hotel Valira",
+      "lat": 42.508699,
+      "lon": 1.542101,
+      "fame_score": 3,
+      "name_ca": "Hotel Valira",
+      "categories": [
+        "historic=building",
+        "building=apartments"
+      ],
+      "wikipedia": "de:Hotel Valira",
+      "wikidata": "Q15934247",
+      "osm_type": "way",
+      "osm_id": 512798902
+    },
+    {
+      "name": "Casa de la Vall",
+      "lat": 42.506622,
+      "lon": 1.520463,
+      "fame_score": 3,
+      "name_ca": "Casa de la Vall",
+      "categories": [
+        "historic=castle",
+        "building=yes"
+      ],
+      "wikipedia": "ca:Casa de la Vall",
+      "wikidata": "Q1046548",
+      "year": "1580",
+      "osm_type": "way",
+      "osm_id": 512803160
+    },
+    {
+      "name": "Hotel Cims",
+      "lat": 42.542244,
+      "lon": 1.734276,
+      "fame_score": 3,
+      "name_ca": "Hotel Cims",
+      "categories": [
+        "tourism=hotel",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 516775885
+    },
+    {
+      "name": "Peralba",
+      "lat": 42.476037,
+      "lon": 1.488731,
+      "fame_score": 3,
+      "name_ca": "Peralba",
+      "categories": [
+        "tourism=hotel",
+        "building=yes"
+      ],
+      "wikidata": "Q112017266",
+      "osm_type": "way",
+      "osm_id": 547229111
+    },
+    {
+      "name": "Radio Andorra",
+      "lat": 42.528748,
+      "lon": 1.569855,
+      "fame_score": 3,
+      "name_ca": "Radio Andorra",
+      "categories": [
+        "building=yes"
+      ],
+      "wikipedia": "ca:Ràdio Andorra",
+      "wikidata": "Q1784663",
+      "osm_type": "way",
+      "osm_id": 668343726
+    },
+    {
+      "name": "Pont de la Tosca",
+      "lat": 42.509219,
+      "lon": 1.545504,
+      "fame_score": 3,
+      "name_ca": "Pont de la Tosca",
+      "categories": [
+        "historic=yes"
+      ],
+      "wikidata": "Q7228021",
+      "year": "1820",
+      "osm_type": "way",
+      "osm_id": 716912509
+    },
+    {
+      "name": "Espai Columba",
+      "lat": 42.494538,
+      "lon": 1.498697,
+      "fame_score": 3,
+      "categories": [
+        "tourism=museum",
+        "building=yes"
+      ],
+      "wikipedia": "en:Executive Council of Andorra",
+      "wikidata": "Q5419813",
+      "address": "Carrer de la Tartera, Santa Coloma",
+      "osm_type": "way",
+      "osm_id": 732677820
+    },
+    {
+      "name": "Sant Andreu del Prat del Campanar",
+      "lat": 42.575413,
+      "lon": 1.481747,
+      "fame_score": 3,
+      "name_ca": "Sant Andreu del Prat del Campanar",
+      "categories": [
+        "building=chapel"
+      ],
+      "wikipedia": "ca:Sant Andreu del Prat del Campanar",
+      "wikidata": "Q11946912",
+      "osm_type": "way",
+      "osm_id": 907459744
+    },
+    {
+      "name": "Refugi de l'Angonella",
+      "lat": 42.607995,
+      "lon": 1.496068,
+      "fame_score": 3,
+      "categories": [
+        "tourism=wilderness_hut",
+        "amenity=shelter",
+        "building=yes"
+      ],
+      "wikipedia": "ca:Refugi de l'Angonella",
+      "wikidata": "Q3931664",
+      "osm_type": "way",
+      "osm_id": 978057872
+    },
+    {
+      "name": "Refugi de Roca de Pimés",
+      "lat": 42.433706,
+      "lon": 1.535768,
+      "fame_score": 3,
+      "categories": [
+        "tourism=wilderness_hut",
+        "amenity=shelter",
+        "building=yes"
+      ],
+      "wikipedia": "ca:Refugi de Roca de Pimes",
+      "wikidata": "Q11945092",
+      "osm_type": "way",
+      "osm_id": 978058669
+    },
+    {
+      "name": "Refugi dels Agols",
+      "lat": 42.511101,
+      "lon": 1.608945,
+      "fame_score": 3,
+      "categories": [
+        "tourism=wilderness_hut",
+        "amenity=shelter",
+        "building=yes"
+      ],
+      "wikipedia": "ca:Refugi de les Agols",
+      "wikidata": "Q3931668",
+      "osm_type": "way",
+      "osm_id": 978058670
+    },
+    {
+      "name": "Refugi de Coma Obaga",
+      "lat": 42.606764,
+      "lon": 1.550555,
+      "fame_score": 3,
+      "categories": [
+        "tourism=wilderness_hut",
+        "building=yes"
+      ],
+      "wikipedia": "ca:Refugi de Coma Obaga",
+      "wikidata": "Q3931656",
+      "osm_type": "way",
+      "osm_id": 978058672
+    },
+    {
+      "name": "Sant Ermengol de l'Aldosa",
+      "lat": 42.543532,
+      "lon": 1.522536,
+      "fame_score": 3,
+      "name_ca": "Sant Ermengol de l'Aldosa",
+      "categories": [
+        "amenity=place_of_worship",
+        "building=yes"
+      ],
+      "wikipedia": "nl:Sint-Armengolkerk",
+      "wikidata": "Q2324678",
+      "religion": "christian",
+      "denomination": "roman_catholic",
+      "osm_type": "way",
+      "osm_id": 1051784031
+    },
+    {
+      "name": "Casa Rossell",
+      "lat": 42.556327,
+      "lon": 1.533764,
+      "fame_score": 3,
+      "name_ca": "Casa Rossell",
+      "categories": [
+        "historic=manor",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 1058074038
+    },
+    {
+      "name": "Toll Bullidor",
+      "lat": 42.547991,
+      "lon": 1.590847,
+      "fame_score": 2,
+      "name_ca": "Toll Bullidor",
+      "categories": [
+        "tourism=attraction"
+      ],
+      "osm_type": "node",
+      "osm_id": 53275640
+    },
+    {
+      "name": "Coll d'Ordino",
+      "lat": 42.554968,
+      "lon": 1.572221,
+      "fame_score": 2,
+      "name_ca": "Coll d'Ordino",
+      "categories": [
+        "tourism=viewpoint"
+      ],
+      "osm_type": "node",
+      "osm_id": 262472865
+    },
+    {
+      "name": "Collada de la Caülla",
+      "lat": 42.480756,
+      "lon": 1.531904,
+      "fame_score": 2,
+      "name_ca": "Collada de la Caulla",
+      "categories": [
+        "tourism=attraction"
+      ],
+      "osm_type": "node",
+      "osm_id": 3956271262
+    },
+    {
+      "name": "Història de la Marratxa",
+      "lat": 42.465072,
+      "lon": 1.490411,
+      "fame_score": 2,
+      "name_ca": "Història de la Marratxa",
+      "categories": [
+        "tourism=artwork"
+      ],
+      "osm_type": "node",
+      "osm_id": 4470129595
+    },
+    {
+      "name": "Antiga presó de la Casa del Quart (segle 18)",
+      "lat": 42.507421,
+      "lon": 1.521782,
+      "fame_score": 2,
+      "name_ca": "Antiga presó de la Casa del Quart (segle 18)",
+      "categories": [
+        "tourism=attraction"
+      ],
+      "address": "Avinguda del Princep Benlloch",
+      "osm_type": "node",
+      "osm_id": 4698145790
+    },
+    {
+      "name": "El meu univers",
+      "lat": 42.508692,
+      "lon": 1.529266,
+      "fame_score": 2,
+      "name_ca": "El meu univers",
+      "categories": [
+        "tourism=artwork"
+      ],
+      "year": "1999",
+      "osm_type": "node",
+      "osm_id": 4780988122
+    },
+    {
+      "name": "Museu Obert de Geologia. Roques al Carrer",
+      "lat": 42.506144,
+      "lon": 1.525262,
+      "fame_score": 2,
+      "name_ca": "Museu Obert de Geologia. Roques al Carrer",
+      "categories": [
+        "tourism=museum"
+      ],
+      "osm_type": "node",
+      "osm_id": 5734236589
+    },
+    {
+      "name": "Mirador Solar de Tristaina",
+      "lat": 42.640732,
+      "lon": 1.477285,
+      "fame_score": 2,
+      "categories": [
+        "tourism=viewpoint"
+      ],
+      "wikidata": "Q115654232",
+      "osm_type": "node",
+      "osm_id": 7795201191
+    },
+    {
+      "name": "Pont de la Margineda",
+      "lat": 42.484286,
+      "lon": 1.491911,
+      "fame_score": 2,
+      "name_es": "Puente románico de La Margineda",
+      "categories": [
+        "tourism=attraction"
+      ],
+      "osm_type": "node",
+      "osm_id": 8958670617
+    },
+    {
+      "name": "Els Jocs d'aigua",
+      "lat": 42.521751,
+      "lon": 1.570915,
+      "fame_score": 2,
+      "name_ca": "Els Jocs d'aigua",
+      "categories": [
+        "tourism=attraction"
+      ],
+      "osm_type": "node",
+      "osm_id": 9988841617
+    },
+    {
+      "name": "El Coll de Jou",
+      "lat": 42.456721,
+      "lon": 1.479889,
+      "fame_score": 2,
+      "name_ca": "El Coll de Jou",
+      "categories": [
+        "tourism=viewpoint"
+      ],
+      "osm_type": "node",
+      "osm_id": 10089764817
+    },
+    {
+      "name": "Sant Roc de Sornàs",
+      "lat": 42.565059,
+      "lon": 1.5278,
+      "fame_score": 2,
+      "categories": [
+        "amenity=place_of_worship"
+      ],
+      "wikipedia": "ca:Sant Roc de Sornàs",
+      "wikidata": "Q26234545",
+      "address": "Sornàs",
+      "religion": "christian",
+      "denomination": "catholic",
+      "osm_type": "node",
+      "osm_id": 10313619294
+    },
+    {
+      "name": "letras Pas",
+      "lat": 42.543231,
+      "lon": 1.735704,
+      "fame_score": 2,
+      "name_es": "letras Pas",
+      "categories": [
+        "tourism=attraction"
+      ],
+      "osm_type": "node",
+      "osm_id": 11071058917
+    },
+    {
+      "name": "Unnic",
+      "lat": 42.506939,
+      "lon": 1.524074,
+      "fame_score": 2,
+      "name_es": "Unnic",
+      "categories": [
+        "tourism=attraction"
+      ],
+      "osm_type": "node",
+      "osm_id": 11071059113
+    },
+    {
+      "name": "Carboneras",
+      "lat": 42.525052,
+      "lon": 1.581772,
+      "fame_score": 2,
+      "name_es": "Carboneras",
+      "categories": [
+        "tourism=attraction"
+      ],
+      "osm_type": "node",
+      "osm_id": 11071059114
+    },
+    {
+      "name": "MW Museu de l'Electricitat",
+      "lat": 42.514674,
+      "lon": 1.553474,
+      "fame_score": 2,
+      "name_ca": "MW Museu de l'Electricitat",
+      "categories": [
+        "tourism=museum"
+      ],
+      "osm_type": "node",
+      "osm_id": 12189161665
+    },
+    {
+      "name": "Człowiek",
+      "lat": 42.50644,
+      "lon": 1.520923,
+      "fame_score": 2,
+      "categories": [
+        "tourism=artwork"
+      ],
+      "osm_type": "node",
+      "osm_id": 12551063909
+    },
+    {
+      "name": "Transparencia. Przejrzystość.",
+      "lat": 42.50723,
+      "lon": 1.52218,
+      "fame_score": 2,
+      "categories": [
+        "tourism=artwork"
+      ],
+      "osm_type": "node",
+      "osm_id": 12551096583
+    },
+    {
+      "name": "Pyrénées Hyper-Centre",
+      "lat": 42.543633,
+      "lon": 1.731857,
+      "fame_score": 2,
+      "categories": [
+        "building=yes"
+      ],
+      "wikipedia": "ca:Pyrénées Andorra",
+      "wikidata": "Q5596036",
+      "address": "Pas de la Casa",
+      "osm_type": "way",
+      "osm_id": 54858984
+    },
+    {
+      "name": "Hotel Alfa Andorra",
+      "lat": 42.534214,
+      "lon": 1.580465,
+      "fame_score": 2,
+      "name_ca": "Hotel Alfa Andorra",
+      "categories": [
+        "tourism=hotel",
+        "building=yes"
+      ],
+      "address": "Avinguda de Joan Martí, 87, Encamp",
+      "osm_type": "way",
+      "osm_id": 183084742
+    },
+    {
+      "name": "Camp del Serrat",
+      "lat": 42.517272,
+      "lon": 1.567939,
+      "fame_score": 2,
+      "name_ca": "Camp del Serrat",
+      "categories": [
+        "tourism=hotel",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 191587693
+    },
+    {
+      "name": "Espel",
+      "lat": 42.510687,
+      "lon": 1.542139,
+      "fame_score": 2,
+      "categories": [
+        "tourism=hotel",
+        "building=yes"
+      ],
+      "wikidata": "Q111412161",
+      "osm_type": "way",
+      "osm_id": 199030322
+    },
+    {
+      "name": "Església de Sant Julià i Sant Germà",
+      "lat": 42.463776,
+      "lon": 1.490998,
+      "fame_score": 2,
+      "categories": [
+        "amenity=place_of_worship",
+        "building=church"
+      ],
+      "wikipedia": "en:Església de Sant Julià i Sant Germà",
+      "wikidata": "Q5397736",
+      "religion": "christian",
+      "osm_type": "way",
+      "osm_id": 202593694
+    },
+    {
+      "name": "Sant Esteve de Juberri",
+      "lat": 42.440151,
+      "lon": 1.490064,
+      "fame_score": 2,
+      "categories": [
+        "amenity=place_of_worship",
+        "building=chapel"
+      ],
+      "wikipedia": "ca:Sant Esteve de Juverri",
+      "wikidata": "Q17485576",
+      "address": "Juberri",
+      "religion": "christian",
+      "osm_type": "way",
+      "osm_id": 202596424
+    },
+    {
+      "name": "Esglèsia de Sant Romà dels Vilars",
+      "lat": 42.514822,
+      "lon": 1.534815,
+      "fame_score": 2,
+      "categories": [
+        "amenity=place_of_worship",
+        "building=chapel"
+      ],
+      "wikipedia": "ca:Sant Romà dels Vilars",
+      "wikidata": "Q11251566",
+      "religion": "christian",
+      "osm_type": "way",
+      "osm_id": 202604477
+    },
+    {
+      "name": "Esglesia de Sant Miquel d'Engolasters",
+      "lat": 42.511463,
+      "lon": 1.560502,
+      "fame_score": 2,
+      "categories": [
+        "amenity=place_of_worship",
+        "building=yes"
+      ],
+      "wikipedia": "ca:Sant Miquel d'Engolasters",
+      "wikidata": "Q4895696",
+      "religion": "christian",
+      "osm_type": "way",
+      "osm_id": 202608372
+    },
+    {
+      "name": "Sant Cristofol d'Anyos",
+      "lat": 42.534944,
+      "lon": 1.524605,
+      "fame_score": 2,
+      "categories": [
+        "amenity=place_of_worship",
+        "building=yes"
+      ],
+      "wikipedia": "ca:Sant Cristòfol d'Anyós",
+      "wikidata": "Q2874750",
+      "address": "Anyós",
+      "religion": "christian",
+      "osm_type": "way",
+      "osm_id": 202616750
+    },
+    {
+      "name": "Museu d'Art Sacre",
+      "lat": 42.534942,
+      "lon": 1.576672,
+      "fame_score": 2,
+      "name_ca": "Museu d'Art Sacre",
+      "categories": [
+        "tourism=museum",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 202617048
+    },
+    {
+      "name": "Centre de Natura de La Cortinada",
+      "lat": 42.574419,
+      "lon": 1.519295,
+      "fame_score": 2,
+      "name_es": "Centro de Naturaleza de La Cortinada",
+      "name_ca": "Centre de Natura de La Cortinada",
+      "categories": [
+        "building=yes"
+      ],
+      "address": "La Cortinada",
+      "osm_type": "way",
+      "osm_id": 202639137
+    },
+    {
+      "name": "Santa Bàrbara d'Ordino",
+      "lat": 42.555528,
+      "lon": 1.529309,
+      "fame_score": 2,
+      "name_ca": "Santa Bàrbara d'Ordino",
+      "categories": [
+        "amenity=place_of_worship",
+        "building=yes"
+      ],
+      "wikidata": "Q5397746",
+      "religion": "christian",
+      "denomination": "catholic",
+      "osm_type": "way",
+      "osm_id": 202640609
+    },
+    {
+      "name": "Rocòdrom d'Ordino",
+      "lat": 42.555982,
+      "lon": 1.532532,
+      "fame_score": 2,
+      "name_ca": "Rocòdrom d'Ordino",
+      "categories": [
+        "tourism=attraction"
+      ],
+      "osm_type": "way",
+      "osm_id": 308687563
+    },
+    {
+      "name": "Casa de colònies Aina",
+      "lat": 42.569708,
+      "lon": 1.605731,
+      "fame_score": 2,
+      "name_ca": "Casa de colònies Aina",
+      "categories": [
+        "tourism=guest_house",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 330823763
+    },
+    {
+      "name": "Centre Comercial Pyrénées Andorra",
+      "lat": 42.508218,
+      "lon": 1.524188,
+      "fame_score": 2,
+      "categories": [
+        "building=yes"
+      ],
+      "wikipedia": "ca:Pyrénées Andorra",
+      "wikidata": "Q5596036",
+      "address": "Avinguda Meritxell, 11, Andorra la Vella",
+      "osm_type": "way",
+      "osm_id": 352338250
+    },
+    {
+      "name": "Borda Estall",
+      "lat": 42.49662,
+      "lon": 1.583655,
+      "fame_score": 2,
+      "name_ca": "Borda Estall",
+      "categories": [
+        "tourism=chalet",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 358047856
+    },
+    {
+      "name": "Refugi del Siscaró",
+      "lat": 42.594872,
+      "lon": 1.70599,
+      "fame_score": 2,
+      "categories": [
+        "tourism=wilderness_hut",
+        "building=yes"
+      ],
+      "wikidata": "Q11945090",
+      "osm_type": "way",
+      "osm_id": 358317385
+    },
+    {
+      "name": "Segle XX",
+      "lat": 42.581219,
+      "lon": 1.637867,
+      "fame_score": 2,
+      "name_ca": "Segle XX",
+      "categories": [
+        "tourism=hotel",
+        "building=yes"
+      ],
+      "address": "Ransol",
+      "osm_type": "way",
+      "osm_id": 360838577
+    },
+    {
+      "name": "L'Ermita",
+      "lat": 42.554028,
+      "lon": 1.589858,
+      "fame_score": 2,
+      "name_ca": "L'Ermita",
+      "categories": [
+        "tourism=hotel",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 360883100
+    },
+    {
+      "name": "Cabana de Claror",
+      "lat": 42.475626,
+      "lon": 1.567841,
+      "fame_score": 2,
+      "name_ca": "Cabana de Claror",
+      "categories": [
+        "building=yes"
+      ],
+      "wikidata": "Q3649135",
+      "osm_type": "way",
+      "osm_id": 382248557
+    },
+    {
+      "name": "Cabana de Setut",
+      "lat": 42.48256,
+      "lon": 1.642277,
+      "fame_score": 2,
+      "categories": [
+        "tourism=wilderness_hut",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 392137329
+    },
+    {
+      "name": "Sant Vicenç d'Enclar",
+      "lat": 42.495737,
+      "lon": 1.493774,
+      "fame_score": 2,
+      "categories": [
+        "amenity=place_of_worship",
+        "building=yes"
+      ],
+      "wikipedia": "ca:Sant Vicenç d'Enclar",
+      "wikidata": "Q20106858",
+      "religion": "christian",
+      "denomination": "catholic",
+      "osm_type": "way",
+      "osm_id": 392397186
+    },
+    {
+      "name": "Cabana dels Planells de Rialb",
+      "lat": 42.645751,
+      "lon": 1.557694,
+      "fame_score": 2,
+      "name_ca": "Cabana dels Planells de Rialb",
+      "categories": [
+        "amenity=shelter",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 407683521
+    },
+    {
+      "name": "Sant Pere del Serrat",
+      "lat": 42.618094,
+      "lon": 1.538263,
+      "fame_score": 2,
+      "name_ca": "Sant Pere del Serrat",
+      "categories": [
+        "amenity=place_of_worship",
+        "building=church"
+      ],
+      "wikidata": "Q5397739",
+      "address": "El Serrat",
+      "religion": "christian",
+      "denomination": "catholic",
+      "osm_type": "way",
+      "osm_id": 419184137
+    },
+    {
+      "name": "Oficina de turisme Canillo",
+      "lat": 42.566243,
+      "lon": 1.599314,
+      "fame_score": 2,
+      "name_ca": "Oficina de turisme Canillo",
+      "categories": [
+        "tourism=information",
+        "building=yes"
+      ],
+      "description": "Officina de turisme",
+      "address": "Canillo",
+      "osm_type": "way",
+      "osm_id": 516715511
+    },
+    {
+      "name": "Barcelona",
+      "lat": 42.476281,
+      "lon": 1.490081,
+      "fame_score": 2,
+      "name_ca": "Barcelona",
+      "categories": [
+        "tourism=hotel",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 547231010
+    },
+    {
+      "name": "Hotel 7 Claus",
+      "lat": 42.513701,
+      "lon": 1.533236,
+      "fame_score": 2,
+      "name_ca": "Hotel 7 Claus",
+      "categories": [
+        "tourism=hotel",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 558591024
+    },
+    {
+      "name": "\"Storm in a Teacup\"",
+      "lat": 42.552066,
+      "lon": 1.454331,
+      "fame_score": 2,
+      "name_ca": "Tempesta en una tassa de té",
+      "categories": [
+        "tourism=artwork"
+      ],
+      "description": "Sculpure",
+      "osm_type": "way",
+      "osm_id": 619765938
+    },
+    {
+      "name": "El dipòsit de Grau Roig",
+      "lat": 42.581273,
+      "lon": 1.472719,
+      "fame_score": 2,
+      "name_en": "Grau Roig Reservoir",
+      "categories": [
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 706880217
+    },
+    {
+      "name": "Hotel Ransol",
+      "lat": 42.580277,
+      "lon": 1.635317,
+      "fame_score": 2,
+      "name_ca": "Hotel Ransol",
+      "categories": [
+        "tourism=hotel",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 769369699
+    },
+    {
+      "name": "Font del Ferro",
+      "lat": 42.584443,
+      "lon": 1.63717,
+      "fame_score": 2,
+      "name_ca": "Font del Ferro",
+      "categories": [
+        "tourism=hotel",
+        "building=yes"
+      ],
+      "address": "Ctra. de Ransol, 5, El Tarter",
+      "osm_type": "way",
+      "osm_id": 863293042
+    },
+    {
+      "name": "Hotel Roc de Sant Miquel",
+      "lat": 42.580876,
+      "lon": 1.663821,
+      "fame_score": 2,
+      "name_ca": "Hotel Roc de Sant Miquel",
+      "categories": [
+        "tourism=hotel",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 908150742
+    },
+    {
+      "name": "Torre de Caldea",
+      "lat": 42.51166,
+      "lon": 1.53724,
+      "fame_score": 2,
+      "name_ca": "Torre de Caldea",
+      "categories": [
+        "tourism=attraction"
+      ],
+      "osm_type": "way",
+      "osm_id": 1058470008
+    },
+    {
+      "name": "Sant Jaume d'Engordany",
+      "lat": 42.513029,
+      "lon": 1.539971,
+      "fame_score": 2,
+      "name_ca": "Sant Jaume d'Engordany",
+      "categories": [
+        "amenity=place_of_worship",
+        "building=yes"
+      ],
+      "wikidata": "Q97489591",
+      "religion": "christian",
+      "osm_type": "way",
+      "osm_id": 1059987759
+    },
+    {
+      "name": "Naturlandia (cota 2000)",
+      "osm_type": "relation",
+      "osm_id": 7947924,
+      "categories": [
+        "tourism=theme_park"
+      ],
+      "fame_score": 2,
+      "needs_geocoding": true
+    },
+    {
+      "name": "Anyós Park",
+      "osm_type": "relation",
+      "osm_id": 14107635,
+      "categories": [
+        "tourism=hotel",
+        "building=yes"
+      ],
+      "fame_score": 2,
+      "needs_geocoding": true
+    },
+    {
+      "name": "Mirador Coll de Jou",
+      "lat": 42.514373,
+      "lon": 1.548871,
+      "fame_score": 1,
+      "categories": [
+        "tourism=viewpoint"
+      ],
+      "osm_type": "node",
+      "osm_id": 51408872
+    },
+    {
+      "name": "Vallnord: Sector Pal",
+      "lat": 42.537025,
+      "lon": 1.490656,
+      "fame_score": 1,
+      "name_ca": "Vallnord: Sector Pal",
+      "categories": [
+        "leisure=sports_centre"
+      ],
+      "osm_type": "node",
+      "osm_id": 258356188
+    },
+    {
+      "name": "Vallnord: Sector Arinsal",
+      "lat": 42.573617,
+      "lon": 1.470747,
+      "fame_score": 1,
+      "name_ca": "Vallnord: Sector Arinsal",
+      "categories": [
+        "leisure=sports_centre"
+      ],
+      "osm_type": "node",
+      "osm_id": 258356379
+    },
+    {
+      "name": "Vallnord: Sector Arcalís",
+      "lat": 42.631391,
+      "lon": 1.500389,
+      "fame_score": 1,
+      "name_ca": "Vallnord: Sector Arcalís",
+      "categories": [
+        "leisure=sports_centre"
+      ],
+      "osm_type": "node",
+      "osm_id": 258357981
+    },
+    {
+      "name": "Estructures Autogeneradores",
+      "lat": 42.569093,
+      "lon": 1.587754,
+      "fame_score": 1,
+      "categories": [
+        "tourism=artwork"
+      ],
+      "osm_type": "node",
+      "osm_id": 262473157
+    },
+    {
+      "name": "Les Fontetes",
+      "lat": 42.546663,
+      "lon": 1.514507,
+      "fame_score": 1,
+      "name_ca": "Les Fontetes",
+      "categories": [
+        "amenity=theatre"
+      ],
+      "osm_type": "node",
+      "osm_id": 442882169
+    },
+    {
+      "name": "l'Anella d'Ordino",
+      "lat": 42.632475,
+      "lon": 1.495802,
+      "fame_score": 1,
+      "categories": [
+        "tourism=artwork"
+      ],
+      "year": "1991",
+      "osm_type": "node",
+      "osm_id": 663953196
+    },
+    {
+      "name": "Grandvalira (Sector de Canillo)",
+      "lat": 42.565907,
+      "lon": 1.60141,
+      "fame_score": 1,
+      "name_ca": "Grandvalira (Sector de Canillo)",
+      "categories": [
+        "leisure=sports_centre"
+      ],
+      "osm_type": "node",
+      "osm_id": 2671660696
+    },
+    {
+      "name": "Grandvalira (Sector del Tarter)",
+      "lat": 42.578307,
+      "lon": 1.646151,
+      "fame_score": 1,
+      "name_ca": "Grandvalira (Sector del Tarter)",
+      "categories": [
+        "leisure=sports_centre"
+      ],
+      "osm_type": "node",
+      "osm_id": 2671662458
+    },
+    {
+      "name": "Grandvalira (Sector de Soldeu)",
+      "lat": 42.575803,
+      "lon": 1.668095,
+      "fame_score": 1,
+      "name_ca": "Grandvalira (Sector de Soldeu)",
+      "categories": [
+        "leisure=sports_centre"
+      ],
+      "osm_type": "node",
+      "osm_id": 2671666127
+    },
+    {
+      "name": "Iron Museum",
+      "lat": 42.545986,
+      "lon": 1.521033,
+      "fame_score": 1,
+      "categories": [
+        "tourism=museum"
+      ],
+      "address": "La Massana",
+      "osm_type": "node",
+      "osm_id": 2966663488
+    },
+    {
+      "name": "Agulles d'Engolasters",
+      "lat": 42.516083,
+      "lon": 1.573293,
+      "fame_score": 1,
+      "categories": [
+        "tourism=attraction"
+      ],
+      "osm_type": "node",
+      "osm_id": 3141318195
+    },
+    {
+      "name": "Via ferrada Tossal Gran d'Aixovall",
+      "lat": 42.478981,
+      "lon": 1.488635,
+      "fame_score": 1,
+      "categories": [
+        "tourism=attraction"
+      ],
+      "osm_type": "node",
+      "osm_id": 3143668913
+    },
+    {
+      "name": "Via ferrada Canal del Grau",
+      "lat": 42.563777,
+      "lon": 1.588518,
+      "fame_score": 1,
+      "categories": [
+        "tourism=attraction"
+      ],
+      "osm_type": "node",
+      "osm_id": 3870463570
+    },
+    {
+      "name": "Cascada del Riu d'Urina",
+      "lat": 42.559267,
+      "lon": 1.583905,
+      "fame_score": 1,
+      "categories": [
+        "tourism=attraction"
+      ],
+      "osm_type": "node",
+      "osm_id": 3904453170
+    },
+    {
+      "name": "Mirador del Toll Bullidor",
+      "lat": 42.547855,
+      "lon": 1.59068,
+      "fame_score": 1,
+      "categories": [
+        "tourism=viewpoint"
+      ],
+      "osm_type": "node",
+      "osm_id": 3904469763
+    },
+    {
+      "name": "Capella de Sant Jaume dels Cortals",
+      "lat": 42.534329,
+      "lon": 1.603278,
+      "fame_score": 1,
+      "name_ca": "Capella de Sant Jaume dels Cortals",
+      "categories": [
+        "amenity=place_of_worship",
+        "building=church"
+      ],
+      "religion": "christian",
+      "denomination": "catholic",
+      "osm_type": "node",
+      "osm_id": 4073385731
+    },
+    {
+      "name": "Mirador del Bosc de les Allaus",
+      "lat": 42.534301,
+      "lon": 1.602283,
+      "fame_score": 1,
+      "categories": [
+        "tourism=viewpoint"
+      ],
+      "osm_type": "node",
+      "osm_id": 4078443919
+    },
+    {
+      "name": "Mirador del Roc de Palomera",
+      "lat": 42.488977,
+      "lon": 1.515744,
+      "fame_score": 1,
+      "categories": [
+        "tourism=viewpoint"
+      ],
+      "osm_type": "node",
+      "osm_id": 4173227322
+    },
+    {
+      "name": "Via ferrada de Sant Vicenç d'Enclar",
+      "lat": 42.495396,
+      "lon": 1.495505,
+      "fame_score": 1,
+      "categories": [
+        "tourism=attraction"
+      ],
+      "osm_type": "node",
+      "osm_id": 4235152216
+    },
+    {
+      "name": "Biblioteca Publica del Govern",
+      "lat": 42.505665,
+      "lon": 1.523154,
+      "fame_score": 1,
+      "name_es": "Biblioteca Publica del Gobierno",
+      "categories": [
+        "amenity=library"
+      ],
+      "osm_type": "node",
+      "osm_id": 4874445631
+    },
+    {
+      "name": "Dr josé Rizal",
+      "lat": 42.506097,
+      "lon": 1.525662,
+      "fame_score": 1,
+      "categories": [
+        "tourism=artwork"
+      ],
+      "osm_type": "node",
+      "osm_id": 5734184043
+    },
+    {
+      "name": "Homenatge a l'emigrant",
+      "lat": 42.506805,
+      "lon": 1.523118,
+      "fame_score": 1,
+      "name_ca": "Homenatge a l'emigrant",
+      "categories": [
+        "historic=monument"
+      ],
+      "osm_type": "node",
+      "osm_id": 5734220253
+    },
+    {
+      "name": "Estripagecs",
+      "lat": 42.62285,
+      "lon": 1.5533,
+      "fame_score": 1,
+      "categories": [
+        "tourism=artwork"
+      ],
+      "osm_type": "node",
+      "osm_id": 5734220433
+    },
+    {
+      "name": "Jaume Plensa",
+      "lat": 42.506294,
+      "lon": 1.520969,
+      "fame_score": 1,
+      "categories": [
+        "tourism=artwork"
+      ],
+      "osm_type": "node",
+      "osm_id": 5734220824
+    },
+    {
+      "name": "Set Poetes",
+      "lat": 42.506302,
+      "lon": 1.521118,
+      "fame_score": 1,
+      "categories": [
+        "tourism=artwork"
+      ],
+      "osm_type": "node",
+      "osm_id": 5734236541
+    },
+    {
+      "name": "Llibreria comunal d'Escaldes",
+      "lat": 42.508796,
+      "lon": 1.540947,
+      "fame_score": 1,
+      "name_ca": "Llibreria comunal d'Escaldes",
+      "categories": [
+        "amenity=library"
+      ],
+      "osm_type": "node",
+      "osm_id": 5825699086
+    },
+    {
+      "name": "Pont de Paris",
+      "lat": 42.509241,
+      "lon": 1.53065,
+      "fame_score": 1,
+      "categories": [
+        "tourism=attraction"
+      ],
+      "osm_type": "node",
+      "osm_id": 5825699087
+    },
+    {
+      "name": "Mirador de la Roca de la Sabina",
+      "lat": 42.572332,
+      "lon": 1.473391,
+      "fame_score": 1,
+      "categories": [
+        "tourism=viewpoint"
+      ],
+      "osm_type": "node",
+      "osm_id": 6573395912
+    },
+    {
+      "name": "Família Jordino",
+      "lat": 42.594543,
+      "lon": 1.528222,
+      "fame_score": 1,
+      "categories": [
+        "tourism=artwork"
+      ],
+      "osm_type": "node",
+      "osm_id": 6641688791
+    },
+    {
+      "name": "Pont de pedra i ciment amb homes de bronze i granit",
+      "lat": 42.594928,
+      "lon": 1.527645,
+      "fame_score": 1,
+      "categories": [
+        "tourism=artwork"
+      ],
+      "osm_type": "node",
+      "osm_id": 6641688994
+    },
+    {
+      "name": "Gran carro de Ferro i Pic",
+      "lat": 42.59422,
+      "lon": 1.527376,
+      "fame_score": 1,
+      "categories": [
+        "tourism=artwork"
+      ],
+      "osm_type": "node",
+      "osm_id": 6641688995
+    },
+    {
+      "name": "A casa da terra e do fogo",
+      "lat": 42.592371,
+      "lon": 1.52723,
+      "fame_score": 1,
+      "categories": [
+        "tourism=artwork"
+      ],
+      "osm_type": "node",
+      "osm_id": 6641689088
+    },
+    {
+      "name": "L'homme-de-fer-taupe-qui-chemine",
+      "lat": 42.591924,
+      "lon": 1.526958,
+      "fame_score": 1,
+      "categories": [
+        "tourism=artwork"
+      ],
+      "osm_type": "node",
+      "osm_id": 6641689292
+    },
+    {
+      "name": "Terra, ferro, aigua i foc",
+      "lat": 42.591362,
+      "lon": 1.52625,
+      "fame_score": 1,
+      "categories": [
+        "tourism=artwork"
+      ],
+      "osm_type": "node",
+      "osm_id": 6641689293
+    },
+    {
+      "name": "Coll de la Botella",
+      "lat": 42.551804,
+      "lon": 1.454506,
+      "fame_score": 1,
+      "categories": [
+        "tourism=viewpoint"
+      ],
+      "osm_type": "node",
+      "osm_id": 6642714846
+    },
+    {
+      "name": "Mina de Llorts",
+      "lat": 42.59956,
+      "lon": 1.532425,
+      "fame_score": 1,
+      "categories": [
+        "tourism=museum"
+      ],
+      "osm_type": "node",
+      "osm_id": 6657240115
+    },
+    {
+      "name": "Sagrat Cor de Jesús",
+      "lat": 42.436141,
+      "lon": 1.473465,
+      "fame_score": 1,
+      "name_ca": "Sagrat Cor de Jesús",
+      "categories": [
+        "amenity=place_of_worship",
+        "building=wayside_shrine"
+      ],
+      "year": "08/1963",
+      "religion": "christian",
+      "denomination": "roman_catholic",
+      "osm_type": "node",
+      "osm_id": 6733504643
+    },
+    {
+      "name": "Grau de la Llosa",
+      "lat": 42.624381,
+      "lon": 1.554943,
+      "fame_score": 1,
+      "categories": [
+        "tourism=viewpoint"
+      ],
+      "osm_type": "node",
+      "osm_id": 7022030446
+    },
+    {
+      "name": "Mirador del circuit de les fonts",
+      "lat": 42.514086,
+      "lon": 1.567092,
+      "fame_score": 1,
+      "categories": [
+        "tourism=viewpoint"
+      ],
+      "osm_type": "node",
+      "osm_id": 7775608986
+    },
+    {
+      "name": "Via ferrada Coma d'Erts",
+      "lat": 42.56188,
+      "lon": 1.492999,
+      "fame_score": 1,
+      "categories": [
+        "tourism=attraction"
+      ],
+      "osm_type": "node",
+      "osm_id": 7796359015
+    },
+    {
+      "name": "Mirador del Roc dels Senders",
+      "lat": 42.502328,
+      "lon": 1.523478,
+      "fame_score": 1,
+      "categories": [
+        "tourism=viewpoint"
+      ],
+      "osm_type": "node",
+      "osm_id": 9019115338
+    },
+    {
+      "name": "Mirador del Bosc Negre",
+      "lat": 42.492294,
+      "lon": 1.52546,
+      "fame_score": 1,
+      "categories": [
+        "tourism=viewpoint"
+      ],
+      "osm_type": "node",
+      "osm_id": 9019115340
+    },
+    {
+      "name": "Dino de la parroquia de Ordino (Tamarro)",
+      "lat": 42.624703,
+      "lon": 1.526701,
+      "fame_score": 1,
+      "categories": [
+        "tourism=artwork"
+      ],
+      "osm_type": "node",
+      "osm_id": 9028650867
+    },
+    {
+      "name": "Furgoneta VW T1",
+      "lat": 42.471896,
+      "lon": 1.543758,
+      "fame_score": 1,
+      "categories": [
+        "tourism=attraction"
+      ],
+      "osm_type": "node",
+      "osm_id": 9127698255
+    },
+    {
+      "name": "Pica Romana 1727 m",
+      "lat": 42.48429,
+      "lon": 1.51006,
+      "fame_score": 1,
+      "categories": [
+        "tourism=viewpoint"
+      ],
+      "osm_type": "node",
+      "osm_id": 9202663227
+    },
+    {
+      "name": "Mirador del Roc de Solobre",
+      "lat": 42.49335,
+      "lon": 1.510515,
+      "fame_score": 1,
+      "categories": [
+        "tourism=viewpoint"
+      ],
+      "osm_type": "node",
+      "osm_id": 9202663229
+    },
+    {
+      "name": "Angel del ttapezi",
+      "lat": 42.506972,
+      "lon": 1.521089,
+      "fame_score": 1,
+      "categories": [
+        "tourism=artwork"
+      ],
+      "osm_type": "node",
+      "osm_id": 9203238017
+    },
+    {
+      "name": "Nilo (Tamarro)",
+      "lat": 42.563693,
+      "lon": 1.574725,
+      "fame_score": 1,
+      "categories": [
+        "tourism=artwork"
+      ],
+      "osm_type": "node",
+      "osm_id": 9208010524
+    },
+    {
+      "name": "Mirador 1",
+      "lat": 42.568341,
+      "lon": 1.589435,
+      "fame_score": 1,
+      "categories": [
+        "tourism=viewpoint"
+      ],
+      "osm_type": "node",
+      "osm_id": 9208013421
+    },
+    {
+      "name": "Andy (Tamarro)",
+      "lat": 42.491491,
+      "lon": 1.525963,
+      "fame_score": 1,
+      "categories": [
+        "tourism=artwork"
+      ],
+      "osm_type": "node",
+      "osm_id": 9214972725
+    },
+    {
+      "name": "Zona d'esports de l'Hotel Coma",
+      "lat": 42.555422,
+      "lon": 1.535265,
+      "fame_score": 1,
+      "name_ca": "Zona d'esports de l'Hotel Coma",
+      "categories": [
+        "leisure=sports_centre"
+      ],
+      "osm_type": "node",
+      "osm_id": 9721845807
+    },
+    {
+      "name": "Piscines Comunals",
+      "lat": 42.510331,
+      "lon": 1.541966,
+      "fame_score": 1,
+      "name_ca": "Piscines Comunals",
+      "categories": [
+        "leisure=sports_centre"
+      ],
+      "osm_type": "node",
+      "osm_id": 9737082995
+    },
+    {
+      "name": "Pont Tibetà de Canillo",
+      "lat": 42.576704,
+      "lon": 1.610302,
+      "fame_score": 1,
+      "categories": [
+        "tourism=attraction"
+      ],
+      "osm_type": "node",
+      "osm_id": 9848769927
+    },
+    {
+      "name": "Tamarro (Caldes)",
+      "lat": 42.514184,
+      "lon": 1.567641,
+      "fame_score": 1,
+      "categories": [
+        "tourism=attraction"
+      ],
+      "osm_type": "node",
+      "osm_id": 9856957777
+    },
+    {
+      "name": "Cap de Rep",
+      "lat": 42.543832,
+      "lon": 1.609917,
+      "fame_score": 1,
+      "categories": [
+        "tourism=viewpoint"
+      ],
+      "description": "Cim i mirador del Cap de Rep amb taula d'orientació i dos troncs amb forma de banc",
+      "osm_type": "node",
+      "osm_id": 9933639346
+    },
+    {
+      "name": "Mirador Solanes de la Peguera",
+      "lat": 42.458521,
+      "lon": 1.516094,
+      "fame_score": 1,
+      "categories": [
+        "tourism=viewpoint"
+      ],
+      "osm_type": "node",
+      "osm_id": 10089764717
+    },
+    {
+      "name": "Port de Cabús",
+      "lat": 42.546523,
+      "lon": 1.419953,
+      "fame_score": 1,
+      "categories": [
+        "tourism=viewpoint"
+      ],
+      "osm_type": "node",
+      "osm_id": 10089764818
+    },
+    {
+      "name": "Macarulla",
+      "lat": 42.537899,
+      "lon": 1.479861,
+      "fame_score": 1,
+      "categories": [
+        "tourism=attraction"
+      ],
+      "osm_type": "node",
+      "osm_id": 10089764917
+    },
+    {
+      "name": "Mirador  Camp Ramonet",
+      "lat": 42.470012,
+      "lon": 1.552313,
+      "fame_score": 1,
+      "categories": [
+        "tourism=viewpoint"
+      ],
+      "osm_type": "node",
+      "osm_id": 10096400486
+    },
+    {
+      "name": "Mirador d'Ordino",
+      "lat": 42.549475,
+      "lon": 1.540947,
+      "fame_score": 1,
+      "categories": [
+        "tourism=viewpoint"
+      ],
+      "osm_type": "node",
+      "osm_id": 10266808809
+    },
+    {
+      "name": "Museu de la Moto",
+      "lat": 42.565871,
+      "lon": 1.601206,
+      "fame_score": 1,
+      "categories": [
+        "tourism=museum"
+      ],
+      "osm_type": "node",
+      "osm_id": 10862649127
+    },
+    {
+      "name": "Àngel precibernètic",
+      "lat": 42.474683,
+      "lon": 1.490263,
+      "fame_score": 1,
+      "categories": [
+        "tourism=artwork"
+      ],
+      "osm_type": "node",
+      "osm_id": 10900417705
+    },
+    {
+      "name": "En memòria de les víctimes del Covid",
+      "lat": 42.461474,
+      "lon": 1.490029,
+      "fame_score": 1,
+      "categories": [
+        "historic=memorial",
+        "tourism=artwork"
+      ],
+      "osm_type": "node",
+      "osm_id": 10900417814
+    },
+    {
+      "name": "Caps",
+      "lat": 42.508738,
+      "lon": 1.539573,
+      "fame_score": 1,
+      "categories": [
+        "tourism=artwork"
+      ],
+      "osm_type": "node",
+      "osm_id": 10903381605
+    },
+    {
+      "name": "Jaume Plensa",
+      "lat": 42.506315,
+      "lon": 1.523159,
+      "fame_score": 1,
+      "categories": [
+        "tourism=artwork"
+      ],
+      "osm_type": "node",
+      "osm_id": 10903381707
+    },
+    {
+      "name": "Agusti Roque",
+      "lat": 42.506203,
+      "lon": 1.523323,
+      "fame_score": 1,
+      "categories": [
+        "tourism=artwork"
+      ],
+      "osm_type": "node",
+      "osm_id": 10903381708
+    },
+    {
+      "name": "Gaset Flinch",
+      "lat": 42.506161,
+      "lon": 1.523097,
+      "fame_score": 1,
+      "categories": [
+        "tourism=artwork"
+      ],
+      "osm_type": "node",
+      "osm_id": 10903381709
+    },
+    {
+      "name": "Miquel Angel Planas Roselló",
+      "lat": 42.506074,
+      "lon": 1.523278,
+      "fame_score": 1,
+      "categories": [
+        "tourism=artwork"
+      ],
+      "osm_type": "node",
+      "osm_id": 10903381807
+    },
+    {
+      "name": "Bici Lab Andorra",
+      "lat": 42.506249,
+      "lon": 1.521187,
+      "fame_score": 1,
+      "categories": [
+        "tourism=museum"
+      ],
+      "osm_type": "node",
+      "osm_id": 10903381808
+    },
+    {
+      "name": "mural",
+      "lat": 42.507959,
+      "lon": 1.521121,
+      "fame_score": 1,
+      "categories": [
+        "tourism=artwork"
+      ],
+      "osm_type": "node",
+      "osm_id": 10903381810
+    },
+    {
+      "name": "Manolo Valdes",
+      "lat": 42.506319,
+      "lon": 1.523276,
+      "fame_score": 1,
+      "categories": [
+        "tourism=artwork"
+      ],
+      "osm_type": "node",
+      "osm_id": 10903381905
+    },
+    {
+      "name": "Samuel Salcedo",
+      "lat": 42.506063,
+      "lon": 1.523156,
+      "fame_score": 1,
+      "categories": [
+        "tourism=artwork"
+      ],
+      "osm_type": "node",
+      "osm_id": 10903382005
+    },
+    {
+      "name": "Miquel Barceló Artigues",
+      "lat": 42.506205,
+      "lon": 1.523192,
+      "fame_score": 1,
+      "categories": [
+        "tourism=artwork"
+      ],
+      "osm_type": "node",
+      "osm_id": 10903382006
+    },
+    {
+      "name": "escultura",
+      "lat": 42.615154,
+      "lon": 1.537555,
+      "fame_score": 1,
+      "categories": [
+        "tourism=artwork"
+      ],
+      "osm_type": "node",
+      "osm_id": 10906028806
+    },
+    {
+      "name": "El pes de la llum",
+      "lat": 42.549068,
+      "lon": 1.522963,
+      "fame_score": 1,
+      "categories": [
+        "tourism=artwork"
+      ],
+      "osm_type": "node",
+      "osm_id": 10908149107
+    },
+    {
+      "name": "Manel Vidal Torrens",
+      "lat": 42.509602,
+      "lon": 1.540441,
+      "fame_score": 1,
+      "categories": [
+        "tourism=artwork"
+      ],
+      "osm_type": "node",
+      "osm_id": 10908160812
+    },
+    {
+      "name": "Cruz de Meritxell",
+      "lat": 42.557215,
+      "lon": 1.591693,
+      "fame_score": 1,
+      "categories": [
+        "historic=monument"
+      ],
+      "osm_type": "node",
+      "osm_id": 11121893405
+    },
+    {
+      "name": "Oratori",
+      "lat": 42.555881,
+      "lon": 1.591646,
+      "fame_score": 1,
+      "categories": [
+        "historic=monument"
+      ],
+      "osm_type": "node",
+      "osm_id": 11121902005
+    },
+    {
+      "name": "Casa de tots",
+      "lat": 42.492111,
+      "lon": 1.525337,
+      "fame_score": 1,
+      "categories": [
+        "tourism=artwork"
+      ],
+      "osm_type": "node",
+      "osm_id": 11168130582
+    },
+    {
+      "name": "Enko (Tamarro)",
+      "lat": 42.53461,
+      "lon": 1.618118,
+      "fame_score": 1,
+      "categories": [
+        "tourism=artwork"
+      ],
+      "osm_type": "node",
+      "osm_id": 11168170148
+    },
+    {
+      "name": "Pont Tibetà d’Encamp",
+      "lat": 42.537875,
+      "lon": 1.633095,
+      "fame_score": 1,
+      "categories": [
+        "tourism=attraction"
+      ],
+      "osm_type": "node",
+      "osm_id": 11757478469
+    },
+    {
+      "name": "Tancerze. 100-lecie reformy",
+      "lat": 42.50648,
+      "lon": 1.520517,
+      "fame_score": 1,
+      "categories": [
+        "historic=memorial"
+      ],
+      "osm_type": "node",
+      "osm_id": 12551062386
+    },
+    {
+      "name": "700-lecie podpisania paktu",
+      "lat": 42.506495,
+      "lon": 1.520448,
+      "fame_score": 1,
+      "categories": [
+        "historic=memorial"
+      ],
+      "osm_type": "node",
+      "osm_id": 12551086089
+    },
+    {
+      "name": "Bolet gegant",
+      "lat": 42.558023,
+      "lon": 1.576732,
+      "fame_score": 1,
+      "categories": [
+        "tourism=attraction"
+      ],
+      "osm_type": "node",
+      "osm_id": 13120786101
+    },
+    {
+      "name": "Justí Guitart",
+      "lat": 42.507179,
+      "lon": 1.52191,
+      "fame_score": 1,
+      "categories": [
+        "tourism=artwork"
+      ],
+      "osm_type": "node",
+      "osm_id": 13184980079
+    },
+    {
+      "name": "Olympia Centre",
+      "lat": 42.541624,
+      "lon": 1.73304,
+      "fame_score": 1,
+      "name_ca": "Olympia Centre",
+      "categories": [
+        "building=yes"
+      ],
+      "address": "Carrer de Catalunya, 11",
+      "osm_type": "way",
+      "osm_id": 54858980
+    },
+    {
+      "name": "Centre Esportiu i Sociocultural",
+      "lat": 42.544729,
+      "lon": 1.733278,
+      "fame_score": 1,
+      "name_ca": "Centre Esportiu i Sociocultural",
+      "categories": [
+        "building=public",
+        "leisure=sports_centre"
+      ],
+      "address": "Pas de la Casa",
+      "osm_type": "way",
+      "osm_id": 54858982
+    },
+    {
+      "name": "Comú d'Encamp",
+      "lat": 42.535947,
+      "lon": 1.583681,
+      "fame_score": 1,
+      "name_ca": "Comú d'Encamp",
+      "categories": [
+        "amenity=townhall",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 183060297
+    },
+    {
+      "name": "Museo Nacional de la Automòbil",
+      "lat": 42.533182,
+      "lon": 1.577932,
+      "fame_score": 1,
+      "categories": [
+        "tourism=museum",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 183087896
+    },
+    {
+      "name": "Llac i Cel",
+      "lat": 42.522182,
+      "lon": 1.572447,
+      "fame_score": 1,
+      "name_ca": "Llac i Cel",
+      "categories": [
+        "amenity=restaurant",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 191587690
+    },
+    {
+      "name": "Husa Imperial Hotel",
+      "lat": 42.46949,
+      "lon": 1.492598,
+      "fame_score": 1,
+      "categories": [
+        "tourism=hotel",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 194525694
+    },
+    {
+      "name": "Comú de Sant Julià de Lòria",
+      "lat": 42.468951,
+      "lon": 1.492538,
+      "fame_score": 1,
+      "name_ca": "Comú de Sant Julià de Lòria",
+      "categories": [
+        "amenity=townhall",
+        "building=yes"
+      ],
+      "address": "Av. Rocafort, Sant Julià de Lòria",
+      "osm_type": "way",
+      "osm_id": 194525696
+    },
+    {
+      "name": "El Pasture",
+      "lat": 42.509485,
+      "lon": 1.530111,
+      "fame_score": 1,
+      "name_ca": "El Pasture",
+      "categories": [
+        "amenity=parking",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 194554948
+    },
+    {
+      "name": "Sant Bartomeu",
+      "lat": 42.466808,
+      "lon": 1.492814,
+      "fame_score": 1,
+      "name_ca": "Sant Bartomeu",
+      "categories": [
+        "amenity=place_of_worship",
+        "building=chapel"
+      ],
+      "religion": "christian",
+      "osm_type": "way",
+      "osm_id": 202595244
+    },
+    {
+      "name": "Mare de Déu de les Neus",
+      "lat": 42.472272,
+      "lon": 1.511278,
+      "fame_score": 1,
+      "name_ca": "Mare de Déu de les Neus",
+      "categories": [
+        "amenity=place_of_worship",
+        "building=church"
+      ],
+      "religion": "christian",
+      "osm_type": "way",
+      "osm_id": 202595652
+    },
+    {
+      "name": "Sant Romà d'Auvinyà",
+      "lat": 42.453327,
+      "lon": 1.496424,
+      "fame_score": 1,
+      "categories": [
+        "amenity=place_of_worship",
+        "building=chapel"
+      ],
+      "wikidata": "Q15081889",
+      "religion": "christian",
+      "denomination": "roman_catholic",
+      "osm_type": "way",
+      "osm_id": 202595952
+    },
+    {
+      "name": "Sant Esteve de Mas d'Alins",
+      "lat": 42.440827,
+      "lon": 1.449836,
+      "fame_score": 1,
+      "name_ca": "Sant Esteve de Mas d'Alins",
+      "categories": [
+        "amenity=place_of_worship",
+        "building=yes"
+      ],
+      "religion": "christian",
+      "osm_type": "way",
+      "osm_id": 202597316
+    },
+    {
+      "name": "Centre d'Interpretació de l'Agua i del Madriu (CIAM)",
+      "lat": 42.509187,
+      "lon": 1.544035,
+      "fame_score": 1,
+      "categories": [
+        "tourism=gallery",
+        "building=yes"
+      ],
+      "address": "Avinguda Carlemany, 8, Escaldes-Engordany",
+      "osm_type": "way",
+      "osm_id": 202606635
+    },
+    {
+      "name": "Centre d'Interpretació Farga Rossell",
+      "lat": 42.546078,
+      "lon": 1.520995,
+      "fame_score": 1,
+      "name_ca": "Centre d'Interpretació Farga Rossell",
+      "categories": [
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 202614659
+    },
+    {
+      "name": "Centre d'Interpretació Andorra Romàntica",
+      "lat": 42.545801,
+      "lon": 1.475182,
+      "fame_score": 1,
+      "name_ca": "Centre d'Interpretació Andorra Romàntica",
+      "categories": [
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 202614933
+    },
+    {
+      "name": "Camp de Tir",
+      "lat": 42.537585,
+      "lon": 1.476503,
+      "fame_score": 1,
+      "name_ca": "Font de Besurt",
+      "categories": [
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 202614934
+    },
+    {
+      "name": "Sant Marc i Santa Maria",
+      "lat": 42.532955,
+      "lon": 1.572066,
+      "fame_score": 1,
+      "name_ca": "Sant Marc i Santa Maria",
+      "categories": [
+        "amenity=place_of_worship",
+        "building=church"
+      ],
+      "religion": "christian",
+      "osm_type": "way",
+      "osm_id": 202617766
+    },
+    {
+      "name": "Molí d'en Guillem",
+      "lat": 42.534672,
+      "lon": 1.584012,
+      "fame_score": 1,
+      "name_ca": "Molí d'en Guillem",
+      "categories": [
+        "building=yes",
+        "man_made=watermill"
+      ],
+      "osm_type": "way",
+      "osm_id": 202617903
+    },
+    {
+      "name": "Església de Sant Jaume dels Cortals",
+      "lat": 42.53403,
+      "lon": 1.605408,
+      "fame_score": 1,
+      "name_ca": "Església de Sant Jaume dels Cortals",
+      "categories": [
+        "amenity=place_of_worship",
+        "building=church"
+      ],
+      "religion": "christian",
+      "denomination": "catholic",
+      "osm_type": "way",
+      "osm_id": 202618486
+    },
+    {
+      "name": "Ermita de Sant Jaume",
+      "lat": 42.580922,
+      "lon": 1.639009,
+      "fame_score": 1,
+      "name_ca": "Ermita de Sant Jaume",
+      "categories": [
+        "amenity=place_of_worship",
+        "building=yes"
+      ],
+      "religion": "christian",
+      "denomination": "catholic",
+      "osm_type": "way",
+      "osm_id": 202636054
+    },
+    {
+      "name": "Museu de la Miniatura",
+      "lat": 42.555334,
+      "lon": 1.533351,
+      "fame_score": 1,
+      "name_ca": "Museu de la Miniatura",
+      "categories": [
+        "building=yes"
+      ],
+      "address": "Ordino",
+      "osm_type": "way",
+      "osm_id": 202638172
+    },
+    {
+      "name": "Museu Iconogràfic Sant Jordi i del Cristianisme",
+      "lat": 42.555386,
+      "lon": 1.533428,
+      "fame_score": 1,
+      "name_ca": "Museu Iconogràfic Sant Jordi i del Cristianisme",
+      "categories": [
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 202638378
+    },
+    {
+      "name": "Cortal de la Plana",
+      "lat": 42.493094,
+      "lon": 1.538508,
+      "fame_score": 1,
+      "name_ca": "Cortal de la Plana",
+      "categories": [
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 208604301
+    },
+    {
+      "name": "Comú de Canillo",
+      "lat": 42.566473,
+      "lon": 1.601271,
+      "fame_score": 1,
+      "name_ca": "Comú de Canillo",
+      "categories": [
+        "amenity=townhall",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 219555998
+    },
+    {
+      "name": "Pla de la Clot",
+      "lat": 42.530397,
+      "lon": 1.473625,
+      "fame_score": 1,
+      "name_ca": "Pla de la Clot",
+      "categories": [
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 225279805
+    },
+    {
+      "name": "Comú d'Escaldes-Engordany",
+      "lat": 42.510773,
+      "lon": 1.539085,
+      "fame_score": 1,
+      "name_ca": "Comú d'Escaldes-Engordany",
+      "categories": [
+        "amenity=townhall",
+        "building=yes"
+      ],
+      "address": "Parc de la Mola, 6",
+      "osm_type": "way",
+      "osm_id": 247994523
+    },
+    {
+      "name": "Parc de la Mola",
+      "lat": 42.511025,
+      "lon": 1.539022,
+      "fame_score": 1,
+      "name_ca": "Parc de la Mola",
+      "categories": [
+        "leisure=park"
+      ],
+      "osm_type": "way",
+      "osm_id": 247994524
+    },
+    {
+      "name": "Viena",
+      "lat": 42.495618,
+      "lon": 1.50503,
+      "fame_score": 1,
+      "name_ca": "Viena",
+      "categories": [
+        "amenity=fast_food",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 275123446
+    },
+    {
+      "name": "Església Sant Pere del Pas de la Casa",
+      "lat": 42.5434,
+      "lon": 1.734165,
+      "fame_score": 1,
+      "name_ca": "Església Sant Pere del Pas de la Casa",
+      "categories": [
+        "amenity=place_of_worship",
+        "building=yes"
+      ],
+      "address": "Pas de la Casa",
+      "religion": "christian",
+      "denomination": "catholic",
+      "osm_type": "way",
+      "osm_id": 284398569
+    },
+    {
+      "name": "Hotel Iglú Grandvalira",
+      "lat": 42.527198,
+      "lon": 1.712161,
+      "fame_score": 1,
+      "categories": [
+        "tourism=hotel",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 291327979
+    },
+    {
+      "name": "Parc Prat Gran",
+      "lat": 42.548976,
+      "lon": 1.511944,
+      "fame_score": 1,
+      "name_ca": "Parc Prat Gran",
+      "categories": [
+        "leisure=park"
+      ],
+      "osm_type": "way",
+      "osm_id": 293095351
+    },
+    {
+      "name": "Restaurant del Prat Gran",
+      "lat": 42.549293,
+      "lon": 1.511911,
+      "fame_score": 1,
+      "name_ca": "Restaurant del Prat Gran",
+      "categories": [
+        "amenity=restaurant",
+        "building=yes"
+      ],
+      "address": "Avinguda del Ravell, 9, La Massana",
+      "osm_type": "way",
+      "osm_id": 293096888
+    },
+    {
+      "name": "ELF",
+      "lat": 42.550071,
+      "lon": 1.511088,
+      "fame_score": 1,
+      "name_ca": "ELF",
+      "categories": [
+        "amenity=fuel",
+        "building=yes"
+      ],
+      "address": "Avinguda del Ravell, La Massana",
+      "osm_type": "way",
+      "osm_id": 293097942
+    },
+    {
+      "name": "St. Gothard",
+      "lat": 42.567167,
+      "lon": 1.489362,
+      "fame_score": 1,
+      "categories": [
+        "tourism=hotel",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 298163333
+    },
+    {
+      "name": "13,5° Winebar Andorra",
+      "lat": 42.506906,
+      "lon": 1.525681,
+      "fame_score": 1,
+      "name_ca": "13,5° Winebar Andorra",
+      "categories": [
+        "amenity=bar",
+        "building=yes"
+      ],
+      "address": "Avinguda Prat de la Creu, 29-39",
+      "osm_type": "way",
+      "osm_id": 305454450
+    },
+    {
+      "name": "L'Orri",
+      "lat": 42.506798,
+      "lon": 1.525042,
+      "fame_score": 1,
+      "name_ca": "L'Orri",
+      "categories": [
+        "amenity=restaurant",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 305459067
+    },
+    {
+      "name": "AFM - Andorra Free Market",
+      "lat": 42.505429,
+      "lon": 1.526617,
+      "fame_score": 1,
+      "name_es": "AFM - Mercado Libre de Andorra",
+      "categories": [
+        "building=yes"
+      ],
+      "address": "Avinguda de Tarragona, 50, Andorra la Vella",
+      "osm_type": "way",
+      "osm_id": 319989340
+    },
+    {
+      "name": "McDonald's",
+      "lat": 42.505099,
+      "lon": 1.527987,
+      "fame_score": 1,
+      "name_ca": "McDonald's",
+      "categories": [
+        "amenity=fast_food",
+        "building=yes"
+      ],
+      "address": "Avinguda de Tarragona, 49, Andorra la Vella",
+      "osm_type": "way",
+      "osm_id": 319995592
+    },
+    {
+      "name": "Apartahotel els Meners",
+      "lat": 42.56961,
+      "lon": 1.605341,
+      "fame_score": 1,
+      "categories": [
+        "tourism=motel",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 330823761
+    },
+    {
+      "name": "Bombers",
+      "lat": 42.569435,
+      "lon": 1.604492,
+      "fame_score": 1,
+      "name_ca": "Bombers",
+      "categories": [
+        "amenity=fire_station",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 330823762
+    },
+    {
+      "name": "Circuit de Grandvalira",
+      "lat": 42.538415,
+      "lon": 1.720626,
+      "fame_score": 1,
+      "name_ca": "Circuit de Grandvalira",
+      "categories": [
+        "leisure=sports_centre"
+      ],
+      "osm_type": "way",
+      "osm_id": 330830540
+    },
+    {
+      "name": "oficina d'informatió i turismo de Sant Julià de Lòria",
+      "lat": 42.466573,
+      "lon": 1.492609,
+      "fame_score": 1,
+      "categories": [
+        "tourism=information",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 338806446
+    },
+    {
+      "name": "El Piolet",
+      "lat": 42.525874,
+      "lon": 1.698251,
+      "fame_score": 1,
+      "name_ca": "El Piolet",
+      "categories": [
+        "amenity=restaurant",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 358085292
+    },
+    {
+      "name": "Sucarà",
+      "lat": 42.57411,
+      "lon": 1.518545,
+      "fame_score": 1,
+      "name_ca": "Sucarà",
+      "categories": [
+        "building=yes"
+      ],
+      "address": "La Cortinada",
+      "osm_type": "way",
+      "osm_id": 360764143
+    },
+    {
+      "name": "Hotel Mu Plaza",
+      "lat": 42.573243,
+      "lon": 1.518363,
+      "fame_score": 1,
+      "categories": [
+        "tourism=hotel",
+        "building=yes"
+      ],
+      "address": "La Cortinada",
+      "osm_type": "way",
+      "osm_id": 360764685
+    },
+    {
+      "name": "El Saler",
+      "lat": 42.581515,
+      "lon": 1.639002,
+      "fame_score": 1,
+      "name_ca": "El Saler",
+      "categories": [
+        "amenity=restaurant",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 360845613
+    },
+    {
+      "name": "la Dama del Llac",
+      "lat": 42.522496,
+      "lon": 1.571917,
+      "fame_score": 1,
+      "name_ca": "la Dama del Llac",
+      "categories": [
+        "amenity=restaurant",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 361532815
+    },
+    {
+      "name": "Caves Manacor",
+      "lat": 42.579181,
+      "lon": 1.641958,
+      "fame_score": 1,
+      "name_ca": "Caves Manacor",
+      "categories": [
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 365957881
+    },
+    {
+      "name": "RM",
+      "lat": 42.579312,
+      "lon": 1.642428,
+      "fame_score": 1,
+      "name_ca": "RM",
+      "categories": [
+        "amenity=restaurant",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 365957882
+    },
+    {
+      "name": "Perfumeria Andorra",
+      "lat": 42.578961,
+      "lon": 1.641105,
+      "fame_score": 1,
+      "name_ca": "Perfumeria Andorra",
+      "categories": [
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 365957962
+    },
+    {
+      "name": "Ascensor",
+      "lat": 42.581158,
+      "lon": 1.63901,
+      "fame_score": 1,
+      "name_ca": "Ascensor",
+      "categories": [
+        "building=yes"
+      ],
+      "address": "Ransol",
+      "osm_type": "way",
+      "osm_id": 365958587
+    },
+    {
+      "name": "Bordes de la Mollera",
+      "lat": 42.602254,
+      "lon": 1.519255,
+      "fame_score": 1,
+      "name_ca": "Bordes de la Mollera",
+      "categories": [
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 371072378
+    },
+    {
+      "name": "La Cantina dels Racons",
+      "lat": 42.562325,
+      "lon": 1.590197,
+      "fame_score": 1,
+      "name_ca": "La Cantina dels Racons",
+      "categories": [
+        "amenity=restaurant",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 383732966
+    },
+    {
+      "name": "Vall de Sorteny",
+      "lat": 42.625677,
+      "lon": 1.551882,
+      "fame_score": 1,
+      "categories": [
+        "tourism=information",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 384145831
+    },
+    {
+      "name": "Refugi de Llosada",
+      "lat": 42.548872,
+      "lon": 1.647175,
+      "fame_score": 1,
+      "name_ca": "Refugi de Llosada",
+      "categories": [
+        "amenity=fast_food",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 385225373
+    },
+    {
+      "name": "Vodka Bar",
+      "lat": 42.525198,
+      "lon": 1.697973,
+      "fame_score": 1,
+      "name_ca": "Vodka Bar",
+      "categories": [
+        "amenity=restaurant",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 385230803
+    },
+    {
+      "name": "Restaurant Coll de la Botella",
+      "lat": 42.544757,
+      "lon": 1.45306,
+      "fame_score": 1,
+      "name_ca": "Restaurant Coll de la Botella",
+      "categories": [
+        "amenity=restaurant",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 386175624
+    },
+    {
+      "name": "Cabana",
+      "lat": 42.600834,
+      "lon": 1.469689,
+      "fame_score": 1,
+      "categories": [
+        "amenity=shelter",
+        "building=yes"
+      ],
+      "wikidata": "Q3649137",
+      "osm_type": "way",
+      "osm_id": 387096691
+    },
+    {
+      "name": "la Sangria",
+      "lat": 42.55213,
+      "lon": 1.590304,
+      "fame_score": 1,
+      "name_ca": "la Sangria",
+      "categories": [
+        "amenity=restaurant",
+        "building=yes"
+      ],
+      "address": "Meritxell",
+      "osm_type": "way",
+      "osm_id": 387523518
+    },
+    {
+      "name": "Andorra 2000",
+      "lat": 42.50572,
+      "lon": 1.529257,
+      "fame_score": 1,
+      "name_ca": "Andorra 2000",
+      "categories": [
+        "building=yes"
+      ],
+      "address": "Avinguda de Tarragona, 30",
+      "osm_type": "way",
+      "osm_id": 391178825
+    },
+    {
+      "name": "Sant Martí",
+      "lat": 42.47493,
+      "lon": 1.493539,
+      "fame_score": 1,
+      "name_ca": "Sant Martí",
+      "categories": [
+        "amenity=place_of_worship",
+        "building=yes"
+      ],
+      "religion": "christian",
+      "denomination": "catholic",
+      "osm_type": "way",
+      "osm_id": 392401248
+    },
+    {
+      "name": "Barraca de l'Orri de Rusca",
+      "lat": 42.558672,
+      "lon": 1.697126,
+      "fame_score": 1,
+      "name_ca": "Barraca de l'Orri de Rusca",
+      "categories": [
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 403591119
+    },
+    {
+      "name": "Estació sísmica La Rabassa",
+      "lat": 42.434506,
+      "lon": 1.533734,
+      "fame_score": 1,
+      "name_ca": "Estació sísmica La Rabassa",
+      "categories": [
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 432393037
+    },
+    {
+      "name": "Bordes dels Prats Nous",
+      "lat": 42.584267,
+      "lon": 1.486131,
+      "fame_score": 1,
+      "name_ca": "Bordes dels Prats Nous",
+      "categories": [
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 432400665
+    },
+    {
+      "name": "Molí dels fanals",
+      "lat": 42.53339,
+      "lon": 1.516348,
+      "fame_score": 1,
+      "name_ca": "Molí dels fanals",
+      "categories": [
+        "amenity=restaurant",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 439892189
+    },
+    {
+      "name": "Tot Natura",
+      "lat": 42.499735,
+      "lon": 1.513311,
+      "fame_score": 1,
+      "name_ca": "Tot Natura",
+      "categories": [
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 466972032
+    },
+    {
+      "name": "Prat de les Mates Bloc A",
+      "lat": 42.571439,
+      "lon": 1.520681,
+      "fame_score": 1,
+      "name_ca": "Prat de les Mates Bloc A",
+      "categories": [
+        "building=yes"
+      ],
+      "address": "La Cortinada",
+      "osm_type": "way",
+      "osm_id": 467604668
+    },
+    {
+      "name": "Borda del Pi",
+      "lat": 42.572233,
+      "lon": 1.589661,
+      "fame_score": 1,
+      "name_ca": "Borda del Pi",
+      "categories": [
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 487378456
+    },
+    {
+      "name": "Restaurant El Bon Racó",
+      "lat": 42.495238,
+      "lon": 1.504699,
+      "fame_score": 1,
+      "name_ca": "Restaurant El Bon Racó",
+      "categories": [
+        "amenity=restaurant",
+        "building=yes"
+      ],
+      "address": "Avinguda de Salou, 86, Santa Coloma",
+      "osm_type": "way",
+      "osm_id": 526175490
+    },
+    {
+      "name": "borda de Soler",
+      "lat": 42.584376,
+      "lon": 1.523111,
+      "fame_score": 1,
+      "name_ca": "borda de Soler",
+      "categories": [
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 540461878
+    },
+    {
+      "name": "Molí de Canillo",
+      "lat": 42.567226,
+      "lon": 1.598515,
+      "fame_score": 1,
+      "name_ca": "Molí de Canillo",
+      "categories": [
+        "building=yes",
+        "man_made=watermill"
+      ],
+      "osm_type": "way",
+      "osm_id": 542627595
+    },
+    {
+      "name": "Delgado",
+      "lat": 42.475759,
+      "lon": 1.487354,
+      "fame_score": 1,
+      "name_ca": "Delgado",
+      "categories": [
+        "amenity=restaurant",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 547224463
+    },
+    {
+      "name": "La Quadra",
+      "lat": 42.476976,
+      "lon": 1.488782,
+      "fame_score": 1,
+      "name_ca": "La Quadra",
+      "categories": [
+        "amenity=restaurant",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 547229113
+    },
+    {
+      "name": "Oficina de Turisme d'Encamp - Pas de la Casa",
+      "lat": 42.543993,
+      "lon": 1.734027,
+      "fame_score": 1,
+      "categories": [
+        "tourism=information",
+        "building=yes"
+      ],
+      "address": "Avinguda del Consell General, Pas de la Casa",
+      "osm_type": "way",
+      "osm_id": 551433982
+    },
+    {
+      "name": "Plaça del monument a l'immigrant",
+      "lat": 42.50678,
+      "lon": 1.520275,
+      "fame_score": 1,
+      "name_ca": "Plaça del monument a l'immigrant",
+      "categories": [
+        "leisure=park"
+      ],
+      "osm_type": "way",
+      "osm_id": 553345908
+    },
+    {
+      "name": "La Carbonera",
+      "lat": 42.525052,
+      "lon": 1.581967,
+      "fame_score": 1,
+      "name_ca": "La Carbonera",
+      "categories": [
+        "historic=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 601558408
+    },
+    {
+      "name": "Jardí botànic",
+      "lat": 42.622652,
+      "lon": 1.553677,
+      "fame_score": 1,
+      "name_ca": "Jardí botànic",
+      "categories": [
+        "leisure=garden"
+      ],
+      "osm_type": "way",
+      "osm_id": 604659469
+    },
+    {
+      "name": "Bombers d'Andorra",
+      "lat": 42.545318,
+      "lon": 1.730832,
+      "fame_score": 1,
+      "name_ca": "Bombers d'Andorra",
+      "categories": [
+        "amenity=fire_station",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 631235779
+    },
+    {
+      "name": "Parc de la Gent Gran",
+      "lat": 42.53524,
+      "lon": 1.581141,
+      "fame_score": 1,
+      "name_ca": "Parc de la Gent Gran",
+      "categories": [
+        "leisure=park"
+      ],
+      "osm_type": "way",
+      "osm_id": 664719127
+    },
+    {
+      "name": "Parc de Bombers d'Andorra la Vella",
+      "lat": 42.494431,
+      "lon": 1.499744,
+      "fame_score": 1,
+      "name_ca": "Parc de Bombers d'Andorra la Vella",
+      "categories": [
+        "amenity=fire_station",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 704181819
+    },
+    {
+      "name": "Centre d'Interpretació del Comapedrosa",
+      "lat": 42.573294,
+      "lon": 1.483797,
+      "fame_score": 1,
+      "categories": [
+        "tourism=information",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 706936566
+    },
+    {
+      "name": "Borda del Torner",
+      "lat": 42.581954,
+      "lon": 1.487439,
+      "fame_score": 1,
+      "name_ca": "Borda del Torner",
+      "categories": [
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 706936575
+    },
+    {
+      "name": "El Tarter",
+      "lat": 42.57832,
+      "lon": 1.652937,
+      "fame_score": 1,
+      "name_ca": "El Tarter",
+      "categories": [
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 722149810
+    },
+    {
+      "name": "Supermercat de la posta",
+      "lat": 42.576862,
+      "lon": 1.666338,
+      "fame_score": 1,
+      "name_ca": "Supermercat de la posta",
+      "categories": [
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 761782611
+    },
+    {
+      "name": "Hotel Soldeu Maistre",
+      "lat": 42.577338,
+      "lon": 1.666052,
+      "fame_score": 1,
+      "categories": [
+        "tourism=hotel",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 761782612
+    },
+    {
+      "name": "Apartamentos Prat de les Molleres",
+      "lat": 42.578605,
+      "lon": 1.66347,
+      "fame_score": 1,
+      "categories": [
+        "tourism=apartment",
+        "building=yes"
+      ],
+      "address": "Carretera general, 2, Soldeu",
+      "osm_type": "way",
+      "osm_id": 761820176
+    },
+    {
+      "name": "Edifici Freixe",
+      "lat": 42.553025,
+      "lon": 1.528477,
+      "fame_score": 1,
+      "name_ca": "Edifici Freixe",
+      "categories": [
+        "building=yes"
+      ],
+      "address": "Urbanització Clota Verda, 7, Ordino",
+      "osm_type": "way",
+      "osm_id": 769732226
+    },
+    {
+      "name": "Centre d'Art d'Escaldes-Engordany (CAEE)",
+      "lat": 42.508879,
+      "lon": 1.540991,
+      "fame_score": 1,
+      "categories": [
+        "historic=building",
+        "tourism=museum",
+        "amenity=arts_centre",
+        "building=yes"
+      ],
+      "description": "Historic 3-story granite building with a museum, an art gallery with sculptures & a cultural center.",
+      "address": "Avinguda Carlemany, 30",
+      "osm_type": "way",
+      "osm_id": 968858237
+    },
+    {
+      "name": "La Borda Xica",
+      "lat": 42.545028,
+      "lon": 1.51344,
+      "fame_score": 1,
+      "name_ca": "La Borda Xica",
+      "categories": [
+        "amenity=restaurant",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 974790592
+    },
+    {
+      "name": "Cabane d'orri vétuste",
+      "lat": 42.626337,
+      "lon": 1.523958,
+      "fame_score": 1,
+      "categories": [
+        "tourism=wilderness_hut",
+        "amenity=shelter",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 975650652
+    },
+    {
+      "name": "Centre Cívic i Esportiu d'Ordino",
+      "lat": 42.556635,
+      "lon": 1.532288,
+      "fame_score": 1,
+      "name_ca": "Centre Cívic i Esportiu d'Ordino",
+      "categories": [
+        "building=yes",
+        "leisure=sports_hall"
+      ],
+      "address": "Travessia d'Ordino, 1, Ordino",
+      "osm_type": "way",
+      "osm_id": 995197868
+    },
+    {
+      "name": "Parc de la Serradora",
+      "lat": 42.495629,
+      "lon": 1.503597,
+      "fame_score": 1,
+      "name_ca": "Parc de la Serradora",
+      "categories": [
+        "leisure=park"
+      ],
+      "osm_type": "way",
+      "osm_id": 999581660
+    },
+    {
+      "name": "Caprabo",
+      "lat": 42.54624,
+      "lon": 1.521926,
+      "fame_score": 1,
+      "name_ca": "Compra Be",
+      "categories": [
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 1051803196
+    },
+    {
+      "name": "Parc de l'Anita",
+      "lat": 42.545022,
+      "lon": 1.514534,
+      "fame_score": 1,
+      "name_ca": "Parc de l'Anita",
+      "categories": [
+        "leisure=park"
+      ],
+      "osm_type": "way",
+      "osm_id": 1052359015
+    },
+    {
+      "name": "Farga Rossell",
+      "lat": 42.546016,
+      "lon": 1.520974,
+      "fame_score": 1,
+      "name_ca": "Farga Rossell",
+      "categories": [
+        "leisure=park"
+      ],
+      "osm_type": "way",
+      "osm_id": 1052385463
+    },
+    {
+      "name": "Santa Maria del Fener",
+      "lat": 42.507536,
+      "lon": 1.532769,
+      "fame_score": 1,
+      "name_ca": "Santa Maria del Fener",
+      "categories": [
+        "amenity=place_of_worship",
+        "building=yes"
+      ],
+      "religion": "christian",
+      "osm_type": "way",
+      "osm_id": 1055262765
+    },
+    {
+      "name": "Plaça Lidia Armengol",
+      "lat": 42.506279,
+      "lon": 1.52118,
+      "fame_score": 1,
+      "name_ca": "Plaça Lidia Armengol",
+      "categories": [
+        "leisure=park"
+      ],
+      "osm_type": "way",
+      "osm_id": 1055348303
+    },
+    {
+      "name": "Edifici Diamant",
+      "lat": 42.508414,
+      "lon": 1.525573,
+      "fame_score": 1,
+      "name_ca": "Edifici Diamant",
+      "categories": [
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 1055573169
+    },
+    {
+      "name": "Sindicatura",
+      "lat": 42.50673,
+      "lon": 1.520652,
+      "fame_score": 1,
+      "name_ca": "Sindicatura",
+      "categories": [
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 1055584595
+    },
+    {
+      "name": "Seu de la Justícia",
+      "lat": 42.504265,
+      "lon": 1.519306,
+      "fame_score": 1,
+      "name_ca": "Seu de la Justícia",
+      "categories": [
+        "amenity=courthouse",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 1055599485
+    },
+    {
+      "name": "Centre Esportiu dels Serradells",
+      "lat": 42.49937,
+      "lon": 1.518973,
+      "fame_score": 1,
+      "name_ca": "Centre Esportiu dels Serradells",
+      "categories": [
+        "leisure=sports_centre"
+      ],
+      "osm_type": "way",
+      "osm_id": 1055885286
+    },
+    {
+      "name": "Poliesportiu Comunal d'Andorra la Vella",
+      "lat": 42.500353,
+      "lon": 1.513522,
+      "fame_score": 1,
+      "name_ca": "Poliesportiu Comunal d'Andorra la Vella",
+      "categories": [
+        "building=yes",
+        "leisure=sports_centre"
+      ],
+      "osm_type": "way",
+      "osm_id": 1055932909
+    },
+    {
+      "name": "Hotel Cèrvol",
+      "lat": 42.503117,
+      "lon": 1.513141,
+      "fame_score": 1,
+      "categories": [
+        "tourism=hotel",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 1056147625
+    },
+    {
+      "name": "Parc del Contrapàs",
+      "lat": 42.498245,
+      "lon": 1.502332,
+      "fame_score": 1,
+      "name_ca": "Parc del Contrapàs",
+      "categories": [
+        "leisure=park"
+      ],
+      "osm_type": "way",
+      "osm_id": 1056567123
+    },
+    {
+      "name": "Parc del Cedre",
+      "lat": 42.497755,
+      "lon": 1.501531,
+      "fame_score": 1,
+      "name_ca": "Parc del Cedre",
+      "categories": [
+        "leisure=park"
+      ],
+      "osm_type": "way",
+      "osm_id": 1056567132
+    },
+    {
+      "name": "Parc del Roure",
+      "lat": 42.496678,
+      "lon": 1.501587,
+      "fame_score": 1,
+      "name_ca": "Parc del Roure",
+      "categories": [
+        "leisure=park"
+      ],
+      "osm_type": "way",
+      "osm_id": 1056578245
+    },
+    {
+      "name": "Club de Tennis Santa Coloma",
+      "lat": 42.49364,
+      "lon": 1.499059,
+      "fame_score": 1,
+      "name_ca": "Club de Tenis Santa Coloma",
+      "categories": [
+        "leisure=sports_centre"
+      ],
+      "osm_type": "way",
+      "osm_id": 1056583666
+    },
+    {
+      "name": "Hotel Garden Andorra",
+      "lat": 42.493634,
+      "lon": 1.498577,
+      "fame_score": 1,
+      "categories": [
+        "tourism=hotel",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 1056583669
+    },
+    {
+      "name": "Plaça Francesc Areny Parramón",
+      "lat": 42.543191,
+      "lon": 1.523558,
+      "fame_score": 1,
+      "name_ca": "Plaça Francesc Areny Parramón",
+      "categories": [
+        "leisure=park"
+      ],
+      "osm_type": "way",
+      "osm_id": 1057785788
+    },
+    {
+      "name": "Edifici Prat del Pomer",
+      "lat": 42.55347,
+      "lon": 1.528601,
+      "fame_score": 1,
+      "name_ca": "Edifici Prat del Pomer",
+      "categories": [
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 1057801041
+    },
+    {
+      "name": "Edifici el Noguer I",
+      "lat": 42.553691,
+      "lon": 1.528896,
+      "fame_score": 1,
+      "name_ca": "Edifici el Noguer I",
+      "categories": [
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 1057801045
+    },
+    {
+      "name": "Edifici el Noguer II",
+      "lat": 42.553403,
+      "lon": 1.528817,
+      "fame_score": 1,
+      "name_ca": "Edifici el Noguer II",
+      "categories": [
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 1057801046
+    },
+    {
+      "name": "Edifici Flor de Neu",
+      "lat": 42.553233,
+      "lon": 1.528664,
+      "fame_score": 1,
+      "name_ca": "Edifici Flor de Neu",
+      "categories": [
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 1057801047
+    },
+    {
+      "name": "La Clota",
+      "lat": 42.552514,
+      "lon": 1.528107,
+      "fame_score": 1,
+      "name_ca": "La Clota",
+      "categories": [
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 1057801049
+    },
+    {
+      "name": "Edifici Clota Mirador",
+      "lat": 42.553051,
+      "lon": 1.528762,
+      "fame_score": 1,
+      "name_ca": "Edifici Clota Mirador",
+      "categories": [
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 1057801054
+    },
+    {
+      "name": "Clota Nova Bloc 1",
+      "lat": 42.553237,
+      "lon": 1.529014,
+      "fame_score": 1,
+      "name_ca": "Clota Nova Bloc 1",
+      "categories": [
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 1057801055
+    },
+    {
+      "name": "Clota Nova Bloc 2",
+      "lat": 42.55348,
+      "lon": 1.529174,
+      "fame_score": 1,
+      "name_ca": "Clota Nova Bloc 2",
+      "categories": [
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 1057801056
+    },
+    {
+      "name": "Edifici Elisa",
+      "lat": 42.553772,
+      "lon": 1.529655,
+      "fame_score": 1,
+      "name_ca": "Edifici Elisa",
+      "categories": [
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 1057801059
+    },
+    {
+      "name": "Edifici la Clota Verda 1",
+      "lat": 42.553417,
+      "lon": 1.529424,
+      "fame_score": 1,
+      "name_ca": "Edifici la Clota Verda 1",
+      "categories": [
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 1057801060
+    },
+    {
+      "name": "Edifici la Clota Verda 2",
+      "lat": 42.55306,
+      "lon": 1.529179,
+      "fame_score": 1,
+      "name_ca": "Edifici la Clota Verda 2",
+      "categories": [
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 1057801061
+    },
+    {
+      "name": "Camp d'Esports d'Ordino",
+      "lat": 42.554337,
+      "lon": 1.53108,
+      "fame_score": 1,
+      "name_ca": "Camp d'Esports d'Ordino",
+      "categories": [
+        "leisure=sports_centre"
+      ],
+      "osm_type": "way",
+      "osm_id": 1057801070
+    },
+    {
+      "name": "La Querola d'Ordino",
+      "lat": 42.551978,
+      "lon": 1.535459,
+      "fame_score": 1,
+      "name_ca": "La Querola d'Ordino",
+      "categories": [
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 1057856839
+    },
+    {
+      "name": "Comú d'Ordino",
+      "lat": 42.556668,
+      "lon": 1.53316,
+      "fame_score": 1,
+      "name_ca": "Comú d'Ordino",
+      "categories": [
+        "amenity=townhall",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 1058074043
+    },
+    {
+      "name": "Prat de Call",
+      "lat": 42.556358,
+      "lon": 1.535702,
+      "fame_score": 1,
+      "name_ca": "Prat de Call",
+      "categories": [
+        "leisure=park"
+      ],
+      "osm_type": "way",
+      "osm_id": 1058236499
+    },
+    {
+      "name": "Centre d'Atenció Primària d'Ordino",
+      "lat": 42.55638,
+      "lon": 1.534861,
+      "fame_score": 1,
+      "name_ca": "Centre d'Atenció Primària d'Ordino",
+      "categories": [
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 1058236520
+    },
+    {
+      "name": "Sala La Buna",
+      "lat": 42.556418,
+      "lon": 1.534827,
+      "fame_score": 1,
+      "name_ca": "Sala La Buna",
+      "categories": [
+        "amenity=exhibition_centre",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 1058236521
+    },
+    {
+      "name": "Centre de Congressos d'Ordino",
+      "lat": 42.555847,
+      "lon": 1.536446,
+      "fame_score": 1,
+      "name_ca": "Centre de Congressos d'Ordino",
+      "categories": [
+        "amenity=conference_centre",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 1058240234
+    },
+    {
+      "name": "Plaça de la Covanella",
+      "lat": 42.555298,
+      "lon": 1.537617,
+      "fame_score": 1,
+      "name_ca": "Plaça de la Covanella",
+      "categories": [
+        "leisure=park"
+      ],
+      "osm_type": "way",
+      "osm_id": 1058241575
+    },
+    {
+      "name": "Complex Esportiu Prat del Roure",
+      "lat": 42.510966,
+      "lon": 1.535951,
+      "fame_score": 1,
+      "name_ca": "Complex Esportiu Prat del Roure",
+      "categories": [
+        "leisure=sports_centre"
+      ],
+      "osm_type": "way",
+      "osm_id": 1058470032
+    },
+    {
+      "name": "Zona Esportiva de Sant Jaume",
+      "lat": 42.51301,
+      "lon": 1.542517,
+      "fame_score": 1,
+      "name_ca": "Zona Esportiva de Sant Jaume",
+      "categories": [
+        "leisure=sports_centre"
+      ],
+      "osm_type": "way",
+      "osm_id": 1059844160
+    },
+    {
+      "name": "Cabana Estall Serrer",
+      "lat": 42.484714,
+      "lon": 1.612332,
+      "fame_score": 1,
+      "name_ca": "Cabana Estall Serrer",
+      "categories": [
+        "amenity=shelter",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 1099896353
+    },
+    {
+      "name": "Cabana Estany de la Bova",
+      "lat": 42.490794,
+      "lon": 1.648818,
+      "fame_score": 1,
+      "name_ca": "Cabana Estany de la Bova",
+      "categories": [
+        "amenity=shelter",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 1099926349
+    },
+    {
+      "name": "Hotel Cal Ruiz",
+      "lat": 42.544114,
+      "lon": 1.733196,
+      "fame_score": 1,
+      "categories": [
+        "tourism=hotel",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 1102353408
+    },
+    {
+      "name": "Hotel Galanthus & Spa",
+      "lat": 42.582531,
+      "lon": 1.664155,
+      "fame_score": 1,
+      "categories": [
+        "tourism=hotel",
+        "building=yes"
+      ],
+      "address": "Urb. la Devesa d'Incles, Incles",
+      "osm_type": "way",
+      "osm_id": 1286995488
+    },
+    {
+      "name": "The Boss",
+      "lat": 42.579273,
+      "lon": 1.640896,
+      "fame_score": 1,
+      "name_ca": "The Boss",
+      "categories": [
+        "amenity=restaurant",
+        "building=yes"
+      ],
+      "address": "CG-2, El Tarter",
+      "osm_type": "way",
+      "osm_id": 1288987664
+    },
+    {
+      "name": "Exe Prisma",
+      "lat": 42.508323,
+      "lon": 1.538523,
+      "fame_score": 1,
+      "categories": [
+        "tourism=hotel",
+        "building=yes"
+      ],
+      "address": "Avenida del Fener, 14, Escaldes-Engordany",
+      "osm_type": "way",
+      "osm_id": 1308644776
+    },
+    {
+      "name": "La Font d'Arans",
+      "lat": 42.582348,
+      "lon": 1.519455,
+      "fame_score": 1,
+      "name_ca": "La Font d'Arans",
+      "categories": [
+        "amenity=restaurant",
+        "building=yes"
+      ],
+      "osm_type": "way",
+      "osm_id": 1483677911
+    },
+    {
+      "name": "Edifici Prada Casadet",
+      "osm_type": "relation",
+      "osm_id": 2995070,
+      "categories": [
+        "building=yes"
+      ],
+      "fame_score": 1,
+      "needs_geocoding": true
+    },
+    {
+      "name": "centre esportiu de Sant Julia de Loria",
+      "osm_type": "relation",
+      "osm_id": 7630873,
+      "categories": [
+        "building=yes"
+      ],
+      "fame_score": 1,
+      "needs_geocoding": true
+    },
+    {
+      "name": "Lexus Andorre",
+      "osm_type": "relation",
+      "osm_id": 7980889,
+      "categories": [
+        "building=yes"
+      ],
+      "fame_score": 1,
+      "needs_geocoding": true
+    },
+    {
+      "name": "Oficina del Comú d'Encamp",
+      "osm_type": "relation",
+      "osm_id": 10837845,
+      "categories": [
+        "amenity=townhall",
+        "building=yes"
+      ],
+      "fame_score": 1,
+      "needs_geocoding": true
+    },
+    {
+      "name": "Centre esportiu dels Serradells",
+      "osm_type": "relation",
+      "osm_id": 14088405,
+      "categories": [
+        "building=yes"
+      ],
+      "fame_score": 1,
+      "needs_geocoding": true
+    },
+    {
+      "name": "Andbank",
+      "osm_type": "relation",
+      "osm_id": 14119424,
+      "categories": [
+        "amenity=bank",
+        "building=yes"
+      ],
+      "fame_score": 1,
+      "needs_geocoding": true
+    },
+    {
+      "name": "Estructures Autogeneradores",
+      "osm_type": "relation",
+      "osm_id": 20598319,
+      "categories": [
+        "tourism=artwork"
+      ],
+      "fame_score": 1,
+      "needs_geocoding": true
+    },
+    {
+      "name": "Santuari de la Mare de Déu de Canòlich",
+      "lat": 42.474528,
+      "lon": 1.452244,
+      "fame_score": 0,
+      "categories": [
+        "historic=monument"
+      ],
+      "osm_type": "node",
+      "osm_id": 2425449897
+    },
+    {
+      "name": "Ermita Mare de Deu",
+      "lat": 42.44679,
+      "lon": 1.465038,
+      "fame_score": 0,
+      "categories": [
+        "historic=monument"
+      ],
+      "osm_type": "node",
+      "osm_id": 4266571030
+    },
+    {
+      "name": "km. 0",
+      "lat": 42.506515,
+      "lon": 1.534155,
+      "fame_score": 0,
+      "categories": [
+        "historic=memorial"
+      ],
+      "osm_type": "node",
+      "osm_id": 5803852951
+    },
+    {
+      "name": "Serradora",
+      "lat": 42.495672,
+      "lon": 1.503853,
+      "fame_score": 0,
+      "categories": [
+        "historic=monument"
+      ],
+      "osm_type": "node",
+      "osm_id": 9203237024
+    },
+    {
+      "name": "En homenatge a Andorra i als seus Pioners.  Autor Àngel Valvente",
+      "lat": 42.508238,
+      "lon": 1.52568,
+      "fame_score": 0,
+      "categories": [
+        "historic=memorial"
+      ],
+      "osm_type": "node",
+      "osm_id": 10903382007
+    },
+    {
+      "name": "Esteve Albert Corp",
+      "lat": 42.507018,
+      "lon": 1.521172,
+      "fame_score": 0,
+      "categories": [
+        "historic=memorial"
+      ],
+      "osm_type": "node",
+      "osm_id": 10906007317
+    },
+    {
+      "name": "Mossèn Cinto Verdaguer",
+      "lat": 42.556306,
+      "lon": 1.534588,
+      "fame_score": 0,
+      "categories": [
+        "historic=memorial"
+      ],
+      "osm_type": "node",
+      "osm_id": 10908160805
+    },
+    {
+      "name": "Serradora",
+      "lat": 42.495579,
+      "lon": 1.503499,
+      "fame_score": 0,
+      "categories": [
+        "historic=monument"
+      ],
+      "osm_type": "node",
+      "osm_id": 10909256288
+    },
+    {
+      "name": "Francesc Cairat",
+      "lat": 42.461895,
+      "lon": 1.490572,
+      "fame_score": 0,
+      "categories": [
+        "historic=memorial"
+      ],
+      "osm_type": "node",
+      "osm_id": 10909398599
+    },
+    {
+      "name": "Ancien émetteur Sud Radio",
+      "lat": 42.533249,
+      "lon": 1.716618,
+      "fame_score": 0,
+      "categories": [
+        "historic=ruins"
+      ],
+      "osm_type": "node",
+      "osm_id": 12477955658
+    },
+    {
+      "name": "Tamarro Lau",
+      "lat": 42.445556,
+      "lon": 1.498198,
+      "fame_score": 0,
+      "categories": [
+        "historic=monument"
+      ],
+      "osm_type": "node",
+      "osm_id": 13099980202
+    },
+    {
+      "name": "Càndid Rossell Rial",
+      "lat": 42.507208,
+      "lon": 1.520816,
+      "fame_score": 0,
+      "categories": [
+        "historic=memorial"
+      ],
+      "year": "2025-04-30",
+      "osm_type": "node",
+      "osm_id": 13195770451
+    },
+    {
+      "name": "Salvador Montanya Codina",
+      "lat": 42.506877,
+      "lon": 1.52114,
+      "fame_score": 0,
+      "categories": [
+        "historic=memorial"
+      ],
+      "year": "2025-04-30",
+      "osm_type": "node",
+      "osm_id": 13195770452
+    },
+    {
+      "name": "Bonaventura Bonfill Torres",
+      "lat": 42.553921,
+      "lon": 1.589669,
+      "fame_score": 0,
+      "categories": [
+        "historic=memorial"
+      ],
+      "year": "2025-04-30",
+      "osm_type": "node",
+      "osm_id": 13195770453
+    },
+    {
+      "name": "Bonaventura Casal Farràs",
+      "lat": 42.486987,
+      "lon": 1.491168,
+      "fame_score": 0,
+      "categories": [
+        "historic=memorial"
+      ],
+      "year": "2025-05-06",
+      "osm_type": "node",
+      "osm_id": 13195875565
+    },
+    {
+      "name": "Josep Calvó Torres",
+      "lat": 42.560309,
+      "lon": 1.593776,
+      "fame_score": 0,
+      "categories": [
+        "historic=memorial"
+      ],
+      "year": "2025-04-30",
+      "osm_type": "node",
+      "osm_id": 13195875566
+    },
+    {
+      "name": "Antoni Vidal Felipó",
+      "lat": 42.560308,
+      "lon": 1.593777,
+      "fame_score": 0,
+      "categories": [
+        "historic=memorial"
+      ],
+      "year": "2025-04-30",
+      "osm_type": "node",
+      "osm_id": 13195875567
+    },
+    {
+      "name": "Pere Mandicó Vidal",
+      "lat": 42.560311,
+      "lon": 1.593776,
+      "fame_score": 0,
+      "categories": [
+        "historic=memorial"
+      ],
+      "year": "2025-04-30",
+      "osm_type": "node",
+      "osm_id": 13195875568
+    },
+    {
+      "name": "Josep Franch Vidal",
+      "lat": 42.567224,
+      "lon": 1.598626,
+      "fame_score": 0,
+      "categories": [
+        "historic=memorial"
+      ],
+      "year": "2025-04-30",
+      "osm_type": "node",
+      "osm_id": 13195875569
+    },
+    {
+      "name": "Farga del Madriu",
+      "lat": 42.489415,
+      "lon": 1.606747,
+      "fame_score": 0,
+      "categories": [
+        "historic=ruins"
+      ],
+      "osm_type": "way",
+      "osm_id": 1313918736
+    },
+    {
+      "name": "Farga del Madriu",
+      "lat": 42.489094,
+      "lon": 1.60639,
+      "fame_score": 0,
+      "categories": [
+        "historic=ruins"
+      ],
+      "osm_type": "way",
+      "osm_id": 1313918737
+    },
+    {
+      "name": "Borda de la Rulla de Coll Pla",
+      "lat": 42.550152,
+      "lon": 1.435639,
+      "fame_score": 0,
+      "categories": [
+        "historic=ruins"
+      ],
+      "osm_type": "way",
+      "osm_id": 1387294191
+    },
+    {
+      "name": "Nou Estadi FAF",
+      "osm_type": "relation",
+      "osm_id": 19321487,
+      "categories": [],
+      "fame_score": 0,
+      "needs_geocoding": true
+    }
+  ]
+}
