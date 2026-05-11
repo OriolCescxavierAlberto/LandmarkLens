@@ -24,6 +24,8 @@ import com.example.landmarklens.data.model.AppTab
 import com.example.landmarklens.data.model.ChatMessage
 import com.example.landmarklens.data.model.LandmarkHistoryItem
 import com.example.landmarklens.data.model.LandmarkLocation
+import com.example.landmarklens.data.remote.DetectedLandmark
+import com.example.landmarklens.data.remote.LandmarkApiClient
 import com.example.landmarklens.data.remote.OllamaClient
 import com.example.landmarklens.data.remote.PlacesService
 import com.example.landmarklens.util.FileUtils
@@ -53,11 +55,20 @@ class LandmarkViewModel(application: Application) : AndroidViewModel(application
 
     val history = mutableStateListOf<LandmarkHistoryItem>()
     var currentTab by mutableStateOf(AppTab.CAMERA)
-    
+
     // Remote Logic state
     var identifiedLocation by mutableStateOf<LandmarkLocation?>(null)
     var isLoadingLocation by mutableStateOf(false)
     var locationError by mutableStateOf<String?>(null)
+
+    // Detected landmarks from API
+    var detectedLandmarks by mutableStateOf<List<DetectedLandmark>>(emptyList())
+
+    // Mini-chat in capture result screen
+    val miniChatMessages = mutableStateListOf<ChatMessage>()
+    var isMiniChatLoading by mutableStateOf(false)
+    var showMiniChat by mutableStateOf(false)
+    var miniChatInput by mutableStateOf("")
 
     // Chat State
     val chatMessages = mutableStateListOf<ChatMessage>()
@@ -103,7 +114,6 @@ class LandmarkViewModel(application: Application) : AndroidViewModel(application
     fun deleteHistoryItem(item: LandmarkHistoryItem) {
         viewModelScope.launch {
             dao.deleteById(item.id)
-            // Nota: Aquí deberíamos borrar el archivo físico también si tuviéramos la ruta exacta
         }
     }
 
@@ -170,6 +180,7 @@ class LandmarkViewModel(application: Application) : AndroidViewModel(application
 
     fun resetCapture() {
         capturedBitmap = null; identifiedLocation = null; showResult = false
+        miniChatMessages.clear(); showMiniChat = false; detectedLandmarks = emptyList()
     }
 
     // Sensors & Location Infrastructure
@@ -200,16 +211,66 @@ class LandmarkViewModel(application: Application) : AndroidViewModel(application
     @SuppressLint("MissingPermission")
     fun captureWithHighAccuracyLocation(bitmap: Bitmap) {
         fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
-            .addOnSuccessListener { 
+            .addOnSuccessListener {
                 it?.let { lat = it.latitude; lon = it.longitude }
                 onPhotoCaptured(bitmap)
             }
             .addOnFailureListener { onPhotoCaptured(bitmap) }
     }
 
+    fun sendMiniChatMessage(question: String) {
+        if (question.isBlank() || isMiniChatLoading) return
+        miniChatMessages.add(ChatMessage(role = "user", text = question))
+        miniChatInput = ""
+        isMiniChatLoading = true
+        val ctx = buildLandmarkContext()
+        viewModelScope.launch {
+            try {
+                val fullPrompt = """Eres un guía turístico experto y entusiasta. El usuario está mirando estos monumentos cercanos: $ctx
+
+Pregunta del usuario: $question
+
+Responde de forma amena, informativa y concisa (máximo 3 párrafos). Usa un tono cercano y apasionado por la historia."""
+                val reply = OllamaClient.askModel(selectedModel, fullPrompt)
+                miniChatMessages.add(ChatMessage(role = "assistant", text = reply))
+            } finally { isMiniChatLoading = false }
+        }
+    }
+
+    private fun buildLandmarkContext(): String {
+        return if (detectedLandmarks.isNotEmpty()) {
+            detectedLandmarks.joinToString(", ") { "${it.name} (a ${it.distance}m)" }
+        } else {
+            identifiedLocation?.name ?: "ubicación desconocida en lat=$capturedLat, lon=$capturedLon"
+        }
+    }
+
+    private fun triggerGuideIntro() {
+        if (isMiniChatLoading) return
+        isMiniChatLoading = true
+        showMiniChat = true
+        val ctx = buildLandmarkContext()
+        viewModelScope.launch {
+            try {
+                val prompt = """Eres un guía turístico experto y entusiasta. El usuario acaba de fotografiar esta zona y hay estos monumentos detectados cerca: $ctx
+
+Preséntate brevemente y cuéntale algo fascinante sobre los monumentos detectados. Sé conciso (2-3 párrafos), entusiasta y usa emojis ocasionalmente para dar vida al texto."""
+                val reply = OllamaClient.askModel(selectedModel, prompt)
+                miniChatMessages.add(ChatMessage(role = "assistant", text = reply))
+            } finally { isMiniChatLoading = false }
+        }
+    }
+
     fun onPhotoCaptured(bitmap: Bitmap) {
         capturedBitmap = bitmap; capturedLat = lat; capturedLon = lon
         capturedAzimuth = azimuth; identifiedLocation = null; showResult = true
+        miniChatMessages.clear(); showMiniChat = false; detectedLandmarks = emptyList()
+        viewModelScope.launch {
+            loadModelsIfNeeded()
+            val landmarks = LandmarkApiClient.queryLandmarks(capturedLat, capturedLon)
+            detectedLandmarks = landmarks
+            triggerGuideIntro()
+        }
     }
 
     fun startSensors() { rotationSensor?.let { sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_NORMAL) } }

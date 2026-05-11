@@ -388,7 +388,6 @@ fun CaptureResultScreen(vm: LandmarkViewModel) {
                                 fontWeight = FontWeight.Bold,
                                 letterSpacing = 1.sp
                             )
-
                             if (vm.identifiedLocation!!.address.isNotEmpty()) {
                                 Spacer(modifier = Modifier.height(16.dp))
                                 Row(verticalAlignment = Alignment.Top) {
@@ -421,6 +420,99 @@ fun CaptureResultScreen(vm: LandmarkViewModel) {
                         longitude = vm.capturedLon,
                         locationName = vm.identifiedLocation?.name ?: "Punto capturado"
                     )
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Chips de monumentos detectados por tu API
+                if (vm.detectedLandmarks.isNotEmpty()) {
+                    Text("MONUMENTOS DETECTADOS", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(start = 8.dp, bottom = 8.dp))
+                    androidx.compose.foundation.lazy.LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    ) {
+                        items(vm.detectedLandmarks) { lm ->
+                            Surface(
+                                shape = RoundedCornerShape(20.dp),
+                                color = MaterialTheme.colorScheme.secondaryContainer,
+                            ) {
+                                Row(modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(Icons.Default.LocationOn, null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.secondary)
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(lm.name, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text("${lm.distance}m", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Mini-chat guía turístico (se activa automáticamente)
+                Text("GUÍA TURÍSTICO IA", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(start = 8.dp, bottom = 12.dp))
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(28.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        if (vm.miniChatMessages.isEmpty() && vm.isMiniChatLoading) {
+                            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(8.dp)) {
+                                CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp, color = MaterialTheme.colorScheme.secondary)
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Text("Tu guía está preparando la bienvenida...", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
+                            }
+                        } else {
+                            androidx.compose.foundation.lazy.LazyColumn(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .heightIn(min = 60.dp, max = 300.dp),
+                                verticalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                items(vm.miniChatMessages) { msg -> ChatBubble(message = msg) }
+                                if (vm.isMiniChatLoading) {
+                                    item {
+                                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(8.dp)) {
+                                            CircularProgressIndicator(modifier = Modifier.size(14.dp), strokeWidth = 2.dp, color = MaterialTheme.colorScheme.secondary)
+                                            Spacer(modifier = Modifier.width(10.dp))
+                                            Text("Pensando...", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(12.dp))
+                        HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outlineVariant)
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            OutlinedTextField(
+                                value = vm.miniChatInput,
+                                onValueChange = { vm.miniChatInput = it },
+                                modifier = Modifier.weight(1f),
+                                placeholder = { Text("Pregunta algo sobre este lugar...", style = MaterialTheme.typography.bodySmall) },
+                                shape = RoundedCornerShape(16.dp),
+                                enabled = !vm.isMiniChatLoading,
+                                maxLines = 2,
+                                textStyle = MaterialTheme.typography.bodySmall
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            IconButton(
+                                onClick = { vm.sendMiniChatMessage(vm.miniChatInput) },
+                                enabled = !vm.isMiniChatLoading && vm.miniChatInput.isNotBlank(),
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .background(
+                                        if (vm.miniChatInput.isNotBlank()) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.surfaceVariant,
+                                        CircleShape
+                                    )
+                            ) {
+                                Icon(Icons.AutoMirrored.Filled.Send, "Enviar", tint = Color.White, modifier = Modifier.size(20.dp))
+                            }
+                        }
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
