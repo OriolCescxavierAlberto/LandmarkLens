@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.example.landmarklens" />
+                  <option name="mobileSdkAppId" value="1:1038327314499:android:684de811524e5afab2bcf6" />
+                  <option name="projectId" value="landmarkleens" />
+                  <option name="projectNumber" value="1038327314499" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

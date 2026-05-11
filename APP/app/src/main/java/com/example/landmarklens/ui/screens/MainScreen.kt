@@ -25,6 +25,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Chat
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -108,7 +109,7 @@ fun MainApp(
                     NavigationBarItem(
                         selected = false,
                         onClick = onLogout,
-                        icon = { Icon(Icons.Default.ExitToApp, "Salir") },
+                        icon = { Icon(Icons.AutoMirrored.Filled.ExitToApp, "Salir") },
                         label = { Text("Salir", style = MaterialTheme.typography.labelSmall) },
                         colors = NavigationBarItemDefaults.colors(
                             unselectedIconColor = MaterialTheme.colorScheme.error.copy(alpha = 0.7f),
@@ -358,6 +359,126 @@ fun CaptureResultScreen(vm: LandmarkViewModel) {
             }
 
             Column(modifier = Modifier.padding(20.dp)) {
+                // Card con resultado del análisis remoto
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(28.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    Column(modifier = Modifier.padding(24.dp)) {
+                        Text(
+                            "📡 Análisis Remoto",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        if (vm.isLoadingRemoteAnalysis) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(24.dp),
+                                    strokeWidth = 2.dp,
+                                    color = MaterialTheme.colorScheme.secondary
+                                )
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Text("Consultando servidor de análisis...", style = MaterialTheme.typography.bodyMedium)
+                            }
+                        } else if (vm.remoteAnalysisError != null) {
+                            Row(verticalAlignment = Alignment.Top, modifier = Modifier.fillMaxWidth()) {
+                                Icon(
+                                    Icons.Default.Warning,
+                                    null,
+                                    tint = MaterialTheme.colorScheme.error,
+                                    modifier = Modifier.size(20.dp).padding(top = 2.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Column {
+                                    Text("Error en análisis remoto", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.error)
+                                    Text(vm.remoteAnalysisError!!, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                            }
+                        } else if (vm.remoteAnalysisResult != null) {
+                            val result = vm.remoteAnalysisResult!!
+                            if (result.landmark != null) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.Top
+                                ) {
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            result.landmark,
+                                            style = MaterialTheme.typography.headlineSmall,
+                                            fontWeight = FontWeight.ExtraBold,
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        if (result.category != null) {
+                                            Text(
+                                                result.category,
+                                                style = MaterialTheme.typography.labelMedium,
+                                                color = MaterialTheme.colorScheme.secondary,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        }
+                                    }
+                                    
+                                    // Mostrar confianza si disponible
+                                    if (result.confidence > 0f) {
+                                        Surface(
+                                            color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
+                                            shape = RoundedCornerShape(12.dp),
+                                            modifier = Modifier.padding(start = 8.dp)
+                                        ) {
+                                            Text(
+                                                "${(result.confidence * 100).toInt()}%",
+                                                style = MaterialTheme.typography.labelMedium,
+                                                fontWeight = FontWeight.Bold,
+                                                color = MaterialTheme.colorScheme.secondary,
+                                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                                            )
+                                        }
+                                    }
+                                }
+                                
+                                if (result.description != null) {
+                                    Spacer(modifier = Modifier.height(12.dp))
+                                    Text(
+                                        result.description,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                }
+                                
+                                if (result.historicalInfo != null) {
+                                    Spacer(modifier = Modifier.height(12.dp))
+                                    Card(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                                        shape = RoundedCornerShape(12.dp)
+                                    ) {
+                                        Column(modifier = Modifier.padding(12.dp)) {
+                                            Text("📚 Información Histórica", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+                                            Spacer(modifier = Modifier.height(8.dp))
+                                            Text(result.historicalInfo, style = MaterialTheme.typography.bodySmall)
+                                        }
+                                    }
+                                }
+                            } else {
+                                Text("No se identificó un monumento en esta ubicación", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                        } else {
+                            Text("Pendiente análisis...", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Card original con datos de ubicación tradicionales
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(28.dp),
