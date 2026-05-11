@@ -21,10 +21,20 @@ import math
 import os
 import pickle
 import random
+import sys
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
+from pathlib import Path
 
-from query_model import DEFAULT_FOV, GRID_SIZE, LANDMARKS_PATH, SpatialIndex, angle_diff, bearing, haversine
+from rag_core import (
+    DEFAULT_FOV,
+    GRID_SIZE,
+    LANDMARKS_PATH,
+    SpatialIndex,
+    angle_diff,
+    bearing,
+    haversine,
+)
 from ranker_models import FeatureScaler, HeuristicRanker, LinearRanker, NUMERIC_FEATURES
 
 

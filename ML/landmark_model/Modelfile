@@ -1,5 +1,5 @@
 # Modelfile para Landmark Finder España
-# Modelo basado en llama3.2:3b — system prompt ligero, datos via RAG
+# Modelo basado en llama3.2:3b - system prompt ligero, datos via RAG
 # Optimizado para RTX 3060 6GB VRAM + 16GB RAM
 
 FROM llama3.2:3b
@@ -23,4 +23,5 @@ When camera orientation (azimuth) is provided:
 
 When NO orientation:
 - Return: [{"name":"EXACT full name","distance":meters,"confidence":"high|medium|low"}]
-- Confidence: <50m=high, <300m=high, <1km=medium, >1km=low"""
+- Confidence: <50m=high, <300m=high, <1km=medium, >1km=low
+"""

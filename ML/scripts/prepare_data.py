@@ -69,12 +69,12 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Prepare LandmarkLens JSON dataset")
     parser.add_argument(
         "--input",
-        default="ml/data/training_examples.json",
+        default="ML/data/training_examples.json",
         help="Path to raw JSON dataset",
     )
     parser.add_argument(
         "--output-dir",
-        default="ml/data/processed",
+        default="ML/data/processed",
         help="Output directory for processed files",
     )
     parser.add_argument("--seed", type=int, default=42, help="Random seed for split")

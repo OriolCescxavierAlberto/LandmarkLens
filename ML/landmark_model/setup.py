@@ -5,8 +5,10 @@ setup.py
 Script de setup completo que:
 1. Instala dependencias Python
 2. Extrae landmarks del archivo OSM
-3. Genera la base de conocimiento
-4. Crea y registra el modelo en Ollama
+3. Genera los artefactos RAG (system prompt, Modelfile y manifest)
+4. Entrena y exporta el ranker local
+5. Descarga el modelo base de Ollama si falta
+6. Crea y registra el modelo en Ollama
 
 Uso:
   python setup.py
@@ -121,10 +123,10 @@ def step2_extract_landmarks():
 
 
 def step3_generate_knowledge():
-    """Paso 3: Generar base de conocimiento."""
+    """Paso 3: Generar los artefactos RAG."""
     return run_command(
         [sys.executable, os.path.join(SCRIPT_DIR, 'generate_knowledge.py')],
-        "PASO 3: Generando base de conocimiento y Modelfile..."
+        "PASO 3: Generando artefactos RAG (system prompt, Modelfile y manifest)..."
     )
 
 

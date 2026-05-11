@@ -20,8 +20,8 @@ def read_jsonl(path: Path) -> list[dict]:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Evaluate prepared dataset quality")
-    parser.add_argument("--test-file", default="ml/data/processed/test.jsonl")
-    parser.add_argument("--output", default="ml/experiments/evaluation_report.json")
+    parser.add_argument("--test-file", default="ML/data/processed/test.jsonl")
+    parser.add_argument("--output", default="ML/experiments/evaluation_report.json")
     args = parser.parse_args()
 
     test_file = Path(args.test_file)

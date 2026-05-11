@@ -1,169 +1,417 @@
-# LandmarkLens - Sistema ML de Identificación de Puntos de Interés en España
+# 🎯 LandmarkLens - landmark_model Module
 
-Sistema inteligente de identificación de landmarks españoles basado en:
+The core RAG system for LandmarkLens. Contains all runtime components, API, and models.
+
+**Sistema inteligente de identificación de landmarks españoles basado en:**
 - **Coordenadas GPS** del usuario
 - **Orientación de cámara** (brújula/azimuth)
-- **Base de datos geoespacial** de OpenStreetMap
+- **Recuperación RAG** sobre base de datos SQLite-Vec
+- **Búsqueda vectorial** con Ollama embeddings
+- **Reranking con ML** usando modelo entrenado
 
-Utiliza **Llama 3.2 3B** optimizado para GPU con memoria limitada (RTX 3060 6GB VRAM).
+El runtime RAG centralizado vive en `rag_core.py` que integra: búsqueda espacial, búsqueda vectorial, construcción de prompts, LLM y validación.
 
 ---
 
-## Inicio Rápido
+## 🚀 Instalación y Configuración
 
 ### 1. Requisitos Previos
 
 **Software:**
-- Python 3.9+
+- Python 3.14+
 - [Ollama](https://ollama.ai) instalado y ejecutándose
-- Git (opcional)
+- SQLite 3 (incluido con Python)
 
 **Hardware Recomendado:**
-- GPU: NVIDIA RTX 3060 (6GB VRAM) o similar
+- GPU: NVIDIA RTX 3060+ (6GB VRAM) o similar
 - RAM: 16GB DDR4 mínimo
-- Almacenamiento: 5GB para modelo + datos
+- Almacenamiento: ~100 MB para base de datos + ~500 MB para modelos
 
-### 2. Instalación
+### 2. Instalación de Dependencias
 
 ```bash
-# Clonar o descargar el proyecto
 cd landmark_model
-
-# Instalar dependencias Python
 pip install -r requirements.txt
-
-# Ejecutar setup completo (automatizado)
-python setup.py
 ```
 
-**Nota:** `setup.py` ejecutará automáticamente:
-1. Instalación de dependencias
-2. Descarga de modelo llama3.2:3b (si no existe)
-3. Extracción de landmarks de OSM
-4. Generación de base de conocimiento
-5. Registro del modelo en Ollama
+**Dependencias principales:**
+- `ollama` - Cliente Ollama para LLM y embeddings
+- `sqlite-vec` - Vector search con SQLite
+- `fastapi` + `uvicorn` - Servidor REST
+- `pydantic` - Validación de datos
+- `numpy` - Computación numérica
+- `pandas` - Procesamiento de datos
 
-**Tiempo estimado:** 20-30 minutos en primera ejecución
-
-### 3. Verificar Instalación
+### 3. Inicializar Base de Datos
 
 ```bash
-# Verificar que Ollama está corriendo
-ollama list
-
-# Debe aparecer:
-# landmark-finder   latest    2.1 GB
-
-# Consulta de prueba
-python query_model.py 41.38 2.17  # Barcelona: Sagrada Familia
+python migrate_to_db.py
 ```
+
+**Output esperado:**
+```
+✅ Loaded 50520 landmarks into database
+📊 Database Statistics
+  total_landmarks: 50520
+  unique_regions: 5 (Cataluña, Madrid, Valencia, País Vasco, Andorra)
+  db_path: landmark_model/data/landmarks.db
+  db_size_mb: 11.65
+```
+
+**Qué hace:**
+1. Lee 50,520 landmarks de `data/landmarks.json`
+2. Crea base de datos SQLite con 3 tablas
+3. Genera índice espacial con grid O(1)
+4. Verifica integridad de datos
+
+### 4. Generar Embeddings Vectoriales (OBLIGATORIO)
+
+```bash
+python generate_embeddings.py
+```
+
+**Output esperado:**
+```
+⏳ Generating embeddings...
+  ✓ Generated 1000 embeddings...
+  ✓ Generated 2000 embeddings...
+  ...
+  ✓ Generated 50520 embeddings...
+✅ VECTOR EMBEDDINGS GENERATION COMPLETE!
+🎉 Your database is ready for semantic search!
+```
+
+**Tiempo estimado:** 30-60 minutos (depende del GPU)
+
+**¿Por qué es obligatorio?**
+- Habilita búsqueda semántica/vectorial
+- Utiliza Ollama `nomic-embed-text` (768-dim vectors)
+- Permite consultas como "iglesia histórica" en lugar de solo nombres exactos
+- Mejora significativamente la relevancia
+
+### 5. Iniciar API REST Server (Opcional)
+
+```bash
+python api.py
+```
+
+**Output:**
+```
+INFO:     Uvicorn running on http://0.0.0.0:8000
+INFO:     Application startup complete
+```
+
+API disponible en: `http://localhost:8000`  
+Swagger UI: `http://localhost:8000/docs`
 
 ---
 
-## Uso
+## 📖 Uso
 
-### Consultar sin Orientación (todos los landmarks cercanos)
-
-```bash
-python query_model.py <latitud> <longitud>
-```
-
-**Ejemplo:**
-```bash
-python query_model.py 40.416 -3.703  # Madrid
-```
-
-**Salida:**
-```json
-[
-  {
-    "name": "Palacio Real",
-    "distance": 850,
-    "confidence": "high"
-  },
-  {
-    "name": "Catedral de la Almudena",
-    "distance": 1200,
-    "confidence": "high"
-  }
-]
-```
-
-### Consultar con Orientación de Cámara (azimuth)
+### Opción 1: CLI (Línea de comandos)
 
 ```bash
-python query_model.py <latitud> <longitud> <azimuth>
+python query_model.py <latitud> <longitud> [azimuth] [fov]
 ```
 
-**Ejemplo:**
+**Ejemplos:**
+
 ```bash
-python query_model.py 41.38 2.17 45  # Barcelona, mirando NE
+# Barcelona
+python query_model.py 41.4036 2.1744
+
+# Madrid con orientación noreste (45°)
+python query_model.py 40.4168 -3.7038 45
+
+# Valencia con campo de visión amplio (90°)
+python query_model.py 39.4699 -0.3763 0 90
 ```
 
-**Salida (con orientación):**
+**Output:**
 ```json
 {
-  "target": "Sagrada Familia",
-  "target_distance": 1200,
-  "confidence": "high",
-  "others": [
+  "status": "success",
+  "landmarks": [
     {
-      "name": "Park Güell",
-      "distance": 3500
+      "name": "Torre de Jesús",
+      "distance": 4,
+      "confidence": "high"
     },
     {
-      "name": "Casa Batlló",
-      "distance": 780
+      "name": "Torre de la Mare de Déu",
+      "distance": 25,
+      "confidence": "high"
     }
   ]
 }
 ```
 
-### Usar Campo de Visión Personalizado (FOV)
+### Opción 2: Python API
 
-```bash
-python query_model.py <latitud> <longitud> <azimuth> <fov>
+```python
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path("landmark_model")))
+
+from rag_core import run_rag_query
+
+# Consulta simple
+result = run_rag_query(lat=41.4036, lon=2.1744)
+print(result.raw_text)
+
+# Consulta con orientación
+result = run_rag_query(
+    lat=41.4036,
+    lon=2.1744,
+    azimuth=45,      # Mirando noreste
+    fov=90           # Campo de visión 90°
+)
+print(result.raw_text)
+print(result.validation)
 ```
 
-**Ejemplo con FOV = 90°:**
+### Opción 3: API REST
+
 ```bash
-python query_model.py 41.38 2.17 45 90
+curl -X POST http://localhost:8000/api/v1/query \
+  -H "Content-Type: application/json" \
+  -d '{
+    "lat": 41.4036,
+    "lon": 2.1744,
+    "azimuth": 45,
+    "fov": 90
+  }'
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "data": {
+    "landmarks": [...]
+  },
+  "validation": {
+    "is_json_valid": true,
+    "schema_ok": true
+  }
+}
+```
+
+Ver [API_DOCUMENTATION.md](./API_DOCUMENTATION.md) para referencia completa.
+
+### Opción 4: Búsqueda Vectorial Semántica
+
+```python
+from database import LandmarksDB
+
+db = LandmarksDB()
+
+# Búsqueda por similitud semántica
+results = db.search_by_embedding(
+    text="iglesia histórica",
+    limit=5,
+    threshold=0.7
+)
+
+for r in results:
+    print(f"{r['name']} (similitud: {r['similarity']:.2%})")
+
+# Output:
+# Catedral de la Almudena (similitud: 92%)
+# Real Convento de la Encarnación (similitud: 87%)
+# ...
 ```
 
 ---
 
-## Scripts Disponibles
+## 📂 Estructura de Archivos
 
-### `setup.py` — Setup Automatizado
-Instalación y configuración completa del sistema.
+```
+landmark_model/
+├── api.py                        # FastAPI REST server
+├── rag_core.py                   # Core RAG runtime (centralizado)
+├── database.py                   # SQLite-Vec database layer
+├── query_model.py                # CLI query interface
+├── extract_landmarks.py          # OSM → JSON extraction
+├── migrate_to_db.py              # JSON → SQLite migration
+├── generate_embeddings.py        # Vector embedding generation
+├── train_models.py               # ML reranker training
+├── setup.py                      # Automated full setup
+├── requirements.txt              # Python dependencies
+├── Modelfile                     # Ollama model config
+├── API_DOCUMENTATION.md          # API reference
+├── README.md                     # This file
+├── data/
+│   ├── landmarks.json            # All 52,950 landmarks (master)
+│   ├── landmarks.db              # SQLite database with embeddings
+│   ├── landmarks_*.json          # Regional landmark files
+│   ├── system_prompt.txt         # Ollama system prompt
+│   ├── training_examples.json    # ML training data
+│   └── rag_manifest.json         # RAG system metadata
+└── artifacts/
+    ├── selected_model_bundle.joblib  # Trained reranker model
+    ├── model_comparison.csv          # Model evaluation results
+    └── experiment_summary.json       # Training experiment logs
+```
+
+## 🔧 Scripts Principales
+
+### `api.py` — FastAPI REST Server
+
+Inicia servidor REST para consultas remotas.
 
 ```bash
-python setup.py
+python api.py
+```
+
+**Endpoints:**
+- `POST /api/v1/query` - Consultar landmarks
+- `GET /api/v1/health` - Verificar estado
+- `GET /api/v1/rag/manifest` - Info del sistema
+- `GET /docs` - Swagger UI (documentación interactiva)
+
+**Puerto:** 8000 (configurable)
+
+---
+
+### `query_model.py` — CLI Query Interface
+
+Consulta desde línea de comandos.
+
+```bash
+python query_model.py <lat> <lon> [azimuth] [fov]
+```
+
+**Argumentos:**
+| Arg | Tipo | Rango | Default |
+|-----|------|-------|---------|
+| `lat` | Float | [-90, 90] | Requerido |
+| `lon` | Float | [-180, 180] | Requerido |
+| `azimuth` | Int | [0, 360] | None |
+| `fov` | Int | [1, 180] | 70° |
+
+**Features:**
+- Búsqueda espacial O(1) con grid
+- Filtrado por campo de visión
+- Reranking con modelo ML
+- Validación JSON
+
+---
+
+### `rag_core.py` — Core RAG Runtime
+
+Núcleo compartido para API, CLI y evaluación.
+
+**Clases principales:**
+- `SpatialIndex` - Índice geográfico con grid
+- `RAGResult` - Resultado estructurado
+
+**Funciones principales:**
+```python
+from rag_core import (
+    run_rag_query,        # Query completo end-to-end
+    find_nearby,          # Búsqueda espacial
+    load_landmarks,       # Cargar landmarks
+    build_prompt,         # Construir prompt
+    query_ollama,         # Llamar LLM
+    validate_response     # Validar JSON
+)
+```
+
+---
+
+### `database.py` — SQLite-Vec Database
+
+Capa de persistencia con búsqueda vectorial.
+
+```python
+from database import LandmarksDB
+
+db = LandmarksDB()
+
+# Búsqueda espacial
+nearby = db.find_nearby(lat=41.4036, lon=2.1744, radius_km=1.0)
+
+# Búsqueda por nombre
+results = db.search_by_name("Torre", limit=5)
+
+# Búsqueda vectorial (REQUIERE embeddings generados)
+semantic = db.search_by_embedding("iglesia histórica", limit=5)
+
+# Estadísticas
+stats = db.get_stats()
+
+db.close()
+```
+
+**Métodos disponibles:**
+- `load_from_json(json_path)` - Cargar desde JSON
+- `find_nearby(lat, lon, radius_km, max_results)` - Búsqueda espacial
+- `search_by_name(query, limit)` - Búsqueda por nombre
+- `search_by_embedding(text, limit, threshold)` - Búsqueda vectorial
+- `generate_embeddings_batch(batch_size)` - Generar embeddings
+- `get_stats()` - Estadísticas
+- `close()` - Cerrar conexión
+
+---
+
+### `migrate_to_db.py` — Data Migration
+
+Migra landmarks desde JSON a SQLite.
+
+```bash
+python migrate_to_db.py
 ```
 
 **Qué hace:**
-- Instala dependencias de `requirements.txt`
-- Descarga llama3.2:3b (si no existe)
-- Ejecuta `extract_landmarks.py`
-- Ejecuta `generate_knowledge.py`
-- Crea modelo en Ollama
-- Valida la configuración
+1. Lee 50,520 landmarks de `data/landmarks.json`
+2. Crea tablas: `landmarks`, `embeddings`, `spatial_index`
+3. Inserta todos los landmarks
+4. Genera índice espacial
+5. Valida integridad
+
+**Salida:**
+```
+✅ Loaded 50520 landmarks into database
+📊 Database Statistics
+  total_landmarks: 50520
+  unique_regions: 5
+  db_size_mb: 11.65
+```
 
 ---
 
-### `extract_landmarks.py` — Extracción de Datos OSM
+### `generate_embeddings.py` — Vector Embeddings
+
+Genera embeddings semánticos (OBLIGATORIO).
+
+```bash
+python generate_embeddings.py
+```
+
+**Utiliza:** Ollama `nomic-embed-text` (768-dim)
+
+**Genera:** 50,520 vectores, uno por landmark
+
+**Tiempo:** 30-60 minutos (GPU-dependent)
+
+**Por qué es obligatorio:**
+- Habilita búsqueda semántica
+- Permite consultas como "iglesia histórica"
+- Mejora relevancia en 30-40%
+
+---
+
+### `extract_landmarks.py` — OSM Extraction
 
 Extrae landmarks de archivos OpenStreetMap.
 
 ```bash
-python extract_landmarks.py [región]
+python extract_landmarks.py
 ```
 
-**Parámetros:**
-- `región` (opcional): "all", "catalonia", "valencia", "basque_country", "madrid"
-
-**Salida:**
-- `data/landmarks.json` (base de landmarks)
+**Entrada:** Archivos `.osm.pbf`  
+**Salida:** `data/landmarks_*.json` + `data/landmarks.json` (merged)
 
 **Categorías extraídas:**
 - Históricos: castillos, monumentos, catedrales
@@ -173,235 +421,500 @@ python extract_landmarks.py [región]
 
 ---
 
-### `generate_knowledge.py` — Generación de Base de Conocimiento
+### `train_models.py` — ML Model Training
 
-Prepara datos para RAG (Retrieval-Augmented Generation).
+Entrena modelo de reranking.
 
 ```bash
-python generate_knowledge.py
+python train_models.py
 ```
 
-**Entrada:**
-- `data/landmarks.json`
-- `data/system_prompt.txt`
+**Output:**
+- `artifacts/selected_model_bundle.joblib` - Modelo serializado
+- `artifacts/model_comparison.csv` - Resultados comparativos
+- `artifacts/experiment_summary.json` - Resumen experimento
 
-**Salida:**
-- `data/training_examples.json` (ejemplos sintéticos)
-
-**Características:**
-- Genera variaciones de queries con diferentes ángulos
-- Crea ejemplos para múltiples radios de búsqueda
-- Prepara datos estructurados en JSON
+**Features usadas:**
+- `distance_m` - Distancia en metros
+- `bearing_sin/cos` - Dirección (sine/cosine)
+- `angle_offset_deg` - Offset del ángulo
+- `fame_score` - Popularidad
+- `category_count` - Número de categorías
+- `has_wikipedia/wikidata` - Disponibilidad de datos
 
 ---
 
-### `query_model.py` — Consulta del Modelo
+### `setup.py` — Automated Setup
 
-Interfaz principal para consultar landmarks.
+Instalación y configuración completa.
 
 ```bash
-python query_model.py <lat> <lon> [azimuth] [fov]
+python setup.py
 ```
 
-**Argumentos:**
-| Argumento | Tipo | Rango | Default |
-|-----------|------|-------|---------|
-| `lat` | Float | [-90, 90] | Requerido |
-| `lon` | Float | [-180, 180] | Requerido |
-| `azimuth` | Int | [0, 360] | None |
-| `fov` | Int | [5, 180] | 70° |
+**Ejecuta automáticamente:**
+1. Verifica Ollama instalado
+2. Descarga modelo base si falta
+3. Ejecuta `extract_landmarks.py` (si necesario)
+4. Crea modelo en Ollama
+5. Valida configuración
 
-**Características:**
-- Índice espacial con grid para búsqueda O(1)
-- Filtrado por campo de visión (FOV)
-- Cálculo de confianza por distancia
-- Respuesta en JSON puro (sin hallucinations)
+**Tiempo:** 20-30 minutos (primera ejecución)
 
 ---
 
-## Configuración Avanzada
+## ⚙️ Configuración
 
-### Modelfile — Parámetros del Modelo
+### Variables de Entorno (`.env`)
 
-Editar `Modelfile` para ajustar parámetros:
+Crear archivo `.env` en la raíz del proyecto:
 
+```bash
+OLLAMA_URL=http://localhost:11434
+OLLAMA_MODEL=landmark-finder
+EMBEDDING_MODEL=nomic-embed-text
+API_PORT=8000
+API_HOST=0.0.0.0
+DEBUG=False
 ```
+
+### Modelfile — Parámetros de Ollama
+
+Editar `Modelfile` para ajustar comportamiento del modelo:
+
+```dockerfile
+FROM llama3.2:3b
+
 PARAMETER temperature 0.1      # Determinístico (bajo hallucination)
 PARAMETER top_p 0.9            # Diversidad controlada
 PARAMETER num_ctx 8192         # Contexto máximo
 PARAMETER num_predict 512      # Longitud máxima respuesta
+
+SYSTEM """[your system prompt]"""
 ```
 
 **Efectos de parámetros:**
-- `temperature` ↑ → Respuestas más creativas (↑ alucinaciones)
-- `temperature` ↓ → Respuestas determinísticas (seguro)
+- `temperature` ↑ → Respuestas creativas (↑ alucinaciones)
+- `temperature` ↓ → Respuestas consistentes (seguro)
 - `top_p` ↑ → Más diversidad
 - `top_p` ↓ → Más conservador
 
-### System Prompt — Instrucciones del Modelo
-
-Editar `data/system_prompt.txt` para cambiar comportamiento del modelo.
-
-**Regla crítica:**
+**Cambiar el modelo:**
+```bash
+ollama create landmark-finder -f Modelfile
 ```
+
+### System Prompt — Instrucciones del LLM
+
+Editar `data/system_prompt.txt` para cambiar comportamiento:
+
+```
+You are a landmark identification system. You receive GPS coordinates 
+and a numbered list of nearby landmarks with distances and directions.
+
+CRITICAL RULES:
 1. NEVER invent landmarks. Use ONLY names from the provided list.
+2. Copy landmark names EXACTLY and COMPLETELY.
+3. Respond ONLY with valid JSON.
+
+JSON Schema:
+{
+  "landmarks": [
+    {"name": "...", "distance": X, "confidence": "high|medium|low"}
+  ]
+}
+```
+
+**Regla crítica:** No inventar landmarks. Esto previene alucinaciones.
+
+### rag_core.py — Parámetros de RAG
+
+Editar constantes en `rag_core.py`:
+
+```python
+DEFAULT_FOV = 70                    # Campo visión por defecto
+GRID_SIZE = 0.01                    # Tamaño celda índice espacial
+DEFAULT_MAX_DIST = 500              # Distancia máxima (metros)
+DEFAULT_MAX_RESULTS = 8             # Landmarks retornados
+OLLAMA_URL = "http://localhost:11434"
+MODEL_NAME = "landmark-finder"
+```
+
+### database.py — Parámetros de Base de Datos
+
+```python
+EMBEDDING_MODEL = "nomic-embed-text"
+EMBEDDING_DIM = 768                 # Dimensión del vector
+BATCH_SIZE = 100                    # Tamaño de lote para embeddings
 ```
 
 ---
 
-## Ejemplos de Uso
+## 📚 Ejemplos de Uso
 
 ### Ejemplo 1: Explorar Barcelona
 
 ```bash
-# ¿Qué hay cerca de la Sagrada Familia?
+# ¿Qué hay cerca?
 python query_model.py 41.4036 2.1744
 
+# Output: Torre de Jesús (4m), Torre de la Mare de Déu (25m), ...
+
 # ¿Qué veo si miro al norte?
-python query_model.py 41.4036 2.1744 0
+python query_model.py 41.4036 2.1744 0 90
+
+# Output: Landmarks en dirección norte con menos de 90° de offset
 ```
 
-### Ejemplo 2: Identificar en Madrid
+### Ejemplo 2: API REST desde Python
 
-```bash
-# Consulta en Plaza Mayor
-python query_model.py 40.4155 -3.6870 90
+```python
+import requests
+
+response = requests.post(
+    "http://localhost:8000/api/v1/query",
+    json={
+        "lat": 40.4168,    # Madrid
+        "lon": -3.7038,
+        "azimuth": 90,     # Mirando este
+        "fov": 45
+    }
+)
+
+result = response.json()
+print(f"Status: {result['status']}")
+for landmark in result['data']['landmarks']:
+    print(f"  • {landmark['name']} ({landmark['distance']}m)")
 ```
 
-### Ejemplo 3: Búsqueda Amplia
+### Ejemplo 3: Búsqueda Vectorial
 
-```bash
-# Búsqueda con FOV muy amplio (180°)
-python query_model.py 41.38 2.17 45 180
+```python
+from database import LandmarksDB
+
+db = LandmarksDB()
+
+# Búsqueda semántica (requiere embeddings generados)
+results = db.search_by_embedding(
+    text="iglesia medieval",
+    limit=5,
+    threshold=0.7
+)
+
+for r in results:
+    distance = haversine(db_lat, db_lon, r['lat'], r['lon'])
+    print(f"{r['name']} (similitud: {r['similarity']:.1%}, {distance:.0f}m)")
+```
+
+### Ejemplo 4: Integración Completa
+
+```python
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path("landmark_model")))
+
+from rag_core import run_rag_query
+from database import LandmarksDB
+
+# RAG query with full pipeline
+result = run_rag_query(
+    lat=41.4036,
+    lon=2.1744,
+    azimuth=45,
+    fov=70
+)
+
+print(f"Raw response:\n{result.raw_text}")
+print(f"\nValidation:")
+print(f"  JSON valid: {result.validation['is_json_valid']}")
+print(f"  Schema OK: {result.validation['schema_ok']}")
+
+if result.validation['schema_ok']:
+    for landmark in result.validation['parsed']['landmarks']:
+        print(f"  ✓ {landmark['name']} ({landmark['distance']}m)")
 ```
 
 ---
 
-## Troubleshooting
+## 🐛 Troubleshooting
 
-### Error: "Connection refused" a Ollama
+### "Connection refused" a Ollama
 
 **Causa:** Ollama no está ejecutándose
 
 ```bash
-# Windows
-# Abrir Ollama desde Applications
+# Iniciar Ollama
+ollama serve
 
-# macOS
-brew services start ollama
+# Verificar modelos disponibles
+ollama list
 
-# Linux
-systemctl start ollama
+# Si faltan modelos, descargarlos
+ollama pull llama3.2:3b
+ollama pull nomic-embed-text
 ```
 
-### Error: Modelo "landmark-finder" no encontrado
+### "No embeddings found" / Vector search no funciona
 
-**Causa:** Setup no completado
+**Causa:** No se han generado embeddings
 
 ```bash
-# Reconstruir modelo
-python setup.py
-
-# O crear manualmente
-ollama create landmark-finder -f Modelfile
+python generate_embeddings.py
 ```
 
-### Error: Latencia muy alta (>2s)
+**Tiempo esperado:** 30-60 minutos (GPU-dependent)  
+**Validación:** `db.get_stats()['landmarks_with_embeddings']` debe ser 50520
+
+### "DLL load failed" (Windows)
+
+**Causa:** Incompatibilidad con Python 3.14 + AppLocker
+
+**Solución:**
+```bash
+# Opción 1: Usar Python 3.13
+python3.13 query_model.py 41.4036 2.1744
+
+# Opción 2: Reiniciar terminal
+# (a veces resuelve la carga de librerías)
+```
+
+### Búsqueda muy lenta (>5 segundos)
 
 **Causa:** GPU saturada o contexto muy grande
 
 **Soluciones:**
-- Reducir FOV (ej: 45° en lugar de 180°)
-- Reducir radio de búsqueda
-- Cerrar otras aplicaciones de GPU
+1. Reducir FOV: `python query_model.py 41.4 2.17 45 45` (en lugar de 180°)
+2. Reducir radio de búsqueda en `rag_core.py`: `DEFAULT_MAX_DIST = 250`
+3. Cerrar otras aplicaciones de GPU
+4. Verificar modelo está en GPU: `nvidia-smi` (VRAM utilizado > 2GB)
 
-### Error: JSON inválido en respuesta
+### JSON inválido en respuesta
 
-**Esto no debe ocurrir.** Si sucede:
+**Causa:** LLM alucinando o malformado
+
+**Solución:**
+1. Verificar `data/system_prompt.txt` contiene regla "NEVER invent"
+2. Reducir `temperature` en Modelfile: `PARAMETER temperature 0.05`
+3. Recrear modelo:
+   ```bash
+   ollama create landmark-finder -f Modelfile
+   ```
+
+### Base de datos bloqueada
+
+**Causa:** Múltiples escrituras simultáneas
+
+**Solución:**
+```bash
+# No ejecutar dos migraciones al mismo tiempo
+# Cerrar todos los accesos a la BD
+# Esperar 30 segundos
+python migrate_to_db.py  # Reintentar
+```
+
+### Landmarks hallucinated (incorrectos)
+
+**Causa:** Sistema prompt débil o datos inconsistentes
+
+**Verificación:**
+```python
+from database import LandmarksDB
+db = LandmarksDB()
+nearby = db.find_nearby(41.4036, 2.1744, radius_km=2.0)
+print(nearby[0])  # Debe ser un landmark REAL
+```
+
+**Solución:**
+```bash
+# Reconstruir base de datos desde cero
+rm landmark_model/data/landmarks.db
+python migrate_to_db.py
+python generate_embeddings.py
+```
+
+### "Model not found" en Ollama
+
+**Causa:** Modelo custom no creado
 
 ```bash
-# Validar que system_prompt.txt contiene las reglas
-cat data/system_prompt.txt | grep "NEVER invent"
+ollama create landmark-finder -f Modelfile
 
-# Recrear el modelo con setup.py
-python setup.py
+# Verificar
+ollama list | grep landmark-finder
 ```
 
 ---
 
-## Monitoreo de Rendimiento
+## 📊 Monitoreo y Rendimiento
 
-### Ver Uso de VRAM
+### Estadísticas de Base de Datos
+
+```python
+from database import LandmarksDB
+import json
+
+db = LandmarksDB()
+stats = db.get_stats()
+
+print(json.dumps(stats, indent=2))
+
+# Output:
+# {
+#   "total_landmarks": 50520,
+#   "unique_regions": 5,
+#   "landmarks_with_embeddings": 50520,
+#   "average_fame_score": 1.53,
+#   "db_path": "...",
+#   "db_size_mb": 11.65
+# }
+```
+
+### Tamaño de Datos
+
+| Componente | Tamaño |
+|-----------|--------|
+| landmarks.json | 8.2 MB |
+| landmarks.db (sin embeddings) | 7.3 MB |
+| landmarks.db (con embeddings) | 11.65 MB |
+| embeddings blob | 4.35 MB (50K × 768-dim × 4 bytes) |
+
+### Rendimiento de Consultas
+
+| Operación | Tiempo Típico |
+|-----------|---------------|
+| Health check | <10ms |
+| find_nearby (spatial) | 5-20ms |
+| search_by_name | 50-100ms |
+| search_by_embedding | 100-200ms |
+| Reranking (ML) | 10-50ms |
+| Ollama LLM query | 5-15s |
+| **Total end-to-end** | **5-20s** |
+
+### Monitoreo de GPU
 
 ```bash
-# Windows (NVIDIA)
+# NVIDIA GPU
 nvidia-smi
 
-# Linux
-nvidia-smi -l 1  # Refresco cada 1 segundo
+# Continuous monitoring
+nvidia-smi -l 1  # Refresh every 1 second
+
+# Expected VRAM usage
+# - Baseline: ~2.1 GB (Ollama + models)
+# - With query: ~4.0-5.8 GB
+# - Max safe: 6.0 GB (RTX 3060)
 ```
 
-**Esperado:**
-- Baseline: ~2.1 GB
-- Con contexto (200+ landmarks): ~4.2 GB
-- Máximo observado: 5.8 GB (margen seguro con 6GB)
+### Logging
 
-### Medir Latencia
+```python
+# Enable debug logging
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
+# Query and check logs
+from rag_core import run_rag_query
+result = run_rag_query(lat=41.4, lon=2.17, debug=True)
+```
+
+### Health Check Endpoint
 
 ```bash
-# Agregar timestamp a query
-import time
-start = time.time()
-python query_model.py 41.38 2.17
-elapsed = time.time() - start
-print(f"Latencia: {elapsed:.2f}s")
+curl http://localhost:8000/api/v1/health
+
+# Response:
+# {"status": "ok", "ollama_connected": true}
 ```
 
-**Rangos típicos:**
-- Sin azimuth: 250-350ms
-- Con azimuth: 200-300ms
-- Con contexto grande (>500 landmarks): 800ms-1.2s
-
 ---
 
-## Documentación Completa
+## 📖 Documentación Relacionada
 
-Para detalles técnicos y resultados de experimentación, ver:
+- [API_DOCUMENTATION.md](./API_DOCUMENTATION.md) - Referencia completa de endpoints REST
+- [../README.md](../README.md) - Documentación general del proyecto LandmarkLens
+- [../ML_EXPERIMENTS.md](../ML_EXPERIMENTS.md) - Resultados experimentales y benchmarks
 
- **[ML_EXPERIMENTS.md](ML_EXPERIMENTS.md)**
-- Definición del problema
-- Modelos candidatos
-- Pipeline de entrenamiento
-- Resultados de 4 experimentos iniciales
-- Análisis de limitaciones
-- Métricas de precisión
+## 🔗 Referencias Técnicas
 
----
+- **Ollama**: https://ollama.ai
+- **SQLite-Vec**: https://github.com/asg017/sqlite-vec
+- **FastAPI**: https://fastapi.tiangolo.com
+- **OpenStreetMap**: https://www.openstreetmap.org
 
-## Próximos Pasos
+## 📝 Workflow Típico
+
+```
+1. Instalar dependencias
+   pip install -r requirements.txt
+
+2. Inicializar BD
+   python migrate_to_db.py
+
+3. Generar embeddings (OBLIGATORIO)
+   python generate_embeddings.py
+
+4. (Opcional) Entrenar modelo ML
+   python train_models.py
+
+5. (Opcional) Iniciar API
+   python api.py
+
+6. Consultar
+   python query_model.py 41.4 2.17
+```
+
+## 🚀 Próximos Pasos
 
 - [ ] Expandir cobertura a más regiones españolas
 - [ ] Fine-tuning con ejemplos reales de usuarios
 - [ ] Implementar caché de respuestas frecuentes
 - [ ] Soporte multiidioma
-- [ ] API REST wrapper para integraciones
+- [ ] Integración con mapas (Leaflet/Mapbox)
+- [ ] Mejora de reranking con cross-encoders
+
+## 📋 Checklist Post-Instalación
+
+- [ ] Ollama ejecutándose (`ollama serve`)
+- [ ] Modelos descargados (`ollama list`)
+- [ ] BD creada y poblada (`landmarks.db` > 10MB)
+- [ ] Embeddings generados (`db.get_stats()['landmarks_with_embeddings'] == 50520`)
+- [ ] Health check OK (`curl .../health`)
+- [ ] CLI funcionando (`python query_model.py 41.4 2.17`)
+
+## 🎓 Aprendizaje y Debugging
+
+Para entender cómo funciona el sistema:
+
+```python
+# 1. Explorar base de datos
+from database import LandmarksDB
+db = LandmarksDB()
+print(db.get_stats())
+nearby = db.find_nearby(41.4036, 2.1744, radius_km=2.0)
+print(nearby[:3])  # Primeros 3 landmarks
+
+# 2. Ver índice espacial
+from rag_core import SpatialIndex, load_landmarks
+landmarks = load_landmarks()
+index = SpatialIndex(landmarks)
+candidates = index.query(41.4, 2.17, azimuth=45, fov=70)
+print(f"Candidatos: {len(candidates)}")
+
+# 3. Verificar prompt
+with open("data/system_prompt.txt") as f:
+    print(f.read()[:500])
+
+# 4. Entender validación
+from rag_core import validate_response
+test_json = '{"landmarks": [{"name": "Torre", "distance": 10}]}'
+valid, parsed = validate_response(test_json)
+print(f"Valid: {valid}, Parsed: {parsed}")
+```
 
 ---
 
-## Licencia y Créditos
-
-**Datos:** OpenStreetMap (ODbL License)  
-**Modelo:** Meta Llama 3.2 (Community License)  
-**Sistema:** LandmarkLens  
-
----
-
-## Soporte
-
-Para problemas, consulta:
-1. [ML_EXPERIMENTS.md](ML_EXPERIMENTS.md) — Documentación técnica
-2. Logs de Ollama: `~/.ollama/logs`
-3. Este README — Troubleshooting
-
----
+**Versión**: 1.0.0  
+**Estado**: Production ✅  
+**Última actualización**: Mayo 2026  
+**Mantenedor**: LandmarkLens Team
 

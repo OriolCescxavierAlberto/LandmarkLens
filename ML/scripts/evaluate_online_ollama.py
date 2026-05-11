@@ -1,26 +1,38 @@
 #!/usr/bin/env python3
-"""Run online inference evaluation against a local Ollama model.
+"""Run online end-to-end evaluation against the local RAG query flow.
 
 This evaluation checks structural quality of model outputs:
 - JSON validity
 - output latency
-- whether predicted landmark names come from provided candidates
+- whether predicted landmark names come from the retrieved candidates
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import statistics
+import sys
 import time
 from pathlib import Path
 from typing import Any
 
-import requests
+# Agregar parent directory al path para que encuentre landmark_model
+SCRIPT_DIR = Path(__file__).resolve().parent
+PARENT_DIR = SCRIPT_DIR.parent
+if str(PARENT_DIR) not in sys.path:
+    sys.path.insert(0, str(PARENT_DIR))
 
-NAME_RE = re.compile(r"(?m)^\d+\.\s+\*\*(.+?)\*\*\s+—")
-DIST_RE = re.compile(r"(?m)^\d+\.\s+\*\*(.+?)\*\*\s+—\s+a\s+(\d+)\s+metros")
+try:
+    from landmark_model import query_model
+except ImportError:
+    # Fallback: import desde landmark_model directamente si está en el mismo directorio
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("query_model", PARENT_DIR / "landmark_model" / "query_model.py")
+    query_model = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(query_model)
 
 
 def read_jsonl(path: Path) -> list[dict[str, Any]]:
@@ -33,109 +45,39 @@ def read_jsonl(path: Path) -> list[dict[str, Any]]:
     return rows
 
 
-def parse_candidates(reference_response: str) -> list[dict[str, Any]]:
-    candidates = []
-    for m in DIST_RE.finditer(reference_response):
-        candidates.append({"name": m.group(1).strip(), "distance": int(m.group(2))})
-
-    if not candidates:
-        for m in NAME_RE.finditer(reference_response):
-            candidates.append({"name": m.group(1).strip(), "distance": None})
-
-    return candidates
-
-
-def extract_json(text: str) -> Any | None:
-    text = text.strip()
-
-    try:
-        return json.loads(text)
-    except json.JSONDecodeError:
-        pass
-
-    start_list = text.find("[")
-    end_list = text.rfind("]")
-    if start_list != -1 and end_list > start_list:
-        chunk = text[start_list : end_list + 1]
-        try:
-            return json.loads(chunk)
-        except json.JSONDecodeError:
-            pass
-
-    start_obj = text.find("{")
-    end_obj = text.rfind("}")
-    if start_obj != -1 and end_obj > start_obj:
-        chunk = text[start_obj : end_obj + 1]
-        try:
-            return json.loads(chunk)
-        except json.JSONDecodeError:
-            pass
-
-    return None
-
-
-def predicted_names(parsed: Any) -> list[str]:
-    names: list[str] = []
-    if isinstance(parsed, list):
-        for item in parsed:
-            if isinstance(item, dict) and isinstance(item.get("name"), str):
-                names.append(item["name"].strip())
-    elif isinstance(parsed, dict):
+def reference_target_name(reference_response: str) -> str | None:
+    parsed = query_model._validate_response(reference_response)
+    if isinstance(parsed, list) and parsed:
+        first_item = parsed[0]
+        if isinstance(first_item, dict):
+            name = first_item.get("name")
+            if isinstance(name, str):
+                return name.strip()
+    if isinstance(parsed, dict):
         target = parsed.get("target")
         if isinstance(target, str):
-            names.append(target.strip())
-        others = parsed.get("others")
-        if isinstance(others, list):
-            for item in others:
-                if isinstance(item, dict) and isinstance(item.get("name"), str):
-                    names.append(item["name"].strip())
-    return names
-
-
-def build_prompt(question: str, candidates: list[dict[str, Any]]) -> str:
-    lines = []
-    for i, c in enumerate(candidates, start=1):
-        if c["distance"] is None:
-            lines.append(f'{i}. "{c["name"]}"')
-        else:
-            lines.append(f'{i}. "{c["name"]}" - {c["distance"]}m')
-
-    candidate_block = "\n".join(lines)
-
-    return (
-        "You are a strict JSON formatter for LandmarkLens.\n"
-        "Use ONLY landmark names from the candidate list.\n"
-        "Return ONLY valid JSON array with objects: \n"
-        '[{"name":"EXACT candidate name","distance":integer,"confidence":"high|medium|low"}]\n\n'
-        f"Question: {question}\n"
-        f"Candidates:\n{candidate_block}\n"
-    )
-
-
-def call_ollama(model: str, prompt: str, base_url: str, timeout_sec: float) -> tuple[str, int]:
-    t0 = time.perf_counter()
-    response = requests.post(
-        f"{base_url}/api/generate",
-        json={"model": model, "prompt": prompt, "stream": False},
-        timeout=timeout_sec,
-    )
-    elapsed_ms = int((time.perf_counter() - t0) * 1000)
-    response.raise_for_status()
-    data = response.json()
-    return str(data.get("response", "")), elapsed_ms
+            return target.strip()
+    return None
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Online Ollama evaluation")
-    parser.add_argument("--model", default="landmark-finder-e4")
-    parser.add_argument("--test-file", default="ML/data/processed/test.jsonl")
-    parser.add_argument("--output", default="ML/experiments/online_eval_report.json")
-    parser.add_argument("--base-url", default="http://localhost:11434")
+    parser.add_argument("--model", default=query_model.MODEL_NAME)
+    parser.add_argument("--test-file", default="data/processed/test.jsonl")
+    parser.add_argument("--output", default="experiments/online_eval_report.json")
     parser.add_argument("--max-samples", type=int, default=20)
-    parser.add_argument("--timeout", type=float, default=60.0)
     args = parser.parse_args()
 
-    rows = read_jsonl(Path(args.test_file))
+    # Resolver rutas relativas a la carpeta ML (parent de scripts)
+    test_file = Path(args.test_file)
+    if not test_file.is_absolute():
+        test_file = PARENT_DIR / test_file
+    
+    output_file = Path(args.output)
+    if not output_file.is_absolute():
+        output_file = PARENT_DIR / output_file
+    
+    rows = read_jsonl(test_file)
     rows = rows[: args.max_samples]
 
     per_sample: list[dict[str, Any]] = []
@@ -143,45 +85,55 @@ def main() -> None:
     json_valid_count = 0
     in_candidates_count = 0
     any_prediction_count = 0
+    top1_count = 0
 
     for idx, row in enumerate(rows, start=1):
         question = str(row.get("prompt", "")).strip()
         reference_response = str(row.get("response", "")).strip()
-        candidates = parse_candidates(reference_response)
+        target_name = reference_target_name(reference_response)
 
-        if not question or not candidates:
+        lat = row.get("latitude")
+        lon = row.get("longitude")
+        if lat is None or lon is None:
             per_sample.append(
                 {
                     "index": idx,
                     "skipped": True,
-                    "reason": "missing_question_or_candidates",
+                    "reason": "missing_coordinates",
                 }
             )
             continue
 
-        prompt = build_prompt(question, candidates)
+        if not question:
+            per_sample.append(
+                {
+                    "index": idx,
+                    "skipped": True,
+                    "reason": "missing_question",
+                }
+            )
+            continue
 
         try:
-            raw_text, latency_ms = call_ollama(
-                model=args.model,
-                prompt=prompt,
-                base_url=args.base_url,
-                timeout_sec=args.timeout,
-            )
+            t0 = time.perf_counter()
+            result = query_model.run_rag_query(float(lat), float(lon), stream=False, model_name=args.model)
+            latency_ms = int((time.perf_counter() - t0) * 1000)
             latency_values.append(latency_ms)
 
-            parsed = extract_json(raw_text)
-            is_json_valid = parsed is not None
+            parsed = result.validation.get("parsed")
+            is_json_valid = bool(result.validation.get("is_json_valid"))
             if is_json_valid:
                 json_valid_count += 1
 
-            pred = predicted_names(parsed) if parsed is not None else []
-            allowed = {c["name"] for c in candidates}
+            pred = result.validation.get("predicted_names", [])
+            allowed = {c["name"] for c in result.nearby if c.get("name")}
             if pred:
                 any_prediction_count += 1
             in_candidates = bool(pred) and all(name in allowed for name in pred)
             if in_candidates:
                 in_candidates_count += 1
+            if target_name and pred and pred[0] == target_name:
+                top1_count += 1
 
             per_sample.append(
                 {
@@ -191,7 +143,9 @@ def main() -> None:
                     "predicted_names": pred,
                     "allowed_candidates": sorted(allowed),
                     "all_predicted_in_candidates": in_candidates,
-                    "raw_output_preview": raw_text[:300],
+                    "top1_matches_reference": bool(target_name and pred and pred[0] == target_name),
+                    "reference_target": target_name,
+                    "raw_output_preview": (result.raw_text or "")[:300],
                 }
             )
         except Exception as exc:
@@ -219,6 +173,7 @@ def main() -> None:
             "non_empty_prediction_rate": round(any_prediction_count / successful_calls, 4)
             if successful_calls
             else 0.0,
+            "top1_match_rate": round(top1_count / successful_calls, 4) if successful_calls else 0.0,
             "latency_avg_ms": round(statistics.mean(latency_values), 2) if latency_values else None,
             "latency_p95_ms": round(statistics.quantiles(latency_values, n=20)[18], 2)
             if len(latency_values) >= 20
@@ -227,9 +182,8 @@ def main() -> None:
         "samples": per_sample,
     }
 
-    output_path = Path(args.output)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")
+    output_file.parent.mkdir(parents=True, exist_ok=True)
+    output_file.write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")
 
     print("Online evaluation finished")
     print(json.dumps(report["metrics"], indent=2, ensure_ascii=False))

@@ -1,32 +1,31 @@
 {
-  "generated_at": "2026-05-04T13:59:41.899019+00:00",
-  "seed": 2,
+  "generated_at": "2026-05-11T13:41:14.098609+00:00",
+  "seed": 42,
   "dataset": {
-    "target_landmarks": 10,
-    "generated_queries": 10,
+    "target_landmarks": 388,
+    "generated_queries": 1552,
     "skipped_queries": 0,
-    "rows": 32
+    "rows": 6515
   },
   "selected_model": {
-    "name": "heuristic_ranker",
+    "name": "linear_logistic",
     "best_params": {
-      "distance_weight": 0.8,
-      "fame_weight": 0.1,
-      "angle_weight": 0.8,
-      "azimuth_weight": 0.1
+      "learning_rate": 0.05,
+      "epochs": 8,
+      "l2": 0.0
     },
-    "validation_candidate_f1": 0.0,
-    "validation_candidate_precision": 0.0,
-    "validation_candidate_recall": 0.0,
-    "validation_candidate_accuracy": 0.8,
-    "validation_query_top1": 0.0,
-    "validation_average_precision": 0.26666666666666666,
-    "test_candidate_f1": 0.0,
-    "test_candidate_precision": 0.0,
-    "test_candidate_recall": 0.0,
-    "test_candidate_accuracy": 0.7142857142857143,
-    "test_query_top1": 1.0,
-    "test_average_precision": 0.75
+    "validation_candidate_f1": 0.22343324250681199,
+    "validation_candidate_precision": 0.5616438356164384,
+    "validation_candidate_recall": 0.13945578231292516,
+    "validation_candidate_accuracy": 0.7834346504559271,
+    "validation_query_top1": 0.5741935483870968,
+    "validation_average_precision": 0.40637573075036737,
+    "test_candidate_f1": 0.2111111111111111,
+    "test_candidate_precision": 0.5588235294117647,
+    "test_candidate_recall": 0.13013698630136986,
+    "test_candidate_accuracy": 0.7867867867867868,
+    "test_query_top1": 0.594855305466238,
+    "test_average_precision": 0.37423756500870803
   },
   "feature_columns": [
     "distance_m",
@@ -50,65 +49,65 @@
   },
   "comparison": [
     {
+      "name": "linear_logistic",
+      "best_params": {
+        "learning_rate": 0.05,
+        "epochs": 8,
+        "l2": 0.0
+      },
+      "validation_candidate_f1": 0.22343324250681199,
+      "validation_candidate_precision": 0.5616438356164384,
+      "validation_candidate_recall": 0.13945578231292516,
+      "validation_candidate_accuracy": 0.7834346504559271,
+      "validation_query_top1": 0.5741935483870968,
+      "validation_average_precision": 0.40637573075036737,
+      "test_candidate_f1": 0.2111111111111111,
+      "test_candidate_precision": 0.5588235294117647,
+      "test_candidate_recall": 0.13013698630136986,
+      "test_candidate_accuracy": 0.7867867867867868,
+      "test_query_top1": 0.594855305466238,
+      "test_average_precision": 0.37423756500870803
+    },
+    {
       "name": "heuristic_ranker",
       "best_params": {
         "distance_weight": 0.8,
         "fame_weight": 0.1,
-        "angle_weight": 0.8,
-        "azimuth_weight": 0.1
+        "angle_weight": 1.0,
+        "azimuth_weight": 0.2
       },
-      "validation_candidate_f1": 0.0,
-      "validation_candidate_precision": 0.0,
-      "validation_candidate_recall": 0.0,
-      "validation_candidate_accuracy": 0.8,
-      "validation_query_top1": 0.0,
-      "validation_average_precision": 0.26666666666666666,
-      "test_candidate_f1": 0.0,
-      "test_candidate_precision": 0.0,
-      "test_candidate_recall": 0.0,
-      "test_candidate_accuracy": 0.7142857142857143,
-      "test_query_top1": 1.0,
-      "test_average_precision": 0.75
-    },
-    {
-      "name": "linear_logistic",
-      "best_params": {
-        "learning_rate": 0.02,
-        "epochs": 12,
-        "l2": 0.0
-      },
-      "validation_candidate_f1": 0.4,
-      "validation_candidate_precision": 0.3333333333333333,
-      "validation_candidate_recall": 0.5,
-      "validation_candidate_accuracy": 0.7,
-      "validation_query_top1": 0.0,
-      "validation_average_precision": 0.375,
-      "test_candidate_f1": 0.0,
-      "test_candidate_precision": 0.0,
-      "test_candidate_recall": 0.0,
-      "test_candidate_accuracy": 0.5714285714285714,
-      "test_query_top1": 0.0,
-      "test_average_precision": 0.26785714285714285
+      "validation_candidate_f1": 0.06493506493506493,
+      "validation_candidate_precision": 0.7142857142857143,
+      "validation_candidate_recall": 0.034013605442176874,
+      "validation_candidate_accuracy": 0.7811550151975684,
+      "validation_query_top1": 0.5483870967741935,
+      "validation_average_precision": 0.3801353064223697,
+      "test_candidate_f1": 0.07006369426751591,
+      "test_candidate_precision": 0.5,
+      "test_candidate_recall": 0.03767123287671233,
+      "test_candidate_accuracy": 0.7807807807807807,
+      "test_query_top1": 0.5787781350482315,
+      "test_average_precision": 0.312493123517452
     },
     {
       "name": "linear_hinge",
       "best_params": {
-        "learning_rate": 0.01,
+        "learning_rate": 0.03,
         "epochs": 8,
-        "l2": 0.0
+        "l2": 0.001
       },
-      "validation_candidate_f1": 0.3333333333333333,
-      "validation_candidate_precision": 0.25,
-      "validation_candidate_recall": 0.5,
-      "validation_candidate_accuracy": 0.6,
-      "validation_query_top1": 0.0,
-      "validation_average_precision": 0.375,
-      "test_candidate_f1": 0.0,
-      "test_candidate_precision": 0.0,
-      "test_candidate_recall": 0.0,
-      "test_candidate_accuracy": 0.5714285714285714,
-      "test_query_top1": 0.0,
-      "test_average_precision": 0.26785714285714285
+      "validation_candidate_f1": 0.038095238095238085,
+      "validation_candidate_precision": 0.2857142857142857,
+      "validation_candidate_recall": 0.02040816326530612,
+      "validation_candidate_accuracy": 0.7697568389057751,
+      "validation_query_top1": 0.5548387096774193,
+      "validation_average_precision": 0.3238659024959735,
+      "test_candidate_f1": 0.026229508196721308,
+      "test_candidate_precision": 0.3076923076923077,
+      "test_candidate_recall": 0.0136986301369863,
+      "test_candidate_accuracy": 0.777027027027027,
+      "test_query_top1": 0.5755627009646302,
+      "test_average_precision": 0.31024178562326904
     }
   ]
 }

@@ -19,9 +19,10 @@ def run_step(cmd: list[str]) -> None:
 def main() -> None:
     python = sys.executable
 
-    run_step([python, str(ROOT / "ml/scripts/prepare_data.py")])
-    run_step([python, str(ROOT / "ml/scripts/train_model.py")])
-    run_step([python, str(ROOT / "ml/scripts/evaluate_model.py")])
+    run_step([python, str(ROOT / "ML/scripts/prepare_data.py")])
+    run_step([python, str(ROOT / "ML/scripts/train_model.py")])
+    run_step([python, str(ROOT / "ML/scripts/evaluate_model.py")])
+    run_step([python, str(ROOT / "ML/scripts/evaluate_online_ollama.py")])
 
     print("Pipeline finished successfully")
 

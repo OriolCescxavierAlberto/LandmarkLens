@@ -1,0 +1,42 @@
+{
+  "generated_at_utc": "2026-05-11T13:59:08.433218+00:00",
+  "model_name": "landmark-finder",
+  "base_model": "llama3.2:3b",
+  "retrieval": {
+    "grid_size": 0.01,
+    "default_fov": 70,
+    "default_max_dist": 500,
+    "default_max_results": 8
+  },
+  "dataset": {
+    "landmarks_total": 52950,
+    "landmarks_with_coordinates": 50520,
+    "training_examples": 200
+  },
+  "artifacts": {
+    "landmarks": "C:\\Users\\oriol\\Desktop\\LandmarkLens\\ML\\landmark_model\\data\\landmarks.json",
+    "system_prompt": "C:\\Users\\oriol\\Desktop\\LandmarkLens\\ML\\landmark_model\\data\\system_prompt.txt",
+    "modelfile": "C:\\Users\\oriol\\Desktop\\LandmarkLens\\ML\\landmark_model\\Modelfile",
+    "bundle": "C:\\Users\\oriol\\Desktop\\LandmarkLens\\ML\\landmark_model\\artifacts\\selected_model_bundle.joblib"
+  },
+  "feature_columns": [
+    "distance_m",
+    "distance_km",
+    "bearing_sin",
+    "bearing_cos",
+    "angle_offset_deg",
+    "azimuth_present",
+    "fov_deg",
+    "fame_score",
+    "category_count",
+    "has_description",
+    "has_wikipedia",
+    "has_wikidata"
+  ],
+  "prompt_rules": [
+    "never invent landmarks",
+    "copy names exactly",
+    "return only valid JSON",
+    "use target/others when azimuth is provided"
+  ]
+}

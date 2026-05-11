@@ -35,9 +35,9 @@ def main() -> None:
     parser.add_argument("--run-name", default="landmark-finder-v1")
     parser.add_argument("--base-model", default="llama3.2:3b")
     parser.add_argument("--model-name", default="landmark-finder-v1")
-    parser.add_argument("--system-prompt", default="ml/data/system_prompt.txt")
-    parser.add_argument("--stats", default="ml/data/processed/dataset_stats.json")
-    parser.add_argument("--output-dir", default="ml/models")
+    parser.add_argument("--system-prompt", default="ML/data/system_prompt.txt")
+    parser.add_argument("--stats", default="ML/data/processed/dataset_stats.json")
+    parser.add_argument("--output-dir", default="ML/models")
     parser.add_argument("--create-model", action="store_true")
     args = parser.parse_args()
 
