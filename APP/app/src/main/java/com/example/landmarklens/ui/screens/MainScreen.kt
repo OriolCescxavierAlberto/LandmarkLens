@@ -92,8 +92,19 @@ fun MainApp(
                         NavigationBarItem(
                             selected = currentTab == tab,
                             onClick = {
+                                if (vm.showResult) {
+                                    // Si estamos en un resultado, permitimos cambiar a CHAT sin resetear.
+                                    // Pero si cambiamos a otra cosa (como MAP), sí reseteamos para limpiar el estado de la cámara.
+                                    if (tab == AppTab.CHAT) {
+                                        if (vm.chatMessages.isEmpty()) {
+                                            vm.sendChatMessage("Hola, ¿qué puedes decirme sobre este lugar?")
+                                        }
+                                        vm.showResult = false // Ocultamos el overlay de resultado para ver el chat
+                                    } else {
+                                        vm.resetCapture()
+                                    }
+                                }
                                 vm.setTab(tab)
-                                if (vm.showResult) vm.resetCapture()
                             },
                             icon = { Icon(icon, label) },
                             label = { Text(label, style = MaterialTheme.typography.labelSmall) },
@@ -401,7 +412,7 @@ fun CaptureResultScreen(vm: LandmarkViewModel) {
                             }
                         } else if (vm.remoteAnalysisResult != null) {
                             val result = vm.remoteAnalysisResult!!
-                            if (result.landmark != null) {
+                            if (result.isSuccessful) {
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -409,7 +420,7 @@ fun CaptureResultScreen(vm: LandmarkViewModel) {
                                 ) {
                                     Column(modifier = Modifier.weight(1f)) {
                                         Text(
-                                            result.landmark,
+                                            result.landmark ?: "Desconocido",
                                             style = MaterialTheme.typography.headlineSmall,
                                             fontWeight = FontWeight.ExtraBold,
                                             color = MaterialTheme.colorScheme.primary
@@ -468,7 +479,21 @@ fun CaptureResultScreen(vm: LandmarkViewModel) {
                                     }
                                 }
                             } else {
-                                Text("No se identificó un monumento en esta ubicación", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+                                    Icon(
+                                        Icons.Default.Info,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.secondary,
+                                        modifier = Modifier.size(40.dp)
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text(
+                                        result.message ?: result.landmark ?: "No se identificó un monumento en esta ubicación",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        textAlign = TextAlign.Center
+                                    )
+                                }
                             }
                         } else {
                             Text("Pendiente análisis...", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -571,6 +596,9 @@ fun CaptureResultScreen(vm: LandmarkViewModel) {
                     }
                     Button(
                         onClick = {
+                            if (vm.chatMessages.isEmpty()) {
+                                vm.sendChatMessage("Hola, cuéntame sobre este lugar")
+                            }
                             vm.setTab(AppTab.CHAT)
                             vm.showResult = false
                         },

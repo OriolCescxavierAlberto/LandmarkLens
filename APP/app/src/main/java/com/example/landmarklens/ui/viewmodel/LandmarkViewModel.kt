@@ -134,15 +134,46 @@ class LandmarkViewModel(application: Application) : AndroidViewModel(application
 
     fun sendChatMessage(question: String) {
         if (question.isBlank() || isChatLoading) return
+        
+        // Si es el primer mensaje, podemos inyectar contexto
+        val isFirstMessage = chatMessages.isEmpty()
+        val contextPrompt = if (isFirstMessage) {
+            buildContextPrompt(question)
+        } else {
+            question
+        }
+
         chatMessages.add(ChatMessage(role = "user", text = question))
         chatQuestion = ""
         isChatLoading = true
         viewModelScope.launch {
             try {
-                val reply = OllamaClient.askModel(selectedModel, question)
+                val reply = OllamaClient.askModel(selectedModel, contextPrompt)
                 chatMessages.add(ChatMessage(role = "assistant", text = reply))
             } finally { isChatLoading = false }
         }
+    }
+
+    private fun buildContextPrompt(question: String): String {
+        val location = identifiedLocation?.name ?: "una ubicación desconocida"
+        val address = identifiedLocation?.address ?: ""
+        val landmark = remoteAnalysisResult?.landmark ?: location
+        val description = remoteAnalysisResult?.description ?: ""
+        
+        // Si no tenemos un landmark claro pero sí un mensaje del servidor, lo usamos
+        val serverMessage = remoteAnalysisResult?.message ?: ""
+        
+        return """
+            Contexto: El usuario está en $landmark ($address). 
+            Información del monumento: $description
+            Mensaje del servidor: $serverMessage
+            Coordenadas: $capturedLat, $capturedLon
+            
+            Pregunta del usuario: $question
+            
+            Por favor, responde como un guía experto en historia y monumentos, usando el contexto proporcionado.
+            Si no se identificó un monumento específico, intenta ayudar al usuario con la información de ubicación general disponible.
+        """.trimIndent()
     }
 
     fun fetchLocationInfo(placesService: PlacesService) {
@@ -183,7 +214,7 @@ class LandmarkViewModel(application: Application) : AndroidViewModel(application
         
         viewModelScope.launch {
             try {
-                // Llamar a la API remota con los parámetros capturados
+                // Llamar a la API remota con los parámetros capturados según la especificación exacta
                 val response = RemoteAnalysisService.queryRemoteAnalysis(
                     latitude = capturedLat,
                     longitude = capturedLon,
@@ -209,45 +240,65 @@ class LandmarkViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    /**
-     * Parsea la respuesta JSON de la API para crear un AnalysisResult.
-     * Se adapta a diferentes formatos posibles de respuesta.
-     */
     private fun parseRemoteAnalysisResponse(jsonResponse: org.json.JSONObject): AnalysisResult {
         return try {
-            // Intentar extraer campos comunes (adaptable según tu API)
-            val landmark = jsonResponse.optString("landmark", "").takeIf { it.isNotBlank() }
-                ?: jsonResponse.optString("name", "").takeIf { it.isNotBlank() }
-                ?: jsonResponse.optString("monument", "").takeIf { it.isNotBlank() }
-            
-            val confidence = jsonResponse.optDouble("confidence", 0.0).toFloat()
-            val description = jsonResponse.optString("description", "").takeIf { it.isNotBlank() }
-            val category = jsonResponse.optString("category", "").takeIf { it.isNotBlank() }
-            val historicalInfo = jsonResponse.optString("historical_info", "").takeIf { it.isNotBlank() }
-                ?: jsonResponse.optString("history", "").takeIf { it.isNotBlank() }
-            
-            val distance = try {
-                jsonResponse.optDouble("distance", 0.0).toFloat().takeIf { it > 0 }
-            } catch (_: Exception) {
-                null
+            val status = jsonResponse.optString("status", "unknown")
+            val data = jsonResponse.optJSONObject("data") ?: jsonResponse
+            val landmarksArray = data.optJSONArray("landmarks")
+
+            if (landmarksArray != null && landmarksArray.length() > 0) {
+                val landmarks = mutableListOf<org.json.JSONObject>()
+                for (i in 0 until landmarksArray.length()) {
+                    landmarks.add(landmarksArray.getJSONObject(i))
+                }
+                
+                // Ordenar por distancia de menor a mayor (la API ya suele darlos ordenados, pero aseguramos)
+                val sortedLandmarks = landmarks.sortedBy { it.optDouble("distance", Double.MAX_VALUE) }
+                val closest = sortedLandmarks[0]
+
+                // Mapear confianza de texto a valor numérico
+                val confidenceScore = when(closest.optString("confidence").lowercase()) {
+                    "high" -> 0.95f
+                    "medium" -> 0.70f
+                    else -> 0.45f
+                }
+
+                // Generar descripción legible con las estructuras cercanas
+                val descBuilder = StringBuilder()
+                descBuilder.append("Se han detectado las siguientes estructuras en las inmediaciones:\n\n")
+                
+                sortedLandmarks.forEachIndexed { index, item ->
+                    val isClosest = index == 0
+                    val icon = if (isClosest) "📍 " else "• "
+                    val label = if (isClosest) " (LA MÁS CERCANA)" else ""
+                    
+                    descBuilder.append("$icon${item.optString("name")}$label\n")
+                    descBuilder.append("  Distancia: ${item.optInt("distance")} metros\n")
+                    descBuilder.append("  Confianza: ${item.optString("confidence")}\n\n")
+                }
+
+                val statusDisplay = if (status == "degraded") "Análisis parcial (Ubicación aproximada)" else "Análisis completado"
+
+                AnalysisResult(
+                    landmark = closest.optString("name"),
+                    confidence = confidenceScore,
+                    estimatedDistance = closest.optDouble("distance").toFloat(),
+                    description = descBuilder.toString().trim(),
+                    message = statusDisplay,
+                    rawResponse = jsonResponse.toMap()
+                )
+            } else {
+                AnalysisResult(
+                    landmark = "Ubicación detectada",
+                    description = "No se encontraron monumentos específicos en la respuesta.",
+                    rawResponse = jsonResponse.toMap()
+                )
             }
-            
-            AnalysisResult(
-                id = jsonResponse.optString("id", "").takeIf { it.isNotBlank() },
-                landmark = landmark,
-                confidence = confidence,
-                description = description,
-                category = category,
-                historicalInfo = historicalInfo,
-                estimatedDistance = distance,
-                rawResponse = jsonResponse.toMap()
-            )
         } catch (e: Exception) {
-            Log.e(TAG, "Error al parsear respuesta de análisis", e)
+            Log.e(TAG, "Error procesando respuesta: ${e.message}")
             AnalysisResult(
-                landmark = "Error en análisis",
-                confidence = 0f,
-                description = "No se pudo procesar la respuesta del servidor"
+                landmark = "Error",
+                description = "No se pudo interpretar la respuesta del servidor."
             )
         }
     }
@@ -298,8 +349,15 @@ class LandmarkViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun onPhotoCaptured(bitmap: Bitmap) {
-        capturedBitmap = bitmap; capturedLat = lat; capturedLon = lon
-        capturedAzimuth = azimuth; identifiedLocation = null; showResult = true
+        capturedBitmap = bitmap
+        capturedLat = lat
+        capturedLon = lon
+        capturedAzimuth = azimuth
+        identifiedLocation = null
+        showResult = true
+        
+        // Lanzar el análisis remoto automáticamente
+        performRemoteAnalysis()
     }
 
     fun startSensors() { rotationSensor?.let { sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_NORMAL) } }

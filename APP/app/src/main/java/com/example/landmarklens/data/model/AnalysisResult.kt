@@ -12,9 +12,10 @@ data class AnalysisResult(
     val category: String? = null,
     val historicalInfo: String? = null,
     val estimatedDistance: Float? = null,
+    val message: String? = null,
     val rawResponse: Map<String, Any> = emptyMap()
 ) {
     val isSuccessful: Boolean
-        get() = landmark != null && confidence > 0f
+        get() = landmark != null && confidence > 0.1f
 }
 
