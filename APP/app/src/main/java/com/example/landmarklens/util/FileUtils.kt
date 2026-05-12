@@ -36,6 +36,13 @@ object FileUtils {
         android.graphics.BitmapFactory.decodeFile(path)
     } catch (e: Exception) { null }
 
+    fun bitmapToBase64(bitmap: Bitmap): String {
+        val byteArrayOutputStream = java.io.ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 70, byteArrayOutputStream)
+        val byteArray = byteArrayOutputStream.toByteArray()
+        return android.util.Base64.encodeToString(byteArray, android.util.Base64.NO_WRAP)
+    }
+
     fun deletePhoto(path: String): Boolean {
         val file = File(path)
         return if (file.exists()) file.delete() else false
