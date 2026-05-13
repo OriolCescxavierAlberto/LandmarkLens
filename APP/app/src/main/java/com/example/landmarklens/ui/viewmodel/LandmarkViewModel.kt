@@ -20,19 +20,20 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.landmarklens.data.local.LandmarkDatabase
 import com.example.landmarklens.data.local.LandmarkEntity
+import com.example.landmarklens.data.model.AnalysisResult
 import com.example.landmarklens.data.model.AppTab
 import com.example.landmarklens.data.model.ChatMessage
 import com.example.landmarklens.data.model.LandmarkHistoryItem
 import com.example.landmarklens.data.model.LandmarkLocation
 import com.example.landmarklens.data.remote.OllamaClient
 import com.example.landmarklens.data.remote.PlacesService
+import com.example.landmarklens.data.remote.RemoteAnalysisService
 import com.example.landmarklens.util.FileUtils
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
 class LandmarkViewModel(application: Application) : AndroidViewModel(application), SensorEventListener {
@@ -58,6 +59,11 @@ class LandmarkViewModel(application: Application) : AndroidViewModel(application
     var identifiedLocation by mutableStateOf<LandmarkLocation?>(null)
     var isLoadingLocation by mutableStateOf(false)
     var locationError by mutableStateOf<String?>(null)
+
+    // Remote Analysis Api state
+    var remoteAnalysisResult by mutableStateOf<AnalysisResult?>(null)
+    var isLoadingRemoteAnalysis by mutableStateOf(false)
+    var remoteAnalysisError by mutableStateOf<String?>(null)
 
     // Chat State
     val chatMessages = mutableStateListOf<ChatMessage>()
@@ -128,15 +134,46 @@ class LandmarkViewModel(application: Application) : AndroidViewModel(application
 
     fun sendChatMessage(question: String) {
         if (question.isBlank() || isChatLoading) return
+        
+        // Si es el primer mensaje, podemos inyectar contexto
+        val isFirstMessage = chatMessages.isEmpty()
+        val contextPrompt = if (isFirstMessage) {
+            buildContextPrompt(question)
+        } else {
+            question
+        }
+
         chatMessages.add(ChatMessage(role = "user", text = question))
         chatQuestion = ""
         isChatLoading = true
         viewModelScope.launch {
             try {
-                val reply = OllamaClient.askModel(selectedModel, question)
+                val reply = OllamaClient.askModel(selectedModel, contextPrompt)
                 chatMessages.add(ChatMessage(role = "assistant", text = reply))
             } finally { isChatLoading = false }
         }
+    }
+
+    private fun buildContextPrompt(question: String): String {
+        val location = identifiedLocation?.name ?: "una ubicación desconocida"
+        val address = identifiedLocation?.address ?: ""
+        val landmark = remoteAnalysisResult?.landmark ?: location
+        val description = remoteAnalysisResult?.description ?: ""
+        
+        // Si no tenemos un landmark claro pero sí un mensaje del servidor, lo usamos
+        val serverMessage = remoteAnalysisResult?.message ?: ""
+        
+        return """
+            Contexto: El usuario está en $landmark ($address). 
+            Información del monumento: $description
+            Mensaje del servidor: $serverMessage
+            Coordenadas: $capturedLat, $capturedLon
+            
+            Pregunta del usuario: $question
+            
+            Por favor, responde como un guía experto en historia y monumentos, usando el contexto proporcionado.
+            Si no se identificó un monumento específico, intenta ayudar al usuario con la información de ubicación general disponible.
+        """.trimIndent()
     }
 
     fun fetchLocationInfo(placesService: PlacesService) {
@@ -159,6 +196,110 @@ class LandmarkViewModel(application: Application) : AndroidViewModel(application
                 }
             } catch (e: Exception) { locationError = e.message }
             finally { isLoadingLocation = false }
+        }
+    }
+
+    /**
+     * Ejecuta un análisis remoto con los parámetros GPS y sensor actuales.
+     * Se llama automáticamente después de capturar una foto.
+     */
+    private fun performRemoteAnalysis() {
+        if (isLoadingRemoteAnalysis || capturedLat == 0.0 || capturedLon == 0.0) return
+        
+        isLoadingRemoteAnalysis = true
+        remoteAnalysisError = null
+        remoteAnalysisResult = null
+        
+        Log.d(TAG, "Iniciando análisis remoto - Lat: $capturedLat, Lon: $capturedLon, Azimuth: $capturedAzimuth")
+        
+        viewModelScope.launch {
+            try {
+                // Llamar a la API remota con los parámetros capturados según la especificación exacta
+                val response = RemoteAnalysisService.queryRemoteAnalysis(
+                    latitude = capturedLat,
+                    longitude = capturedLon,
+                    azimuth = capturedAzimuth,
+                    fov = 70f
+                )
+                
+                if (response != null) {
+                    // Parsear la respuesta y crear AnalysisResult
+                    val result = parseRemoteAnalysisResponse(response)
+                    remoteAnalysisResult = result
+                    Log.d(TAG, "Análisis remoto completado: ${result.landmark}")
+                } else {
+                    remoteAnalysisError = "No se recibió respuesta del servidor de análisis"
+                    Log.w(TAG, remoteAnalysisError ?: "Unknown error")
+                }
+            } catch (e: Exception) {
+                remoteAnalysisError = e.message ?: "Error desconocido en el análisis"
+                Log.e(TAG, "Error en análisis remoto", e)
+            } finally {
+                isLoadingRemoteAnalysis = false
+            }
+        }
+    }
+
+    private fun parseRemoteAnalysisResponse(jsonResponse: org.json.JSONObject): AnalysisResult {
+        return try {
+            val status = jsonResponse.optString("status", "unknown")
+            val data = jsonResponse.optJSONObject("data") ?: jsonResponse
+            val landmarksArray = data.optJSONArray("landmarks")
+
+            if (landmarksArray != null && landmarksArray.length() > 0) {
+                val landmarks = mutableListOf<org.json.JSONObject>()
+                for (i in 0 until landmarksArray.length()) {
+                    landmarks.add(landmarksArray.getJSONObject(i))
+                }
+                
+                // Ordenar por distancia de menor a mayor (la API ya suele darlos ordenados, pero aseguramos)
+                val sortedLandmarks = landmarks.sortedBy { it.optDouble("distance", Double.MAX_VALUE) }
+                val closest = sortedLandmarks[0]
+
+                // Mapear confianza de texto a valor numérico
+                val confidenceScore = when(closest.optString("confidence").lowercase()) {
+                    "high" -> 0.95f
+                    "medium" -> 0.70f
+                    else -> 0.45f
+                }
+
+                // Generar descripción legible con las estructuras cercanas
+                val descBuilder = StringBuilder()
+                descBuilder.append("Se han detectado las siguientes estructuras en las inmediaciones:\n\n")
+                
+                sortedLandmarks.forEachIndexed { index, item ->
+                    val isClosest = index == 0
+                    val icon = if (isClosest) "📍 " else "• "
+                    val label = if (isClosest) " (LA MÁS CERCANA)" else ""
+                    
+                    descBuilder.append("$icon${item.optString("name")}$label\n")
+                    descBuilder.append("  Distancia: ${item.optInt("distance")} metros\n")
+                    descBuilder.append("  Confianza: ${item.optString("confidence")}\n\n")
+                }
+
+                val statusDisplay = if (status == "degraded") "Análisis parcial (Ubicación aproximada)" else "Análisis completado"
+
+                AnalysisResult(
+                    landmark = closest.optString("name"),
+                    confidence = confidenceScore,
+                    estimatedDistance = closest.optDouble("distance").toFloat(),
+                    description = descBuilder.toString().trim(),
+                    message = statusDisplay,
+                    rawResponse = jsonResponse.toMap()
+                )
+            } else {
+                AnalysisResult(
+                    landmark = "Ubicación detectada",
+                    description = "No se encontraron monumentos específicos en la respuesta.",
+                    rawResponse = jsonResponse.toMap()
+                )
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error procesando respuesta: ${e.message}")
+            AnalysisResult(
+                landmark = "Error",
+                description = "No se pudo interpretar la respuesta del servidor."
+            )
         }
     }
 
@@ -208,8 +349,15 @@ class LandmarkViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun onPhotoCaptured(bitmap: Bitmap) {
-        capturedBitmap = bitmap; capturedLat = lat; capturedLon = lon
-        capturedAzimuth = azimuth; identifiedLocation = null; showResult = true
+        capturedBitmap = bitmap
+        capturedLat = lat
+        capturedLon = lon
+        capturedAzimuth = azimuth
+        identifiedLocation = null
+        showResult = true
+        
+        // Lanzar el análisis remoto automáticamente
+        performRemoteAnalysis()
     }
 
     fun startSensors() { rotationSensor?.let { sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_NORMAL) } }
@@ -223,4 +371,20 @@ class LandmarkViewModel(application: Application) : AndroidViewModel(application
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+
+    /**
+     * Convierte un JSONObject a Map para almacenar en AnalysisResult.
+     */
+    private fun org.json.JSONObject.toMap(): Map<String, Any> {
+        val map = mutableMapOf<String, Any>()
+        val keys = this.keys()
+        while (keys.hasNext()) {
+            val key = keys.next()
+            val value = this.get(key)
+            if (value != org.json.JSONObject.NULL) {
+                map[key] = value
+            }
+        }
+        return map
+    }
 }

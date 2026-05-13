@@ -30,7 +30,13 @@ El runtime RAG centralizado vive en `rag_core.py` que integra: búsqueda espacia
 ### 2. Instalación de Dependencias
 
 ```bash
+# Entrar al directorio
 cd landmark_model
+
+# Activar entorno virtual (opcional)
+source venv/bin/activate
+
+# Instalar dependencias Python
 pip install -r requirements.txt
 ```
 
