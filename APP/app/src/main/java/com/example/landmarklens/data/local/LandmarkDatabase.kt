@@ -5,7 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [LandmarkEntity::class], version = 1, exportSchema = false)
+@Database(entities = [LandmarkEntity::class], version = 3, exportSchema = false)
 abstract class LandmarkDatabase : RoomDatabase() {
     abstract fun landmarkDao(): LandmarkDao
 
@@ -19,7 +19,9 @@ abstract class LandmarkDatabase : RoomDatabase() {
                     context.applicationContext,
                     LandmarkDatabase::class.java,
                     "landmark_database"
-                ).build()
+                )
+                    .fallbackToDestructiveMigration()
+                    .build()
                 INSTANCE = instance
                 instance
             }

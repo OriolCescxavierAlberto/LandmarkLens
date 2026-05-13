@@ -97,6 +97,13 @@ class LandmarkViewModel(application: Application) : AndroidViewModel(application
                                 longitude = entity.lon,
                                 type = entity.locationType ?: ""
                             ),
+                            aiResult = if (entity.aiLandmark != null) {
+                                AnalysisResult(
+                                    landmark = entity.aiLandmark,
+                                    description = entity.aiDescription ?: "",
+                                    confidence = entity.aiConfidence?.toFloat() ?: 0.0f
+                                )
+                            } else null,
                             timestamp = entity.timestamp
                         ))
                     }
@@ -224,7 +231,10 @@ class LandmarkViewModel(application: Application) : AndroidViewModel(application
                             imagePath = path,
                             lat = capturedLat, lon = capturedLon, azimuth = capturedAzimuth,
                             locationName = result?.name, locationAddress = result?.address,
-                            locationType = result?.type, timestamp = System.currentTimeMillis()
+                            locationType = result?.type, timestamp = System.currentTimeMillis(),
+                            aiLandmark = remoteAnalysisResult?.landmark,
+                            aiDescription = remoteAnalysisResult?.description,
+                            aiConfidence = remoteAnalysisResult?.confidence?.toDouble()
                         ))
                     }
                 }
@@ -261,6 +271,19 @@ class LandmarkViewModel(application: Application) : AndroidViewModel(application
                     val result = parseRemoteAnalysisResponse(response)
                     remoteAnalysisResult = result
                     Log.d(TAG, "Análisis remoto completado: ${result.landmark}")
+                    
+                    // Actualizar el registro en la base de datos si ya se guardó con la info de ubicación
+                    viewModelScope.launch {
+                        val lastEntity = dao.getLastLandmark()
+                        if (lastEntity != null && lastEntity.aiLandmark == null) {
+                            dao.updateAIInfo(
+                                lastEntity.id,
+                                result.landmark ?: "Desconocido",
+                                result.description ?: "",
+                                result.confidence.toDouble()
+                            )
+                        }
+                    }
                 } else {
                     remoteAnalysisError = "No se recibió respuesta del servidor de análisis"
                     Log.w(TAG, remoteAnalysisError ?: "Unknown error")
@@ -277,18 +300,25 @@ class LandmarkViewModel(application: Application) : AndroidViewModel(application
     private fun parseRemoteAnalysisResponse(jsonResponse: org.json.JSONObject): AnalysisResult {
         return try {
             val status = jsonResponse.optString("status", "unknown")
-            val data = jsonResponse.optJSONObject("data") ?: jsonResponse
             
-            // Intentar obtener landmarks del objeto 'data' o directamente del root
-            var landmarksArray = data.optJSONArray("landmarks")
+            // Intentar obtener el array de landmarks de diferentes estructuras posibles
+            var landmarksArray = jsonResponse.optJSONArray("data") 
+                ?: jsonResponse.optJSONArray("landmarks")
             
-            // Si no está, intentar parsear 'raw_response' que a veces viene como string JSON
+            if (landmarksArray == null) {
+                val dataObj = jsonResponse.optJSONObject("data")
+                if (dataObj != null) {
+                    landmarksArray = dataObj.optJSONArray("landmarks")
+                }
+            }
+            
+            // Si aún no está, intentar parsear 'raw_response' que a veces viene como string JSON
             if (landmarksArray == null) {
                 val rawRespStr = jsonResponse.optString("raw_response")
                 if (rawRespStr.isNotBlank()) {
                     try {
                         val innerJson = org.json.JSONObject(rawRespStr)
-                        landmarksArray = innerJson.optJSONArray("landmarks")
+                        landmarksArray = innerJson.optJSONArray("landmarks") ?: innerJson.optJSONArray("data")
                     } catch (e: Exception) {
                         Log.w(TAG, "No se pudo parsear raw_response como JSON")
                     }
@@ -379,6 +409,7 @@ class LandmarkViewModel(application: Application) : AndroidViewModel(application
     fun viewHistoryItem(item: LandmarkHistoryItem) {
         capturedBitmap = item.bitmap; capturedLat = item.lat; capturedLon = item.lon
         capturedAzimuth = item.azimuth; identifiedLocation = item.location
+        remoteAnalysisResult = item.aiResult
         showResult = true; currentTab = AppTab.CAMERA
     }
 

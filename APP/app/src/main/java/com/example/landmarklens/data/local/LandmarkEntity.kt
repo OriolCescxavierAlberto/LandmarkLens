@@ -13,5 +13,8 @@ data class LandmarkEntity(
     val locationName: String?,
     val locationAddress: String?,
     val locationType: String?,
-    val timestamp: Long
+    val timestamp: Long,
+    val aiLandmark: String? = null,
+    val aiDescription: String? = null,
+    val aiConfidence: Double? = null
 )
