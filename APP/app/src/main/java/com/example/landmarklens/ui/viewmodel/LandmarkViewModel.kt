@@ -71,6 +71,7 @@ class LandmarkViewModel(application: Application) : AndroidViewModel(application
     var selectedModel by mutableStateOf("Cargando...")
     var chatQuestion by mutableStateOf("")
     var isChatLoading by mutableStateOf(false)
+    private var chatJob: kotlinx.coroutines.Job? = null
 
     init {
         loadHistory()
@@ -121,23 +122,29 @@ class LandmarkViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun loadModelsIfNeeded() {
-        if (availableModels.size == 1 && availableModels.first().contains("Cargando")) {
-            viewModelScope.launch {
-                val models = OllamaClient.getModels()
-                if (models.isNotEmpty()) {
-                    availableModels = models
-                    selectedModel = models.first()
-                }
+        viewModelScope.launch {
+            val models = OllamaClient.getModels()
+            if (models.isNotEmpty()) {
+                availableModels = models
+                // Priorizar llama3.2:3b si está disponible
+                val preferred = models.find { it.contains("3.2:3b") } ?: models.first()
+                selectedModel = preferred
             }
         }
+    }
+
+    fun startNewChat(question: String) {
+        chatJob?.cancel()
+        isChatLoading = false
+        chatMessages.clear()
+        sendChatMessage(question)
     }
 
     fun sendChatMessage(question: String) {
         if (question.isBlank() || isChatLoading) return
         
         // Si es el primer mensaje, podemos inyectar contexto
-        val isFirstMessage = chatMessages.isEmpty()
-        val contextPrompt = if (isFirstMessage) {
+        val contextPrompt = if (chatMessages.isEmpty()) {
             buildContextPrompt(question)
         } else {
             question
@@ -146,10 +153,22 @@ class LandmarkViewModel(application: Application) : AndroidViewModel(application
         chatMessages.add(ChatMessage(role = "user", text = question))
         chatQuestion = ""
         isChatLoading = true
-        viewModelScope.launch {
+        chatJob = viewModelScope.launch {
             try {
+                // Asegurarse de que el modelo seleccionado sea válido antes de preguntar
+                if (selectedModel == "Cargando...") {
+                    val models = OllamaClient.getModels()
+                    if (models.isNotEmpty()) {
+                        availableModels = models
+                        selectedModel = models.find { it.contains("3.2:3b") } ?: models.first()
+                    }
+                }
+                
                 val reply = OllamaClient.askModel(selectedModel, contextPrompt)
                 chatMessages.add(ChatMessage(role = "assistant", text = reply))
+            } catch (e: Exception) {
+                Log.e(TAG, "Error en chat: ${e.message}")
+                chatMessages.add(ChatMessage(role = "assistant", text = "Lo siento, no puedo responder en este momento. Asegúrate de que Ollama esté corriendo."))
             } finally { isChatLoading = false }
         }
     }
@@ -162,17 +181,32 @@ class LandmarkViewModel(application: Application) : AndroidViewModel(application
         
         // Si no tenemos un landmark claro pero sí un mensaje del servidor, lo usamos
         val serverMessage = remoteAnalysisResult?.message ?: ""
-        
+
         return """
-            Contexto: El usuario está en $landmark ($address). 
-            Información del monumento: $description
-            Mensaje del servidor: $serverMessage
-            Coordenadas: $capturedLat, $capturedLon
-            
-            Pregunta del usuario: $question
-            
-            Por favor, responde como un guía experto en historia y monumentos, usando el contexto proporcionado.
-            Si no se identificó un monumento específico, intenta ayudar al usuario con la información de ubicación general disponible.
+            ERES UN GUÍA ARQUITECTÓNICO Y CULTURAL EXPERTO, ESPECIALIZADO EXCLUSIVAMENTE EN ESTRUCTURAS FÍSICAS, EDIFICIOS Y MONUMENTOS TANGIBLES.
+        
+            TU MISIÓN:
+            Analizar la información proporcionada y responder a la pregunta del usuario centrándote ÚNICAMENTE en las construcciones físicas detectadas.
+        
+            REGLAS ESTRICTAS E INQUEBRANTABLES:
+            1. FOCO EXCLUSIVO EN ESTRUCTURAS: Tu respuesta debe centrarse al 100% en la estructura, edificio o monumento principal.
+               - PERMITIDO: Sagrada Familia, Arco de Triunfo, Castillo de Montjuic, Casa Batlló, murallas, iglesias, fábricas históricas, estatuas. Habla sobre su arquitectura, estilo, historia, arquitecto y materiales.
+            2. IGNORAR VÍAS PÚBLICAS Y ESPACIOS ABIERTOS: Está TOTALMENTE PROHIBIDO mencionar o centrar la respuesta en calles, avenidas, carreteras, plazas, parques o barrios. 
+               - NO PERMITIDO: "Estás en la calle...", "Esta plaza es famosa por...", "El parque tiene...".
+            3. REDIRECCIÓN ACTIVA: Si el usuario pregunta por una calle o plaza (ej. "¿Qué hay en esta calle?"), ignora la calle y redirige la conversación inmediatamente hacia el edificio o monumento más relevante detectado en los datos (ej. "Justo aquí destaca la majestuosa estructura de...").
+            4. CERO DATOS TÉCNICOS: Bajo ninguna circunstancia menciones coordenadas GPS, identificadores de OpenStreetMap (osm_id), puntuaciones (fame_score) o datos del servidor. Usa esa información solo para entender el contexto, no para hablar.
+            5. TONO: Educativo, fascinante y directo. Eres un guía turístico experto compartiendo los secretos de una construcción.
+        
+            DATOS DE LA OBSERVACIÓN (Contexto para tu análisis):
+            - Estructura principal detectada: $landmark
+            - Ubicación aproximada: $address
+            - Detalles de estructuras cercanas y categorías: $description
+            - Estado del sistema: $serverMessage
+        
+            PREGUNTA DEL USUARIO:
+            "$question"
+        
+            INSTRUCCIÓN FINAL: Responde a la pregunta del usuario en el idioma en que te ha preguntado, aplicando estrictamente las reglas anteriores y describiendo únicamente las estructuras.
         """.trimIndent()
     }
 
@@ -244,17 +278,56 @@ class LandmarkViewModel(application: Application) : AndroidViewModel(application
         return try {
             val status = jsonResponse.optString("status", "unknown")
             val data = jsonResponse.optJSONObject("data") ?: jsonResponse
-            val landmarksArray = data.optJSONArray("landmarks")
+            
+            // Intentar obtener landmarks del objeto 'data' o directamente del root
+            var landmarksArray = data.optJSONArray("landmarks")
+            
+            // Si no está, intentar parsear 'raw_response' que a veces viene como string JSON
+            if (landmarksArray == null) {
+                val rawRespStr = jsonResponse.optString("raw_response")
+                if (rawRespStr.isNotBlank()) {
+                    try {
+                        val innerJson = org.json.JSONObject(rawRespStr)
+                        landmarksArray = innerJson.optJSONArray("landmarks")
+                    } catch (e: Exception) {
+                        Log.w(TAG, "No se pudo parsear raw_response como JSON")
+                    }
+                }
+            }
 
             if (landmarksArray != null && landmarksArray.length() > 0) {
-                val landmarks = mutableListOf<org.json.JSONObject>()
+                val allLandmarks = mutableListOf<org.json.JSONObject>()
                 for (i in 0 until landmarksArray.length()) {
-                    landmarks.add(landmarksArray.getJSONObject(i))
+                    allLandmarks.add(landmarksArray.getJSONObject(i))
                 }
                 
-                // Ordenar por distancia de menor a mayor (la API ya suele darlos ordenados, pero aseguramos)
-                val sortedLandmarks = landmarks.sortedBy { it.optDouble("distance", Double.MAX_VALUE) }
-                val closest = sortedLandmarks[0]
+                // Filtrar para obtener solo monumentos y edificios de interés histórico/turístico
+                // Excluimos: hoteles, hostales, apartamentos, galerías, tiendas, restaurantes, parkings, bancos y vías públicas.
+                val blackList = listOf(
+                    "hotel", "hostel", "apart", "gallery", "shop", "tienda", "restaurant", "restaurante",
+                    "parking", "carrer ", "calle ", "avinguda", "avenida", "plaça ", "plaza ", "passatge", 
+                    "passeig", "bank", "banco", "oficina", "clinic", "hospital", "school", "colegio", 
+                    "university", "universidad", "bar ", "pub ", "cafe ", "supermarket", "supermercado",
+                    "farmacia", "pharmacy", "gym", "gimnasio", "station", "estación", "stop", "parada",
+                    "oficina", "correos"
+                )
+
+                val filteredLandmarks = allLandmarks.filter { item ->
+                    val name = item.optString("name").lowercase()
+                    !blackList.any { keyword -> name.contains(keyword) }
+                }.sortedBy { it.optDouble("distance", Double.MAX_VALUE) }
+                 .take(5) // LIMITAR A MÁXIMO 5 MONUMENTOS
+
+                if (filteredLandmarks.isEmpty()) {
+                    return AnalysisResult(
+                        landmark = "Ubicación detectada",
+                        description = "No se encontraron monumentos o edificios históricos específicos en la vecindad inmediata.",
+                        message = status,
+                        rawResponse = jsonResponse.toMap()
+                    )
+                }
+
+                val closest = filteredLandmarks[0]
 
                 // Mapear confianza de texto a valor numérico
                 val confidenceScore = when(closest.optString("confidence").lowercase()) {
@@ -263,21 +336,21 @@ class LandmarkViewModel(application: Application) : AndroidViewModel(application
                     else -> 0.45f
                 }
 
-                // Generar descripción legible con las estructuras cercanas
+                // Generar descripción legible con las estructuras cercanas (máximo 5)
                 val descBuilder = StringBuilder()
-                descBuilder.append("Se han detectado las siguientes estructuras en las inmediaciones:\n\n")
+                descBuilder.append("Se han detectado los siguientes monumentos y edificios históricos:\n\n")
                 
-                sortedLandmarks.forEachIndexed { index, item ->
+                filteredLandmarks.forEachIndexed { index, item ->
                     val isClosest = index == 0
-                    val icon = if (isClosest) "📍 " else "• "
-                    val label = if (isClosest) " (LA MÁS CERCANA)" else ""
+                    val icon = if (isClosest) "🏛️ " else "• "
+                    val label = if (isClosest) " (MONUMENTO PRINCIPAL)" else ""
                     
                     descBuilder.append("$icon${item.optString("name")}$label\n")
                     descBuilder.append("  Distancia: ${item.optInt("distance")} metros\n")
-                    descBuilder.append("  Confianza: ${item.optString("confidence")}\n\n")
+//                    descBuilder.append("  Confianza: ${item.optString("confidence")}\n\n")
                 }
 
-                val statusDisplay = if (status == "degraded") "Análisis parcial (Ubicación aproximada)" else "Análisis completado"
+                val statusDisplay = if (status == "degraded") "Análisis parcial" else "Análisis completado"
 
                 AnalysisResult(
                     landmark = closest.optString("name"),

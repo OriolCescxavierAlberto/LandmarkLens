@@ -596,9 +596,17 @@ fun CaptureResultScreen(vm: LandmarkViewModel) {
                     }
                     Button(
                         onClick = {
-                            if (vm.chatMessages.isEmpty()) {
-                                vm.sendChatMessage("Hola, cuéntame sobre este lugar")
+                            val contextQuestion = if (vm.remoteAnalysisResult?.landmark != null) {
+                                "Hola, cuéntame sobre ${vm.remoteAnalysisResult?.landmark}"
+                            } else if (vm.identifiedLocation?.name != null) {
+                                "Hola, cuéntame sobre ${vm.identifiedLocation?.name}"
+                            } else {
+                                "Hola, cuéntame sobre este lugar"
                             }
+                            
+                            // Usamos startNewChat para limpiar estados anteriores y cancelar peticiones colgadas
+                            vm.startNewChat(contextQuestion)
+
                             vm.setTab(AppTab.CHAT)
                             vm.showResult = false
                         },
