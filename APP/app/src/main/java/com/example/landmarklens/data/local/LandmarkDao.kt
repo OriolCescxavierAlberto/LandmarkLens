@@ -19,4 +19,10 @@ interface LandmarkDao {
 
     @Query("DELETE FROM landmark_history")
     suspend fun deleteAllLandmarks()
+
+    @Query("SELECT * FROM landmark_history ORDER BY timestamp DESC LIMIT 1")
+    suspend fun getLastLandmark(): LandmarkEntity?
+
+    @Query("UPDATE landmark_history SET aiLandmark = :landmark, aiDescription = :description, aiConfidence = :confidence WHERE id = :id")
+    suspend fun updateAIInfo(id: Long, landmark: String, description: String, confidence: Double)
 }

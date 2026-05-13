@@ -82,8 +82,7 @@ fun MainApp(
                     val items = listOf(
                         AppTab.CAMERA to ("Explorar" to Icons.Default.PhotoCamera),
                         AppTab.MAP to ("Mapa" to Icons.Default.LocationOn),
-                        AppTab.CHAT to ("Guía IA" to Icons.AutoMirrored.Filled.Chat),
-                        AppTab.ML to ("Offline" to Icons.Default.Memory)
+                        AppTab.CHAT to ("Guía IA" to Icons.AutoMirrored.Filled.Chat)
                     )
 
                     // ✅ CORREGIDO: cada tab usa su propio label, icon y acción
@@ -136,7 +135,6 @@ fun MainApp(
                 AppTab.CAMERA -> CameraLandmarkScreen(vm)
                 AppTab.MAP    -> MapTab(vm)
                 AppTab.CHAT   -> OllamaChatScreen(vm)
-                AppTab.ML     -> MLOfflineScreen()
             }
         }
     }
@@ -596,9 +594,17 @@ fun CaptureResultScreen(vm: LandmarkViewModel) {
                     }
                     Button(
                         onClick = {
-                            if (vm.chatMessages.isEmpty()) {
-                                vm.sendChatMessage("Hola, cuéntame sobre este lugar")
+                            val contextQuestion = if (vm.remoteAnalysisResult?.landmark != null) {
+                                "Hola, cuéntame sobre ${vm.remoteAnalysisResult?.landmark}"
+                            } else if (vm.identifiedLocation?.name != null) {
+                                "Hola, cuéntame sobre ${vm.identifiedLocation?.name}"
+                            } else {
+                                "Hola, cuéntame sobre este lugar"
                             }
+                            
+                            // Usamos startNewChat para limpiar estados anteriores y cancelar peticiones colgadas
+                            vm.startNewChat(contextQuestion)
+
                             vm.setTab(AppTab.CHAT)
                             vm.showResult = false
                         },
@@ -790,34 +796,6 @@ fun HistoryListEntry(item: LandmarkHistoryItem, onClick: () -> Unit, onDelete: (
     }
 }
 
-@Composable
-fun MLOfflineScreen() {
-    Column(
-        modifier = Modifier.fillMaxSize().padding(32.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Surface(
-            color = MaterialTheme.colorScheme.secondaryContainer,
-            shape = CircleShape,
-            modifier = Modifier.size(120.dp)
-        ) {
-            Box(contentAlignment = Alignment.Center) {
-                Icon(Icons.Default.Memory, contentDescription = null,
-                    modifier = Modifier.size(60.dp), tint = MaterialTheme.colorScheme.secondary)
-            }
-        }
-        Spacer(Modifier.height(32.dp))
-        Text("Detección Local", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-        Spacer(Modifier.height(12.dp))
-        Text(
-            "Estamos entrenando una IA local para que puedas identificar monumentos sin conexión a internet. ¡Próximamente!",
-            textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
-}
 
 @Composable
 fun OllamaChatScreen(vm: LandmarkViewModel) {

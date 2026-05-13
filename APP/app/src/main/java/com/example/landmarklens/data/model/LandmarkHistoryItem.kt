@@ -9,5 +9,6 @@ data class LandmarkHistoryItem(
     val lon: Double,
     val azimuth: Float,
     val location: LandmarkLocation?,
+    val aiResult: AnalysisResult? = null,
     val timestamp: Long = System.currentTimeMillis()
 )
