@@ -163,8 +163,9 @@
       "wikipedia": "ca:Temple Expiatori de la Sagrada Família",
       "wikidata": "Q48435",
       "architect": "Antoni Gaudí i Cornet",
-      "needs_geocoding": true,
-      "region": "Cataluña"
+      "region": "Cataluña",
+      "lat": 41.4036,
+      "lon": 2.1744
     },
     {
       "name": "Casa Batlló",

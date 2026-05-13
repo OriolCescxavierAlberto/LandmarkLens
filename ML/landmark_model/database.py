@@ -201,7 +201,7 @@ class LandmarksDB:
             cos(radians(?)) * cos(radians(lat)) * cos(radians(lon) - radians(?)) +
             sin(radians(?)) * sin(radians(lat))
         )) <= ?
-        ORDER BY distance_km ASC
+        ORDER BY distance_km - (fame_score * 0.005) ASC
         LIMIT ?
         """
 

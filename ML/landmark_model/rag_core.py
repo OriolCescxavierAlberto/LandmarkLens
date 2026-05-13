@@ -60,18 +60,41 @@ NUMERIC_FEATURES = [
 
 SYSTEM_PROMPT = """You are a landmark identification system. You receive GPS coordinates and a numbered list of nearby landmarks with distances.
 
-RULES:
-1. NEVER invent landmarks. Use ONLY names from the provided list.
-2. Copy landmark names EXACTLY and COMPLETELY from the list. Never truncate or abbreviate.
-3. Respond ONLY with valid JSON, no extra text.
+CRITICAL RULES - FOLLOW EXACTLY:
+1. NEVER invent landmarks. Use ONLY names from the provided list, word for word.
+2. Copy landmark names EXACTLY and COMPLETELY from the list. No truncation, no changes.
+3. Respond ONLY with valid JSON. NO other text before, after, or between.
+4. Use double quotes for ALL JSON keys and string values: "name", "distance", "confidence"
+5. All numeric values must be numbers, not strings: "distance": 42 (not "distance": "42")
 
-When camera orientation (azimuth) is provided:
-- Return: {"target":"EXACT full name","target_distance":meters,"confidence":"high|medium|low","others":[{"name":"EXACT full name","distance":meters}]}
-- Pick target: lowest angle offset from center + closest distance.
+RESPONSE FORMAT WITHOUT camera orientation (azimuth):
+Return a JSON array with ONE object per landmark:
+[
+  {"name": "landmark name exactly as listed", "distance": meters_as_number, "confidence": "high" or "medium" or "low"},
+  {"name": "another landmark", "distance": meters_as_number, "confidence": "high" or "medium" or "low"}
+]
 
-When NO orientation:
-- Return: [{"name":"EXACT full name","distance":meters,"confidence":"high|medium|low"}]
-- Confidence: <50m=high, <300m=high, <1km=medium, >1km=low
+RESPONSE FORMAT WITH camera orientation (azimuth):
+Return ONE object with target and others list:
+{"target": "landmark name exactly as listed", "target_distance": meters_as_number, "confidence": "high" or "medium" or "low", "others": [{"name": "landmark", "distance": meters_as_number}]}
+
+Confidence scoring WITHOUT azimuth:
+- distance < 100m: "high"
+- distance < 300m: "high"
+- distance < 1000m: "medium"
+- distance >= 1000m: "low"
+
+Pick target (with azimuth): landmark with smallest angle offset from camera center OR closest if tied.
+
+DO NOT:
+- Add extra fields like "magnitude", "categories", "bearing", "fame_score"
+- Wrap array in an object: {"landmarks": [...]} is WRONG
+- Forget quotes around keys: {distance: 5} is WRONG
+- Add explanatory text
+- Reorder the landmarks list
+
+EXAMPLE CORRECT RESPONSE (no azimuth):
+[{"name": "Torre de Jesús", "distance": 4, "confidence": "high"}, {"name": "Plaça", "distance": 50, "confidence": "high"}]
 """
 
 
@@ -351,8 +374,12 @@ def find_nearby(
 
                 results.append(result)
             
-            results.sort(key=lambda item: item["distance"] - item.get("fame_score", 0) * 5)
-            return score_candidates_with_ranker(results, azimuth, fov)[:max_results]
+            if results:
+                results.sort(key=lambda item: item["distance"] - item.get("fame_score", 0) * 5)
+                ranked_results = score_candidates_with_ranker(results, azimuth, fov)[:max_results]
+                if ranked_results:
+                    return ranked_results
+                # If ranking returned empty, continue to fallback
         except Exception as e:
             print(f"⚠️  Database query failed: {e}, falling back to index")
     
@@ -428,19 +455,19 @@ def build_prompt(lat: float, lon: float, nearby: list[dict[str, Any]], azimuth: 
         return (
             f"Pos:{lat},{lon} Cam:{azimuth}deg FOV:{fov}deg\n"
             f"Landmarks:\n{build_context(nearby)}\n\n"
-            'Return JSON: {"target":"FULL landmark name","target_distance":meters,'
-            '"confidence":"high|medium|low",'
-            '"others":[{"name":"FULL landmark name","distance":meters}]}'
-            "\nUse EXACT complete names from the list. Pick closest to camera center."
+            'RESPOND WITH EXACTLY THIS JSON STRUCTURE (with proper quotes):\n'
+            '{"target": "LANDMARK NAME", "target_distance": NUMBER, "confidence": "high|medium|low", "others": [{"name": "NAME", "distance": NUMBER}]}\n'
+            "Rules: Use EXACT names from list above. Pick landmark closest to camera center. Use quotes around all keys and string values."
         )
 
     return (
         f"Pos:{lat},{lon}\n"
         f"Landmarks:\n{build_context(nearby)}\n\n"
-        f"Return a JSON array with ALL {len(nearby)} landmarks listed above.\n"
-        'Format: [{"name":"FULL landmark name","distance":meters,"confidence":"high|medium|low"}]\n'
-        "Include EVERY landmark. Use EXACT complete names from the list."
+        f"RESPOND WITH A JSON ARRAY (use proper quotes on all keys):\n"
+        '[{"name": "LANDMARK NAME", "distance": NUMBER, "confidence": "high|medium|low"}, ...]\n'
+        "Rules: List ALL landmarks above. Use EXACT names. Put quotes around keys and values."
     )
+
 
 
 def query_ollama(prompt: str, stream: bool = True, timeout: int = 180, model_name: str = MODEL_NAME) -> str:
