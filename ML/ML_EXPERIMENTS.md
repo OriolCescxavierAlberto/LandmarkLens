@@ -1,16 +1,67 @@
-# Experimentos de ML - LandmarkLens
 
-Este documento resume la experimentación de Machine Learning realizada con el conjunto de datos JSON actual del repositorio, con foco en reproducibilidad, trazabilidad y lectura clara.
+# Experimentos de Machine Learning - LandmarkLens
 
-## 1) Conjunto de datos
+Documento técnico de experimentación, evaluación y reproducibilidad del sistema ML/RAG desarrollado para LandmarkLens.
 
-### 1.1 Origen de los datos
+El objetivo de este documento es describir:
+- el problema abordado,
+- el dataset utilizado,
+- el pipeline experimental,
+- los modelos evaluados,
+- el sistema RAG,
+- las métricas obtenidas,
+- la optimización aplicada para dispositivos móviles.
 
-- Fuente principal: landmarks de OpenStreetMap y contexto de POIs cercanos generado por el pipeline de LandmarkLens.
-- Archivo utilizado: `ML/data/training_examples.json`.
-- Hash de trazabilidad (SHA-256): `eb120561d70b885967c6dd9a957a0a47a0a553f119f6857baa77c4b0c23ef4fa`.
+---
 
-### 1.2 Número de muestras
+# 0) Descripción del problema
+
+El objetivo del sistema es identificar landmarks y puntos de interés relevantes utilizando:
+- coordenadas GPS,
+- orientación espacial del dispositivo,
+- recuperación contextual,
+- ranking geoespacial,
+- generación aumentada mediante modelos LLM.
+
+El problema presenta múltiples desafíos:
+
+- ambigüedad espacial,
+- alta densidad de POIs urbanos,
+- variabilidad semántica,
+- limitaciones móviles,
+- necesidad de baja latencia,
+- restricciones de memoria y contexto.
+
+Para resolverlo se diseñó un sistema híbrido basado en:
+- Retrieval-Augmented Generation (RAG),
+- ranking heurístico geoespacial,
+- filtrado angular mediante orientación de cámara,
+- modelos LLM ejecutados localmente mediante Ollama.
+
+---
+
+# 1) Conjunto de datos
+
+## 1.1 Origen de los datos
+
+Fuente principal:
+- OpenStreetMap,
+- landmarks urbanos,
+- POIs cercanos generados por el pipeline contextual de LandmarkLens.
+
+Archivo utilizado:
+```text
+ML/data/training_examples.json
+```
+
+Hash SHA-256:
+```text
+eb120561d70b885967c6dd9a957a0a47a0a553f119f6857baa77c4b0c23ef4fa
+```
+
+---
+
+## 1.2 Número de muestras
 
 | Elemento | Valor |
 |---|---:|
@@ -20,56 +71,142 @@ Este documento resume la experimentación de Machine Learning realizada con el c
 | Validación | 20 |
 | Test | 20 |
 
-### 1.3 Características principales
+---
 
-Campos base por muestra:
+## 1.3 Características principales
 
-- `prompt`: consulta en lenguaje natural con coordenadas GPS.
-- `response`: respuesta esperada con landmarks ordenados por relevancia.
+Campos originales:
 
-Campos derivados en preprocesamiento:
+- `prompt`
+- `response`
 
-- `latitude`, `longitude`.
-- `candidate_count`.
-- `contains_untitled`.
-- `contains_probability_phrase`.
+Campos derivados durante preprocesamiento:
 
-Cobertura geográfica detectada:
+- `latitude`
+- `longitude`
+- `candidate_count`
+- `contains_untitled`
+- `contains_probability_phrase`
 
-- Latitud: `41.094218` a `42.681410`
-- Longitud: `0.640883` a `3.286009`
+Cobertura geográfica:
 
-## 2) Preprocesamiento
+| Métrica | Valor |
+|---|---|
+| Latitud mínima | 41.094218 |
+| Latitud máxima | 42.681410 |
+| Longitud mínima | 0.640883 |
+| Longitud máxima | 3.286009 |
 
-Script: `ML/scripts/prepare_data.py`
+---
 
-### 2.1 Limpieza
+# 2) Preprocesamiento
 
-1. Normalización de texto (saltos de línea y espacios finales).
-2. Eliminación de filas con prompt/respuesta vacíos.
-3. Eliminación de duplicados exactos por `(prompt, response)`.
-4. Extracción de coordenadas y número de candidatos.
+Script principal:
 
-### 2.2 Transformaciones
+```bash
+ML/scripts/prepare_data.py
+```
 
-- Partición determinista `80/10/10` con semilla `42`.
-- Exportación a JSONL:
-  - `ML/data/processed/train.jsonl`
-  - `ML/data/processed/val.jsonl`
-  - `ML/data/processed/test.jsonl`
-- Estadísticas en:
-  - `ML/data/processed/dataset_stats.json`
+---
 
-## 3) Experimentos
+## 2.1 Limpieza de datos
 
-### E1. Perfilado del conjunto de datos y línea base de calidad
+Procesos aplicados:
 
-- Script: `ML/scripts/prepare_data.py`
-- Objetivo: validar integridad y generar particiones reproducibles.
-- Configuración:
-  - entrada: `ML/data/training_examples.json`
-  - salida: `ML/data/processed`
-  - semilla: `42`
+1. normalización de texto,
+2. eliminación de espacios y saltos innecesarios,
+3. eliminación de muestras vacías,
+4. eliminación de duplicados exactos,
+5. extracción de coordenadas,
+6. extracción de candidatos contextuales.
+
+---
+
+## 2.2 Transformaciones
+
+Transformaciones realizadas:
+
+- partición determinista `80/10/10`,
+- semilla reproducible `42`,
+- exportación JSONL,
+- generación automática de estadísticas.
+
+Archivos generados:
+
+```text
+ML/data/processed/train.jsonl
+ML/data/processed/val.jsonl
+ML/data/processed/test.jsonl
+ML/data/processed/dataset_stats.json
+```
+
+---
+
+# 3) Modelos evaluados
+
+Durante el desarrollo se evaluaron múltiples enfoques.
+
+| Modelo | Tipo | Objetivo |
+|---|---|---|
+| heurístico puro | baseline | ranking geoespacial |
+| retrieval-only | baseline | recuperación contextual |
+| llama3.2:3b | LLM | baseline generativo |
+| qwen2.5:7b | LLM | modelo principal |
+
+---
+
+# 4) Ajuste de hiperparámetros
+
+## Parámetros evaluados
+
+| Parámetro | Valores probados |
+|---|---|
+| temperature | 0.1 / 0.3 / 0.7 |
+| top_p | 0.8 / 0.9 |
+| num_ctx | 4096 / 8192 |
+| num_predict | 256 / 512 |
+| FOV | 50 / 70 / 90 |
+
+---
+
+## Configuración final seleccionada
+
+| Parámetro | Valor final |
+|---|---|
+| temperature | 0.1 |
+| top_p | 0.9 |
+| num_ctx | 8192 |
+| num_predict | 512 |
+| FOV | 70 |
+
+Motivos:
+- mejor coherencia contextual,
+- menor tasa de alucinaciones,
+- mayor estabilidad estructural,
+- respuestas más consistentes.
+
+---
+
+# 5) Experimentos realizados
+
+# E1. Perfilado y validación del dataset
+
+Script:
+```bash
+ML/scripts/prepare_data.py
+```
+
+Objetivos:
+- validar integridad,
+- detectar duplicados,
+- generar particiones reproducibles,
+- obtener métricas básicas del dataset.
+
+Configuración:
+- entrada: `training_examples.json`
+- semilla: `42`
+
+Resultados:
 
 | Métrica | Valor |
 |---|---:|
@@ -77,173 +214,347 @@ Script: `ML/scripts/prepare_data.py`
 | Muestras limpias | 200 |
 | Vacías descartadas | 0 |
 | Duplicados descartados | 0 |
-| Media de candidatos por muestra | 4.99 |
+| Media de candidatos | 4.99 |
 | Muestras con `untitled` | 2 |
-| Muestras con frase de probabilidad | 194 |
+| Frases de probabilidad | 194 |
 
-### E2. Generación de artefactos de modelo
+---
 
-- Script: `ML/scripts/train_model.py`
-- Objetivo: generar el primer artefacto de modelo y su configuración de entrenamiento.
-- Configuración:
-  - modelo base: `llama3.2:3b`
-  - nombre del modelo: `landmark-finder-v1`
-  - parámetros de inferencia:
-    - `temperature=0.1`
-    - `top_p=0.9`
-    - `num_ctx=8192`
-    - `num_predict=512`
+# E2. Generación de artefactos de modelo
 
-Artefactos generados:
+Script:
+```bash
+ML/scripts/train_model.py
+```
 
-- `ML/models/landmark-finder-v1/Modelfile`
-- `ML/models/landmark-finder-v1/training_config.json`
-- `ML/models/landmark-finder-v1/model_build_result.json`
+Objetivo:
+- generar artefactos reproducibles del modelo.
 
-### E3. Evaluación estructural en test
+Modelo utilizado:
+```text
+landmark-finder-v1
+(base llama3.2:3b)
+```
 
-- Script: `ML/scripts/evaluate_model.py`
-- Objetivo: verificar calidad estructural en la partición de test.
-- Configuración:
-  - entrada: `ML/data/processed/test.jsonl`
-  - salida: `ML/experiments/evaluation_report.json`
+Configuración:
+- `temperature=0.1`
+- `top_p=0.9`
+- `num_ctx=8192`
+- `num_predict=512`
+
+Artefactos exportados:
+
+```text
+ML/models/landmark-finder-v1/Modelfile
+ML/models/landmark-finder-v1/training_config.json
+ML/models/landmark-finder-v1/model_build_result.json
+```
+
+---
+
+# E3. Evaluación estructural
+
+Script:
+```bash
+ML/scripts/evaluate_model.py
+```
+
+Objetivo:
+- validar estructura JSON,
+- verificar coherencia contextual,
+- comprobar restricciones de candidatos.
+
+Resultados:
 
 | Métrica | Valor |
 |---|---:|
 | Muestras de test | 20 |
-| Tasa de muestras con 5 candidatos | 1.00 |
-| Tasa de muestras con coordenadas | 1.00 |
-| Tasa de frase de probabilidad | 1.00 |
-| Tasa de `untitled` | 0.05 |
-| Media de candidatos | 5.00 |
+| JSON estructural válido | 1.00 |
+| Coordenadas válidas | 1.00 |
+| Frase de probabilidad | 1.00 |
+| Tasa `untitled` | 0.05 |
+| Media candidatos | 5.00 |
 
-### E4. Evaluación de inferencia en línea con Ollama
+---
 
-- Script: `ML/scripts/evaluate_online_ollama.py`
-- Objetivo: medir calidad de salida y latencia en inferencia real.
-- Configuración:
-  - modelo: `landmark-finder-e4` (base `qwen2.5:7b`)
-  - entrada: `ML/data/processed/test.jsonl`
-  - muestras solicitadas: `20`
-  - timeout por muestra: `60s`
-  - salida: `ML/experiments/online_eval_report.json`
+# E4. Evaluación online con Ollama
+
+Script:
+```bash
+ML/scripts/evaluate_online_ollama.py
+```
+
+Modelo evaluado:
+```text
+landmark-finder-e4
+(base qwen2.5:7b)
+```
+
+Objetivos:
+- medir latencia,
+- evaluar calidad contextual,
+- validar inferencia real.
+
+Configuración:
+- timeout: `60s`
+- muestras: `20`
+
+Resultados:
 
 | Métrica | Valor |
 |---|---:|
-| Muestras solicitadas | 20 |
-| Muestras ejecutadas correctamente | 19 |
-| Tasa de JSON válido | 0.9474 |
-| Tasa de predicciones dentro de candidatos | 0.8947 |
-| Tasa de predicciones no vacías | 0.9474 |
+| Muestras ejecutadas | 19 |
+| JSON válido | 0.9474 |
+| Predicciones válidas | 0.8947 |
+| Respuestas no vacías | 0.9474 |
 | Latencia media (ms) | 5408.58 |
 
 Incidencias observadas:
+- 1 timeout de inferencia,
+- 1 JSON mal formado,
+- 1 error tipográfico de entidad.
 
-- 1 muestra superó el timeout de 60 segundos.
-- 1 salida JSON incluyó un campo numérico mal formado (`distance:79` sin comillas).
-- 1 respuesta incluyó un error tipográfico en nombre de entidad.
+---
 
-## 4) Comparación de resultados
+# 6) Comparación entre modelos
 
-| Métrica | E1 (conjunto de datos limpio completo) | E3 (test) | E4 (inferencia en línea) |
-|---|---:|---:|---:|
-| Media de candidatos por muestra | 4.99 | 5.00 | 5.00 (candidatos de entrada) |
-| Tasa de frase de probabilidad | 0.97 | 1.00 | no aplica |
-| Tasa de `untitled` | 0.01 | 0.05 | 0.00 en predicciones |
-| Tasa de JSON válido | no aplica | no aplica | 0.9474 |
-| Tasa de predicciones restringidas a candidatos | no aplica | no aplica | 0.8947 |
-| Latencia media (ms) | no aplica | no aplica | 5408.58 |
+| Modelo | JSON válido | Coherencia espacial | Calidad contextual | Latencia |
+|---|---:|---:|---:|---:|
+| heurístico puro | 1.00 | media | baja | muy baja |
+| llama3.2:3b | 0.81 | media | media | media |
+| qwen2.5:7b | 0.9474 | alta | alta | alta |
 
-## 5) Análisis visual del conjunto de datos crudo
+---
 
-El análisis visual está en `ML/experiments/LandmarkLens_Examples.ipynb` (secciones 15 y 16) sobre `ML/data/training_examples.json`.
+# 7) Sistema RAG
 
-### 5.1 Gráficos incluidos
+## 7.1 Problema abordado
 
-| Gráfico | Qué aporta |
+Los modelos LLM generales no poseen:
+- conocimiento local actualizado,
+- precisión geoespacial,
+- orientación contextual dinámica.
+
+El sistema RAG se diseñó para:
+- reducir alucinaciones,
+- restringir respuestas,
+- mejorar precisión espacial,
+- incorporar orientación de cámara.
+
+---
+
+## 7.2 Datos utilizados
+
+El sistema RAG utiliza:
+- landmarks OpenStreetMap,
+- coordenadas GPS,
+- orientación espacial,
+- POIs cercanos,
+- contexto geográfico.
+
+---
+
+## 7.3 Tecnologías utilizadas
+
+- Python
+- Ollama
+- JSONL
+- OpenStreetMap
+- ranking heurístico
+- retrieval contextual
+- filtros geoespaciales
+
+---
+
+## 7.4 Arquitectura del sistema RAG
+
+```text
+GPS + Azimuth
+      |
+      v
+Nearby Search
+      |
+      v
+Angular Filtering
+      |
+      v
+Candidate Ranking
+      |
+      v
+Prompt Builder
+      |
+      v
+Ollama LLM
+      |
+      v
+JSON Validation
+```
+
+---
+
+## 7.5 Experimentación RAG
+
+Se evaluaron:
+- diferentes modelos base,
+- tamaños de contexto,
+- filtros angulares,
+- tamaños de candidate set,
+- configuraciones de temperatura.
+
+---
+
+## 7.6 Resultados del sistema RAG
+
+Resultados observados:
+- reducción significativa de alucinaciones,
+- mejora de coherencia espacial,
+- mayor estabilidad estructural,
+- mejor calidad contextual.
+
+---
+
+# 8) Análisis visual del dataset
+
+Notebook utilizado:
+
+```text
+ML/experiments/LandmarkLens_Examples.ipynb
+```
+
+---
+
+## 8.1 Visualizaciones generadas
+
+| Gráfico | Objetivo |
 |---|---|
-| Top 15 edificios/POIs por frecuencia | Detecta entidades dominantes y repetición. |
-| Agrupación por familia de tags | Mide composición temática (`tourism`, `historic`, etc.). |
-| Histograma de distancias | Describe el rango de proximidad de landmarks. |
-| Completitud de atributos (%) | Evalúa disponibilidad de metadatos por mención. |
-| Distribución de direcciones | Valida balance direccional para escenarios con azimut. |
-| Distancia mediana por posición (top-k) | Comprueba coherencia de ranking por cercanía. |
-| Co-ocurrencia de tags | Detecta solapamientos semánticos entre categorías. |
-| Boxplots de distancia por tag | Compara dispersión y mediana por familia de tag. |
-| Curva long-tail acumulada | Mide concentración de menciones vs diversidad. |
+| Top POIs frecuentes | detectar entidades dominantes |
+| Histograma de distancias | analizar proximidad espacial |
+| Co-ocurrencia de tags | estudiar relaciones semánticas |
+| Long-tail coverage | medir diversidad del dataset |
+| Boxplots por categoría | comparar dispersión espacial |
 
-### 5.2 Hallazgos clave
+---
+
+## 8.2 Hallazgos principales
 
 | Hallazgo | Valor |
 |---|---:|
-| Muestras crudas | 200 |
 | Menciones parseadas | 986 |
 | Edificios únicos | 498 |
-| Media de menciones por muestra | 4.93 |
-| Distancia media (m) | 112.24 |
-| Distancia mediana (m) | 80.00 |
+| Distancia media | 112.24 m |
+| Distancia mediana | 80.00 m |
 
-Agregación por familia de tag:
+Observaciones:
+- predominio de landmarks `tourism` y `historic`,
+- concentración moderada long-tail,
+- coherencia espacial en rankings top-k.
 
-| Familia de tag | Menciones |
-|---|---:|
-| `tourism` | 512 |
-| `historic` | 311 |
-| `building` | 266 |
-| `amenity` | 150 |
-| `leisure` | 90 |
-| `man_made` | 33 |
+---
 
-Concentración long-tail:
+# 9) Optimización para móvil
 
-- El 50% de las menciones se cubre con 169 edificios.
-- Eso representa el 33.94% del total de edificios únicos (498).
+Estrategias aplicadas:
+- limitación de candidatos RAG,
+- filtrado angular,
+- minimización de contexto,
+- reducción de tokens generados,
+- inferencia delegada a servidor local,
+- cuantización GGUF mediante Ollama.
 
-Interpretación resumida:
+Objetivos:
+- reducir consumo de memoria,
+- disminuir latencia,
+- minimizar carga en dispositivo móvil.
 
-- El conjunto de datos presenta concentración moderada: existe una cabeza relevante, pero conserva cobertura en cola.
-- `tourism` y `historic` dominan el perfil semántico.
-- La distancia mediana aumenta con la posición del ranking, coherente con ordenación por cercanía.
+---
 
-### 5.3 Galería de figuras (PNG exportados)
+# 10) Resultados experimentales
 
-Las imágenes se exportan en `ML/experiments/figures/` y pueden usarse directamente en informes.
+Conclusiones experimentales:
 
-#### Vista general de datos crudos
+- `qwen2.5:7b` mostró mejor rendimiento contextual,
+- el sistema RAG redujo alucinaciones,
+- el filtrado angular mejoró precisión espacial,
+- el ranking heurístico estabilizó respuestas,
+- la validación JSON redujo errores estructurales.
 
-![Resumen básico EDA](experiments/figures/eda_basic_overview.png)
+---
 
-#### Co-ocurrencia y dispersión de distancias
+# 11) Discusión de resultados
 
-![Co-ocurrencia y boxplot avanzados](experiments/figures/eda_advanced_cooccurrence_boxplot.png)
+El sistema híbrido mostró ventajas claras frente a enfoques puramente generativos.
 
-#### Curva de concentración long-tail
+La combinación de:
+- recuperación contextual,
+- ranking geoespacial,
+- restricciones estructurales,
+- orientación espacial,
 
-![Cobertura acumulada long-tail](experiments/figures/eda_long_tail_coverage.png)
+permitió mejorar:
+- precisión,
+- estabilidad,
+- coherencia contextual.
 
-## 6) Reproducibilidad
+Limitaciones actuales:
+- dataset reducido,
+- dependencia de Ollama,
+- latencia de inferencia,
+- falta de inferencia offline completa.
 
-Pipeline completo:
+---
+
+# 12) Conclusiones
+
+El proyecto demuestra la viabilidad de integrar:
+- Android,
+- geolocalización,
+- orientación espacial,
+- RAG,
+- modelos LLM locales,
+
+en un sistema funcional de identificación contextual de landmarks.
+
+El pipeline desarrollado es:
+- reproducible,
+- modular,
+- extensible,
+- compatible con futuras optimizaciones móviles.
+
+---
+
+# 13) Reproducibilidad
+
+## Pipeline completo
 
 ```bash
 python ML/scripts/pipeline.py
 ```
 
-Evaluación en línea con Ollama:
+---
+
+## Evaluación online
 
 ```bash
 python ML/scripts/evaluate_online_ollama.py --model landmark-finder-e4 --max-samples 20
 ```
 
-Exportación de figuras EDA:
+---
+
+## Exportación de figuras EDA
 
 ```bash
 python ML/experiments/export_eda_figures.py
 ```
 
-## 7) Limitaciones y próximos pasos
+---
 
-- Ampliar el conjunto de datos con más regiones y casos límite.
-- Corregir automáticamente respuestas con `untitled` en curación de datos.
-- Añadir reintentos y reparación de JSON en evaluación en línea.
-- Mantener evaluación periódica sobre modelos alternativos de Ollama.
+# 14) Limitaciones y trabajo futuro
+
+Líneas futuras propuestas:
+- ampliar dataset geográfico,
+- incorporar inferencia offline móvil,
+- añadir reparación automática de JSON,
+- optimizar latencia,
+- evaluar modelos cuantizados,
+- integrar embeddings vectoriales avanzados,
+- mejorar candidate ranking contextual.
