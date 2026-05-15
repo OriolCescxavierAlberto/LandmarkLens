@@ -1,140 +1,442 @@
+
 # LandmarkLens
 
-Aplicacion Android para identificar monumentos y puntos de interes mediante la camara del dispositivo, combinando GPS, brujula y consultas a una API de lugares. Incluye un chat con modelos de lenguaje local (Ollama) y visualizacion de la ubicacion actual en mapa.
+Aplicación Android para identificación contextual de monumentos, edificios históricos y puntos de interés utilizando cámara, GPS, orientación espacial y modelos de inteligencia artificial ejecutados mediante Ollama.
+
+El sistema combina:
+- captura de imagen en tiempo real,
+- geolocalización GPS,
+- orientación del dispositivo,
+- recuperación contextual de landmarks,
+- consultas geoespaciales,
+- generación de respuestas mediante modelos LLM.
 
 ---
 
-## Descripcion del proyecto
+# Descripción del proyecto
 
-LandmarkLens permite al usuario apuntar la camara hacia un lugar, capturar una fotografia y obtener informacion sobre el sitio: nombre, tipo y direccion, obtenidos a partir de las coordenadas GPS en el momento de la captura. Adicionalmente, la aplicacion ofrece un mapa con la posicion actual, un asistente de guia turistico basado en Ollama y una pantalla reservada para futura clasificacion offline mediante modelos ML en el dispositivo.
+LandmarkLens permite al usuario apuntar la cámara hacia un entorno urbano, capturar una fotografía y obtener información contextual sobre el lugar observado.
 
-El proyecto es un prototipo funcional desarrollado como parte de una asignatura universitaria. El objetivo de esta entrega es demostrar una arquitectura solida, navegacion entre pantallas, integracion de sensores y una primera version funcional de la aplicacion.
+La aplicación utiliza:
+- coordenadas GPS,
+- orientación espacial del dispositivo,
+- filtrado geográfico,
+- recuperación contextual,
+- generación aumentada mediante IA.
+
+El sistema devuelve:
+- nombre del landmark,
+- tipo de lugar,
+- dirección aproximada,
+- información contextual,
+- recomendaciones turísticas generadas por IA.
+
+Además, la aplicación incorpora:
+- visualización de ubicación actual en mapa,
+- asistente turístico basado en Ollama,
+- arquitectura modular MVVM,
+- integración completa con sensores Android,
+- pipeline preparado para futuras capacidades ML offline.
 
 ---
 
-## Arquitectura general
+# Objetivo del proyecto
 
-La aplicacion sigue el patron MVVM (Model-View-ViewModel), adaptado a Jetpack Compose:
+El objetivo principal del proyecto es desarrollar una aplicación Android capaz de identificar landmarks cercanos combinando:
+- visión contextual,
+- geolocalización,
+- orientación espacial,
+- recuperación contextual mediante RAG,
+- modelos LLM locales.
 
-```
-UI (Composables)
+El proyecto fue desarrollado como prototipo universitario enfocado en:
+- arquitectura Android moderna,
+- integración de sensores,
+- sistemas híbridos IA + geolocalización,
+- diseño modular y extensible,
+- integración ML end-to-end.
+
+---
+
+# Arquitectura general
+
+La aplicación sigue el patrón MVVM (Model-View-ViewModel) utilizando Jetpack Compose.
+
+```text
+UI (Jetpack Compose)
     |
-    |  observa estado / lanza eventos
+    | observa estado / lanza eventos
     v
 ViewModel (LandmarkViewModel)
     |
-    |  llama a
+    | coordina lógica y estado
     v
-Servicios / Clientes (PlacesService, OllamaClient, FileUtils)
+Servicios y Clientes
+(PlacesService, OllamaClient, FileUtils)
 ```
 
-- La capa de UI esta formada exclusivamente por funciones Composable. No contiene logica de negocio ni llamadas de red.
-- El ViewModel centraliza todo el estado de la aplicacion mediante Compose State. Al sobrevivir los cambios de configuracion (rotacion de pantalla), el estado de navegacion, el historial del chat y los resultados de GPS se mantienen sin necesidad de restauracion manual.
-- Los servicios son clases o singletons sin dependencia del ciclo de vida de Android.
+---
+
+# Arquitectura completa del sistema
+
+```text
+Android App
+    |
+    | GPS + Cámara + Azimuth
+    v
+Context Retrieval
+    |
+    | landmarks cercanos
+    v
+Ranking geoespacial
+    |
+    v
+Ollama LLM
+    |
+    v
+Respuesta contextual JSON
+```
 
 ---
 
-## Modulos principales
+# Componentes principales
 
-### LandmarkViewModel
-Unico ViewModel de la aplicacion. Gestiona:
-- Estado de navegacion entre pestanas (`currentTab`)
-- Lectura de sensores: sensor de rotacion (TYPE_ROTATION_VECTOR) para el acimut
-- GPS mediante FusedLocationProviderClient con dos niveles de precision: balanceada para el overlay y alta precision en el momento de la captura
-- Ciclo de vida de la captura: bitmap, coordenadas y resultado de Places
-- Estado completo del chat: historial de mensajes, modelo seleccionado, carga de modelos y envio de preguntas
+## LandmarkViewModel
 
-### PlacesService
-Consulta una API de lugares a partir de latitud y longitud. Devuelve un objeto `LandmarkLocation` con nombre, tipo y direccion del sitio. Es invocado desde el ViewModel mediante `viewModelScope`.
+ViewModel principal de la aplicación.
 
-### OllamaClient
-Cliente HTTP (OkHttp) que se comunica con una instancia local de Ollama. Expone dos funciones suspendidas: `getModels()` para listar los modelos disponibles y `askModel()` para enviar una pregunta y recibir la respuesta.
+Gestiona:
+- navegación entre pestañas,
+- estado global de UI,
+- sensores de orientación,
+- GPS y localización,
+- resultados de captura,
+- estado del chat,
+- comunicación con backend,
+- flujo completo de datos entre app y modelo IA.
 
-### FileUtils
-Guarda el bitmap capturado en el almacenamiento del dispositivo incluyendo metadatos de GPS y acimut en el nombre del archivo.
+Funciones principales:
+- lectura del sensor TYPE_ROTATION_VECTOR,
+- obtención de ubicación mediante FusedLocationProviderClient,
+- captura y almacenamiento de imágenes,
+- gestión del historial del chat,
+- sincronización de estados Compose.
 
-### Pantallas (Composables)
+---
 
-| Composable | Descripcion |
+## PlacesService
+
+Servicio encargado de:
+- consultar lugares cercanos,
+- recuperar información contextual,
+- obtener landmarks mediante coordenadas GPS.
+
+Devuelve objetos `LandmarkLocation` con:
+- nombre,
+- categoría,
+- dirección,
+- contexto asociado.
+
+---
+
+## OllamaClient
+
+Cliente HTTP basado en OkHttp que se comunica con Ollama.
+
+Funciones principales:
+- carga de modelos disponibles,
+- envío de prompts,
+- recepción de respuestas IA,
+- integración del sistema RAG.
+
+---
+
+## FileUtils
+
+Módulo responsable de:
+- almacenamiento de imágenes capturadas,
+- generación de nombres con metadatos,
+- persistencia local de capturas.
+
+Los archivos incluyen:
+- timestamp,
+- coordenadas GPS,
+- acimut de cámara.
+
+---
+
+# Pantallas principales
+
+| Pantalla | Descripción |
 |---|---|
-| `CameraLandmarkScreen` | Previsualizacion de camara en tiempo real con overlay de GPS y brujula. Boton de captura. |
-| `CaptureResultScreen` | Muestra la foto capturada, el mapa del lugar y la informacion obtenida de PlacesService. |
-| `MapTab` | Mapa OSMDroid centrado en la posicion actual del usuario. |
-| `OllamaChatScreen` | Chat con el modelo Ollama seleccionado. Historial persistente durante la sesion. |
-| `MLOfflineScreen` | Pantalla reservada para clasificacion offline (en desarrollo). |
+| `CameraLandmarkScreen` | Preview de cámara con overlay GPS y brújula en tiempo real. |
+| `CaptureResultScreen` | Resultado contextual tras captura y análisis. |
+| `MapTab` | Mapa OSMDroid centrado en posición actual. |
+| `OllamaChatScreen` | Chat turístico con modelos Ollama. |
+| `MLOfflineScreen` | Pantalla reservada para inferencia ML offline futura. |
 
 ---
 
-## Sensores y APIs integradas
+# Integración ML y sistema RAG
 
-- **Camara**: CameraX (androidx.camera) para previsualizacion y captura de fotogramas.
-- **GPS**: Google Play Services Location (FusedLocationProviderClient) con prioridad configurable.
-- **Brujula / orientacion**: SensorManager con TYPE_ROTATION_VECTOR y calculo de acimut mediante matriz de rotacion.
-- **Mapa**: OSMDroid, mapa de codigo abierto sin necesidad de API Key.
-- **Identificacion de lugares**: PlacesService con peticion HTTP a partir de coordenadas.
-- **Chat IA**: Ollama ejecutado localmente en la misma red que el dispositivo.
+El sistema incorpora un pipeline híbrido basado en:
+- recuperación contextual,
+- filtrado geoespacial,
+- orientación de cámara,
+- generación mediante modelos LLM.
+
+## Flujo del sistema
+
+```text
+GPS + Orientación
+        |
+        v
+Búsqueda de landmarks cercanos
+        |
+        v
+Filtrado angular
+        |
+        v
+Ranking contextual
+        |
+        v
+Construcción del prompt
+        |
+        v
+Ollama LLM
+        |
+        v
+Respuesta estructurada
+```
 
 ---
 
-## Permisos requeridos
+# Sensores y APIs integradas
+
+## Cámara
+- CameraX (`androidx.camera`)
+- preview en tiempo real,
+- captura de imágenes.
+
+## GPS
+- Google Play Services Location,
+- FusedLocationProviderClient,
+- precisión configurable.
+
+## Orientación espacial
+- SensorManager,
+- TYPE_ROTATION_VECTOR,
+- cálculo de acimut mediante matrices de rotación.
+
+## Mapa
+- OSMDroid,
+- mapas open-source sin API Key.
+
+## IA y backend
+- Ollama,
+- OkHttp,
+- consultas HTTP,
+- modelos LLM locales.
+
+---
+
+# Tecnologías utilizadas
+
+## Android
+- Kotlin
+- Jetpack Compose
+- Coroutines
+- ViewModel
+- CameraX
+- OSMDroid
+
+## Backend y ML
+- Python
+- Ollama
+- JSON
+- OpenStreetMap
+- Retrieval-Augmented Generation (RAG)
+
+---
+
+# Permisos requeridos
 
 - `CAMERA`
 - `ACCESS_FINE_LOCATION`
 - `ACCESS_COARSE_LOCATION`
 - `INTERNET`
-- `WRITE_EXTERNAL_STORAGE` (solo en Android 9 o inferior)
+- `WRITE_EXTERNAL_STORAGE` (Android 9 o inferior)
 
 ---
 
-## Requisitos previos
+# Requisitos previos
 
 - Android Studio Hedgehog o superior
-- Dispositivo o emulador con Android 7.0 (API 24) o superior
-- SDK de compilacion: API 36
-- Para el chat: instancia de Ollama accesible desde el dispositivo (misma red local o localhost si se usa un emulador)
+- Android API 24+
+- SDK de compilación API 36
+- Python 3.10+
+- Instancia local de Ollama
 
 ---
 
-## Instrucciones para ejecutar la app
+# Instrucciones de ejecución
 
-1. Clonar el repositorio:
-   ```
-   git clone https://github.com/usuario/LandmarkLens.git
-   ```
+## 1. Clonar repositorio
 
-2. Abrir la carpeta `APP` con Android Studio (File > Open > seleccionar la carpeta APP).
-
-3. Esperar a que Gradle sincronice las dependencias.
-
-4. Conectar un dispositivo fisico por USB con depuracion activada, o iniciar un emulador con soporte de camara y GPS.
-
-5. Pulsar Run (Shift + F10) o el boton de play en Android Studio.
-
-6. En el primer arranque, aceptar los permisos de camara y ubicacion cuando el sistema los solicite.
-
-7. Para usar el chat con Ollama, asegurarse de que el servidor Ollama esta corriendo y es accesible desde el dispositivo. Si se usa un emulador, Ollama debe escuchar en `0.0.0.0` y la URL configurada en `OllamaClient` debe apuntar a `10.0.2.2` (IP del host desde el emulador).
-
----
-
-## Estructura del proyecto
-
+```bash
+git clone https://github.com/usuario/LandmarkLens.git
 ```
+
+---
+
+## 2. Abrir proyecto Android
+
+Abrir la carpeta `APP` desde Android Studio:
+
+```text
+File > Open > APP
+```
+
+---
+
+## 3. Sincronizar Gradle
+
+Esperar descarga automática de dependencias.
+
+---
+
+## 4. Ejecutar Ollama
+
+Ejemplo:
+
+```bash
+ollama run qwen2.5:7b
+```
+
+Si se usa emulador Android:
+- Ollama debe escuchar en `0.0.0.0`
+- usar `10.0.2.2` como host.
+
+---
+
+## 5. Ejecutar aplicación
+
+Conectar dispositivo físico o iniciar emulador.
+
+Ejecutar:
+```text
+Shift + F10
+```
+
+o pulsar botón Run en Android Studio.
+
+---
+
+## 6. Conceder permisos
+
+Aceptar permisos de:
+- cámara,
+- ubicación,
+- almacenamiento.
+
+---
+
+# Estructura del proyecto
+
+```text
 APP/
   app/
     src/
       main/
         java/com/example/landmarklens/
-          MainActivity.kt          # UI: Composables y navegacion
-          LandmarkViewModel.kt     # ViewModel central
-          PlacesService.kt         # Identificacion de lugares por GPS
-          OllamaClient.kt          # Cliente HTTP para Ollama
-          FileUtils.kt             # Guardado de imagenes
-        res/                       # Recursos: temas, iconos, strings
+
+          MainActivity.kt
+          # Navegación y UI Compose
+
+          LandmarkViewModel.kt
+          # Estado global y lógica principal
+
+          PlacesService.kt
+          # Recuperación contextual de landmarks
+
+          OllamaClient.kt
+          # Cliente HTTP para Ollama
+
+          FileUtils.kt
+          # Persistencia local de imágenes
+
+        res/
+          # Recursos gráficos y temas
+
         AndroidManifest.xml
 ```
 
 ---
 
-## Estado actual del proyecto
+# Pipeline ML
 
-La aplicacion es un prototipo funcional en desarrollo activo. Las funcionalidades implementadas son la captura con GPS, la identificacion de lugares, el mapa de posicion actual, el chat con Ollama y la navegacion completa entre pestanas. La pantalla de clasificacion offline (ML en dispositivo) esta reservada para una entrega posterior.
+El sistema ML incluye:
+- generación de dataset,
+- preprocesamiento,
+- ranking contextual,
+- recuperación RAG,
+- evaluación experimental,
+- serving mediante Ollama.
+
+Scripts principales:
+- `prepare_data.py`
+- `train_model.py`
+- `evaluate_model.py`
+- `evaluate_online_ollama.py`
+- `pipeline.py`
+
+---
+
+# Integración completa con backend
+
+La aplicación se comunica con:
+- servicios HTTP,
+- sistema RAG,
+- Ollama local,
+- recuperación contextual geoespacial.
+
+El flujo completo:
+- captura,
+- contexto,
+- inferencia,
+- respuesta,
+- visualización
+
+está implementado end-to-end.
+
+---
+
+# Optimización para móvil
+
+El sistema incorpora:
+- reducción de candidatos,
+- filtrado angular,
+- minimización de contexto,
+- limitación de tokens,
+- inferencia delegada a servidor local.
+
+Estas estrategias reducen:
+- consumo de memoria,
+- uso de CPU,
+- latencia en dispositivo móvil.
+
+---
+
+# Estado actual del proyecto
+
+El proyecto implementa actualmente:
+- aplicación Android completamente funcional,
+- navegación completa,
+- captura contextual con GPS,
+- integración IA mediante Ollama,
+- sistema RAG operativo,
+- mapa interactivo,
+- arquitectura MVVM modular,
+- pipeline ML reproducible.
+
+La pantalla `MLOfflineScreen` queda reservada para futuras capacidades de inferencia offline mediante modelos optimizados para móvil.
